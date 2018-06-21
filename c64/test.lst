@@ -1,0 +1,34 @@
+0001   0000             #define SCREEN $0400
+0002   0000             
+0003   07FF             .org 2047  ; 2048
+0004   07FF 01          .byte 01h ; load addr lo
+0005   0800 10          .byte 10h ; load addr hi
+0006   0801             
+0007   0801             ;.org 2048
+0008   0801             .include prgheader.asm
+0001+  0801             ;BASIC header for a C64 .prg file
+0002+  0801             ;ORG needs to be set to 4096
+0003+  0801              
+0004+  0801             
+0005+  0801 0B          .byte 11d ;link lo 4097
+0006+  0802 10          .byte 16d ;link hi
+0007+  0803 0A          .byte 10d  ;line# lo 4099
+0008+  0804 00          .byte 0d ;line# hi 4100
+0009+  0805 9E          .byte 158d ;SYS TOKEN 4101
+0010+  0806 32          .byte 50d  ; 2
+0011+  0807 30          .byte 48d  ; 0
+0012+  0808 36          .byte 54d  ; 6
+0013+  0809 31          .byte 49d  ; 1
+0014+  080A 00          .byte 0d  ; null terminator  address:4106
+0015+  080B 00          .byte 0d ;link lo  
+0016+  080C 00          .byte 0d ;link hi    4108
+0009   080D             
+0010   080D             	.module main
+0011   080D             start
+0012   080D             _lp
+0013   080D A9 41       	lda #65
+0014   080F 8D 00 04    	sta SCREEN
+0015   0812 4C 0D 08    	jmp _lp
+0016   0815 60          	rts
+0017   0816             .end
+tasm: Number of errors = 0

@@ -1,0 +1,196 @@
+;formatted printing routines
+;formatted printing routines
+
+POLLKB	EQU $A000 ; VECTOR TO KBSCAN
+CRSADDR EQU 0x0088 ; 2 byte addr of cursor
+;addr of string is in X
+printstrf
+@lp
+	lda ,x
+	cmpa #0
+	beq @out
+	;compute remaining space
+	lda scrwidth
+	suba curscol
+	sta charsleft
+	jsr wordlen ; len -> A
+	cmpa charsleft
+	bcc @nl ; word len < charsleft
+	jsr printchars ; len still in A
+	bra @lp ; back to top
+@nl ;print a newline
+	pshs d ; save len
+	lda #0
+	sta curscol
+	lda cursrow
+	inca 
+	sta cursrow
+	cmpa lastline ; last line
+	bne @p
+	;reached last line
+	jsr moreprmpt ; prompt and cls
+@p	puls d ; restore len
+	jsr printchars ; len still in A
+	bra @lp ; back to top
+@out	
+	jsr poscursor
+	rts
+
+poscursor
+	pshs d,x
+	lda cursrow
+	ldb scrwidth
+	mul
+	addb curscol
+	adca #0
+	tfr d,x
+	leax $400,x
+	stx CRSADDR
+	puls x,d
+	rts
+	
+;prints a "more" prompt, then clears the screen
+moreprmpt
+	pshs d,x,y
+	;move to bottom left
+	lda #0
+	sta curscol
+	lda scrheight
+	deca
+	sta	 cursrow 
+	ldx #more
+	jsr printstr
+@kb	jsr [POLLKB]  ; PUTS KEYCODE INTO A - 0 = NO KEY 	
+	beq @kb
+	jsr cls
+	puls y,x,d 
+	rts	
+
+;string in x
+;prints until null, no formatting
+printstr
+@lp
+	lda ,x+
+	cmpa #0
+	beq @x
+	jsr charout
+	bra @lp
+@x	rts
+	
+;X contains start of word
+;returns word length in A
+;counts the word plus trailing white space
+;X is not changed
+wordlen
+	pshs x
+	lda #0
+@lp 
+	ldb ,x+
+	cmpb #' '
+    beq @in
+	cmpb #0 ; null?
+    beq @out
+	inca 
+	bra @lp
+	;now count trailing spaces
+@in	
+	inca
+@lp1 
+	ldb ,x+
+	cmpb #' '
+    bne @out ; hit next word
+	inca
+	bra @lp1
+@out	
+	puls x
+	rts
+
+
+;prints word 
+;A contains len
+;X points to data and is updated
+printchars
+	tfr a,b
+	cmpa #0
+	beq @x
+@lp	lda ,x+
+	jsr charout
+	decb
+	bne @lp
+@x	rts
+	
+;A contains char to print
+;Cursor col is incremented
+;lowercase is converted to uppercase
+;if lowercase is not enabled
+charout	
+	pshs d ; save char
+	pshs d ; save char
+	lda cursrow
+	ldb scrwidth
+	mul
+	addb curscol
+	adca #0
+	tfr d,y
+	puls d ; restore char
+	ldb lcase
+	cmpb #1
+	beq @p
+	cmpa #96
+	bcs @p
+	cmpa #128
+	bcc @p
+	suba #32 ; convert it to uppercase
+@p	cmpa #32
+    bne @q
+	lda #96
+@q	sta 1024,y  ; THIS NEEDS TO CHANGE FOR COCO2
+	lda curscol
+	inca
+	sta curscol
+	jsr	poscursor
+
+	puls d
+	rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;CLS
+;CLEARS SCREEN
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+cls
+	pshs d,x,y  ; save registers
+	lda #0
+	sta curscol
+	lda #1
+	sta cursrow
+	ldy #0
+ 	lda #96 blank space 	
+	ldx #1024 ; THIS HAS TO MOVE FOR COCOVGA!!!
+@a 	sta ,x+
+	leay 1,y	; inc loop counter
+	cmpy #512  ; bottom of screen mem THIS HAS TO CHANGE FOR COCOVGA!!!
+	bne @a
+	puls y,x,d  ; restore registers
+	rts
+
+PRINTCR
+	lda #0
+	sta curscol
+	lda cursrow
+	inca 
+	sta cursrow
+	cmpa lastline ; last line
+	bne @x
+	;reached last line
+	jsr moreprmpt ; prompt and cls
+@x	jsr poscursor
+	rts
+	
+	
+scrsize .byte 512	
+cursrow .byte 1
+curscol .byte 0
+charsleft .byte 32
+more .strz "-MORE-"
+
+test .strz "MICROWARE PATCHES THE ORIGINAL ROMS WITH HOOKS, ETC. THEY DID THIS BECAUSE MICROSOFT REFUSED TO MAKE A NEW BASIC. SO THE COCO3 LOADS THE ORIGINAL ROM INTO RAM, THEN PATCHES IT. THEY avoided license problems with Microsoft that way. So they have no claim to the original ROM code, as far as I understand it. MICROWARE PATCHES THE ORIGINAL ROMS WITH HOOKS, ETC. THEY DID THIS BECAUSE MICROSOFT REFUSED TO MAKE A NEW BASIC. SO THE COCO3 LOADS THE ORIGINAL ROM INTO RAM, THEN PATCHES IT. THEY avoided license problems with Microsoft that way. So they have no claim to the original ROM code, as far as I understand it."

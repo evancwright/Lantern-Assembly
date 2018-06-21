@@ -1,0 +1,1514 @@
+0001   0000             ;
+0002   0000             ; To assembly this, either use the zxasm.bat file:
+0003   0000             ;
+0004   0000             ; zxasm hello
+0005   0000             ;
+0006   0000             ; or... assemble with the following options:
+0007   0000             ;
+0008   0000             ; tasm -80 -b -s hello.asm hello.p
+0009   0000             ;
+0010   0000             ;==============================================
+0011   0000             ;    ZX81 Wumpus
+0012   0000             ;==============================================
+0013   0000             ;
+0014   0000             ;defs
+0015   0000             #include "zx81defs.asm"
+0001+  0000             ;defines to make us feel more at home
+0002+  0000             #define         DEFB .BYTE
+0003+  0000             #define         DEFW .WORD
+0004+  0000             #define         DEFM .TEXT
+0005+  0000             #define         ORG  .ORG
+0006+  0000             #define         EQU  .EQU
+0016   0000             ;EQUs for ROM routines
+0017   0000             #include "zx81rom.asm"
+0001+  0000             ;ZX81 ROM routines
+0002+  0000             PRINT			EQU $10
+0003+  0000             PRINTAT			EQU $08F5
+0004+  0000             DISPROUT		EQU $0281
+0005+  0000             DISPLAY_3		EQU $0292 ;restore registers after a 'slow' display
+0006+  0000             DISPLAY_5		EQU $02B5
+0007+  0000             PLOT			EQU $0BB2 	; note ROM plot is 0baf - however first thing it does try to pull BC from the calculator stack
+0008+  0000             							; so we'll skip past that and set BC ourselves
+0009+  0000             CLS				EQU $0A2A
+0010+  0000             KSCAN           EQU $02BB 
+0011+  0000             FINDCHR         EQU $07BD
+0012+  0000             COPY            EQU $0869
+0013+  0000             FAST            EQU $0F23
+0014+  0000             SLOW            EQU $0F2B
+0015+  0000             SLOWORFAST		EQU $0207
+0016+  0000             ;sys vars
+0017+  0000             ERR_NR			EQU $40000018   0000             ;ZX81 char codes/how to survive without ASCII
+0019   0000             #include "charcodes.asm"
+0001+  0000             ; ZX81 Characters.
+0002+  0000             __:				EQU	$00	;spacja
+0003+  0000             _QT:			EQU	$0B	;"
+0004+  0000             _PD:			EQU	$0C	;funt
+0005+  0000             _SD:			EQU	$0D	;$
+0006+  0000             _CL:			EQU	$0E	;:
+0007+  0000             _QM:			EQU	$0F	;?
+0008+  0000             _OP:			EQU	$10	;(
+0009+  0000             _CP:			EQU	$11	;)
+0010+  0000             _GT:			EQU	$12	;>
+0011+  0000             _LT:			EQU	$13	;<
+0012+  0000             _EQ:			EQU	$14	;=
+0013+  0000             _PL:			EQU	$15	;+
+0014+  0000             _MI:			EQU	$16	;-
+0015+  0000             _AS:			EQU	$17	;*
+0016+  0000             _SL:			EQU	$18	;/
+0017+  0000             _SC:			EQU	$19	;;
+0018+  0000             _CM:			EQU	$1A	;,
+0019+  0000             _DT:			EQU	$1B	;.
+0020+  0000             _NL:			EQU	$76	;NEWLINE
+0021+  0000             
+0022+  0000             _0				EQU $1C
+0023+  0000             _1				EQU $1D
+0024+  0000             _2				EQU $1E
+0025+  0000             _3				EQU $1F
+0026+  0000             _4				EQU $20
+0027+  0000             _5				EQU $21
+0028+  0000             _6				EQU $22
+0029+  0000             _7				EQU $23
+0030+  0000             _8				EQU $24
+0031+  0000             _9				EQU $25
+0032+  0000             _A				EQU $26
+0033+  0000             _B				EQU $27
+0034+  0000             _C				EQU $28
+0035+  0000             _D				EQU $29
+0036+  0000             _E				EQU $2A
+0037+  0000             _F				EQU $2B
+0038+  0000             _G				EQU $2C
+0039+  0000             _H				EQU $2D
+0040+  0000             _I				EQU $2E
+0041+  0000             _J				EQU $2F
+0042+  0000             _K				EQU $30
+0043+  0000             _L				EQU $31
+0044+  0000             _M				EQU $32
+0045+  0000             _N				EQU $33
+0046+  0000             _O				EQU $34
+0047+  0000             _P				EQU $35
+0048+  0000             _Q				EQU $36
+0049+  0000             _R				EQU $37
+0050+  0000             _S				EQU $38
+0051+  0000             _T				EQU $39
+0052+  0000             _U				EQU $3A
+0053+  0000             _V				EQU $3B
+0054+  0000             _W				EQU $3C
+0055+  0000             _X				EQU $3D
+0056+  0000             _Y				EQU $3E
+0057+  0000             _Z				EQU $3F
+0020   0000             ;system variables
+0021   0000             #include "zx81sys.asm"
+0001+  0000             ;system variables
+0002+  0000             ;Origin of a ZX81 file is always 16393
+0003+  0000             
+0004+  4009                             ORG 16393
+0005+  4009                             
+0006+  4009             ; System variables live here
+0007+  4009 00          VERSN:          DEFB 0
+0008+  400A 02 00       E_PPC:          DEFW 2
+0009+  400C 93 46       D_FILE:         DEFW Display
+0010+  400E 94 46       DF_CC:          DEFW Display+1                  ; First character of display
+0011+  4010 AC 49       VARS:           DEFW Variables
+0012+  4012 00 00       DEST:           DEFW 0
+0013+  4014 AD 49       E_LINE:         DEFW BasicEnd 
+0014+  4016 B1 49       CH_ADD:         DEFW BasicEnd+4                 ; Simulate SAVE "X"
+0015+  4018 00 00       X_PTR:          DEFW 0
+0016+  401A B2 49       STKBOT:         DEFW BasicEnd+5
+0017+  401C B2 49       STKEND:         DEFW BasicEnd+5                 ; Empty stack
+0018+  401E 00          BREG:           DEFB 0
+0019+  401F 5D 40       MEM:            DEFW MEMBOT
+0020+  4021 00          UNUSED1:        DEFB 0
+0021+  4022 02          DF_SZ:          DEFB 2
+0022+  4023 02 00       S_TOP:          DEFW $0002                      ; Top program line number
+0023+  4025 BF FD       LAST_K:         DEFW $fdbf
+0024+  4027 0F          DEBOUN:         DEFB 15
+0025+  4028 37          MARGIN:         DEFB 55
+0026+  4029 81 46       NXTLIN:         DEFW Line2                      ; Next line address
+0027+  402B 00 00       OLDPPC:         DEFW 0
+0028+  402D 00          FLAGX:          DEFB 0
+0029+  402E 00 00       STRLEN:         DEFW 0
+0030+  4030 8D 0C       T_ADDR:         DEFW $0c8d
+0031+  4032 00 00       SEED:           DEFW 0
+0032+  4034 A3 F5       FRAMES:         DEFW $f5a3
+0033+  4036 00 00       COORDS:         DEFW 0
+0034+  4038 BC          PR_CC:          DEFB $bc
+0035+  4039 21 18       S_POSN:         DEFW $1821
+0036+  403B 40          CDFLAG:         DEFB $40
+0037+  403C 00 00 00 00 PRBUFF:         DEFB 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,$76 ; 32 Spaces + Newline
+0037+  4040 00 00 00 00 
+0037+  4044 00 00 00 00 
+0037+  4048 00 00 00 00 
+0037+  404C 00 00 00 00 
+0037+  4050 00 00 00 00 
+0037+  4054 00 00 00 00 
+0037+  4058 00 00 00 00 
+0037+  405C 76 
+0038+  405D 00 00 00 00 MEMBOT:         DEFB 0,0,0,0,0,0,0,0,0,0,$84,$20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; 30 zeros
+0038+  4061 00 00 00 00 
+0038+  4065 00 00 84 20 
+0038+  4069 00 00 00 00 
+0038+  406D 00 00 00 00 
+0038+  4071 00 00 00 00 
+0038+  4075 00 00 00 00 
+0038+  4079 00 00 
+0039+  407B 00 00       UNUNSED2:       DEFW 0
+0040+  407D             
+0041+  407D             ; End of system variables
+0042+  407D             
+0022   407D             
+0023   407D             ;the standard REM statement that will contain our 'hex' code
+0024   407D             #include "line1.asm"
+0001+  407D             ;Line 1
+0002+  407D             ;this is the REM statement...
+0003+  407D 00 00       Line1:          DEFB $00,$00                    ; Line 1
+0004+  407F 00 06                       DEFW Line1End-Line1Text         ; Line 1 length
+0005+  4081 EA          Line1Text:      DEFB $ea                        ; REM             
+0006+  4082             
+0025   4082             
+0026   4082             ;------------------------------------------------------------
+0027   4082             ; code starts here and gets added to the end of the REM 
+0028   4082             ;------------------------------------------------------------
+0029   4082             
+0030   4082 CD 88 43        call set_up_game
+0031   4085 21 AE 44        ld hl, welcome;
+0032   4088 CD 53 41        call printline
+0033   408B CD 6A 42        call scroll
+0034   408E 21 C9 44        ld hl, welcome2;
+0035   4091 CD 53 41        call printline
+0036   4094 CD 6A 42        call scroll
+0037   4097                 
+0038   4097 21 E6 44        ld hl, welcome3;
+0039   409A CD 53 41        call printline
+0040   409D CD 6A 42        call scroll
+0041   40A0 CD 6A 42        call scroll
+0042   40A3 CD A4 41        call print_current_room;
+0043   40A6 CD 24 41        call promptcommand
+0044   40A9             
+0045   40A9             mainloop:
+0046   40A9                 
+0047   40A9                 
+0048   40A9                 
+0049   40A9             getchar:
+0050   40A9                 
+0051   40A9 D5              push de ;save de
+0052   40AA 11 98 44        ld de, kbstatus
+0053   40AD CD 38 41        call readkeyboard ;put the keycode in the address stored in de
+0054   40B0 D1              pop de ;restore de
+0055   40B1                 
+0056   40B1                 ;now we can check kbstatus
+0057   40B1                 ;if no key was pressed, the both bytes will be $ff
+0058   40B1                 
+0059   40B1 3A 98 44        ld a, (kbstatus)
+0060   40B4 3C              inc a
+0061   40B5 F5              push af
+0062   40B6 FE 00           cp 0
+0063   40B8 CC 49 41        call z, clearflag; set the flag saying we can take a key
+0064   40BB F1              pop af
+0065   40BC FE 00           cp 0
+0066   40BE CA A9 40        jp z, getchar; ; no key pressed
+0067   40C1              
+0068   40C1                 ;if a key is already down jump to getchar
+0069   40C1 3A 9A 44        ld a, (keydown)
+0070   40C4 FE 01           cp 1
+0071   40C6 CA A9 40        jp z, getchar;  a key was pressed but it was a repeat
+0072   40C9                 
+0073   40C9                 ;setkey down
+0074   40C9 3E 01           ld a, 1
+0075   40CB 32 9A 44        ld (keydown), a
+0076   40CE                 
+0077   40CE                 ;call findchar (ROM) to get the key code
+0078   40CE ED 4B 98 44     ld bc, (kbstatus)
+0079   40D2 CD BD 07        call FINDCHR; takes code in bc and returns addr of code in hl
+0080   40D5 7E              ld a, (HL) ; store returned code in a
+0081   40D6                 
+0082   40D6                 ;was quit key pressed
+0083   40D6 FE 36           cp $36; code for 'q'
+0084   40D8 C8              ret z
+0085   40D9                 
+0086   40D9                 ;was the enter key pressed?
+0087   40D9 FE 76           cp $76
+0088   40DB C2 F6 40        jp nz, noenter
+0089   40DE                 
+0090   40DE                 ;enter was pressed process the input
+0091   40DE 3A A7 44        ld a, (inputstate) 
+0092   40E1 FE 00           cp 0 ; m or s option was previously entered
+0093   40E3 F5              push af;
+0094   40E4 CC 88 42        call z, handle_command_input ; was m or s pressed?
+0095   40E7 F1              pop af; restore flags
+0096   40E8 FE 00           cp 0 ; m or s option was previously entered
+0097   40EA C4 AD 42        call nz, handle_room_input
+0098   40ED                
+0099   40ED                 ;is the player dead?
+0100   40ED 3A AD 44        ld a, (gameover)
+0101   40F0 FE 01           cp 1
+0102   40F2 C8              ret z
+0103   40F3                
+0104   40F3 C3 A9 40        jp mainloop;
+0105   40F6                 
+0106   40F6             noenter:    
+0107   40F6                 ;was del key pressed?
+0108   40F6 FE 77           cp $77
+0109   40F8 C2 01 41        jp nz, noclear;
+0110   40FB CD 6F 41        call clearbuf;
+0111   40FE C3 1B 41        jp printbuf; 
+0112   4101                 ;
+0113   4101             noclear:   
+0114   4101             
+0115   4101                  
+0116   4101             skip:
+0117   4101              
+0118   4101                 ;then put that key code in the text buffer
+0119   4101             ;    push af
+0120   4101 ED 4B A5 44     ld bc, (bufferix)
+0121   4105 5F              ld e,a
+0122   4106 79              ld a,c
+0123   4107 FE 05           cp 5
+0124   4109 CA 1B 41        jp z, fullbuf
+0125   410C 7B              ld a, e; copy char back 
+0126   410D 21 9B 44        ld hl, buffer
+0127   4110 09              add hl, bc
+0128   4111 77              ld (hl), a;put char in buffer
+0129   4112                 
+0130   4112                 ;and increment the count
+0131   4112 ED 4B A5 44     ld bc, (bufferix); 
+0132   4116 03              inc bc
+0133   4117 ED 43 A5 44     ld (bufferix), bc; store it back
+0134   411B             fullbuf:
+0135   411B             printbuf:    
+0136   411B                 ;print the buffer
+0137   411B              ;   ld hl, (D_FILE)
+0138   411B              ;   ;ld bc, 661
+0139   411B              ;   ld bc, 628 
+0140   411B              ;   add hl, bc 
+0141   411B              ;   ld d, h
+0142   411B              ;   ld e, l
+0143   411B 21 9B 44        ld hl, buffer
+0144   411E CD 53 41        call printline
+0145   4121                 
+0146   4121 C3 A9 40        jp mainloop ; end of main loop
+0147   4124             
+0148   4124             promptcommand:
+0149   4124             
+0150   4124                 ;print the buffer
+0151   4124 21 07 45        ld hl, msprompt
+0152   4127 CD 53 41        call printline
+0153   412A CD 6A 42        call scroll
+0154   412D C9              ret
+0155   412E                
+0156   412E             promptroom
+0157   412E             
+0158   412E                 ;print the room message prompt
+0159   412E 21 1C 45        ld hl, roomprompt
+0160   4131 CD 53 41        call printline
+0161   4134 CD 6A 42        call scroll    
+0162   4137 C9              ret
+0163   4138             
+0164   4138             ;----------------------------
+0165   4138             ;THIS ROUTINE CALL KSCAN AT 02BB, THEN STORES
+0166   4138             ;THE STATUS CODE IN THE ADDRESS STORED IN DE
+0167   4138             readkeyboard: ; 40A0
+0168   4138 E5              push hl    ;save HL to stack
+0169   4139 C5              push bc    ;save BC
+0170   413A D5              push de
+0171   413B CD BB 02        call KSCAN    ;call ROM subroutine at address 02BB, result put in HL
+0172   413E D1              pop de
+0173   413F 44              ld b, h  ;move hl to bc (because we're about to need HL)
+0174   4140 4D              ld c, l
+0175   4141 62              ld h, d  ;copy kb status flag address into HL (so we can store it)
+0176   4142 6B              ld l, e
+0177   4143 71              ld (hl), c ;store B in (HL)
+0178   4144 2C              inc l
+0179   4145 70              ld (hl), b ;store C in (HL)+1
+0180   4146 C1              pop bc
+0181   4147 E1              pop hl
+0182   4148 C9              ret
+0183   4149                 
+0184   4149             ;sets the key down flag to 0
+0185   4149             clearflag:
+0186   4149 F5              push af
+0187   414A E5              push hl
+0188   414B 3E 00           ld a, 0
+0189   414D 32 9A 44        ld (keydown), a
+0190   4150 E1              pop hl
+0191   4151 F1              pop af
+0192   4152 C9              ret
+0193   4153             
+0194   4153             ;accepts the address of the text to print in hl, and the D_FILE location to print in DE
+0195   4153             ;printing stops when the char 0xFF is hit
+0196   4153             printline:
+0197   4153 C5              push bc
+0198   4154 F5              push af
+0199   4155 E5              push hl
+0200   4156 2A 0C 40        ld hl, (D_FILE)
+0201   4159 01 95 02        ld bc, 661
+0202   415C 09              add hl, bc 
+0203   415D 54              ld d, h
+0204   415E 5D              ld e, l
+0205   415F E1              pop hl
+0206   4160             prloop:    
+0207   4160 7E              ld a, (hl)  ; //get a char
+0208   4161 FE FF           cp $ff      ; hit the end?
+0209   4163 CA 6C 41        jp z, done
+0210   4166 12              ld (de), a; copy char in 'a' to D_FILE
+0211   4167 23              inc hl ; increment addr to copy to
+0212   4168 13              inc de ; get addr of next cha racter
+0213   4169 C3 60 41        jp prloop
+0214   416C             done:
+0215   416C F1              pop af
+0216   416D C1              pop bc
+0217   416E C9              ret
+0218   416F             
+0219   416F             clearbuf:
+0220   416F ED 5B 0C 40     ld de, (D_FILE)
+0221   4173 21 95 02        ld hl, 661
+0222   4176 19              add hl, de
+0223   4177 54              ld d, h
+0224   4178 5D              ld e, l
+0225   4179                 
+0226   4179 3E 00           ld a, 0
+0227   417B 06 0A           ld b, 10
+0228   417D                 
+0229   417D 21 9B 44        ld hl, buffer
+0230   4180                 
+0231   4180             clrloop:
+0232   4180 0E FF           ld c, $ff
+0233   4182 71              ld (hl), c ; put endline in buffer
+0234   4183 23              inc hl
+0235   4184 E5              push hl ; save hl ()
+0236   4185 0E 00           ld c, $00
+0237   4187 62              ld h, d ; move de to hl
+0238   4188 6B              ld l, e
+0239   4189 71              ld (hl), c ; put space on screen
+0240   418A 23              inc hl; inc dest address
+0241   418B 54              ld d,h  ; store it back in de
+0242   418C 5D              ld e,l
+0243   418D E1              pop hl
+0244   418E 3C              inc a; inc lp counter
+0245   418F B8              cp b; done?
+0246   4190 C2 80 41        jp nz, clrloop
+0247   4193                 ;set buffer ix to 
+0248   4193 3E 00           ld a, 0
+0249   4195 32 A5 44        ld (bufferix), a; set buffer index = 0
+0250   4198 32 A6 44        ld (bufferix+1), a; set buffer index = 0
+0251   419B C9              ret
+0252   419C             
+0253   419C             ;this subroutine takes a 8-bit number and a location to print it at
+0254   419C             ;bc = number to convert
+0255   419C             ;hl = address to store it at
+0256   419C             ;de = # of characters in buffer
+0257   419C             indextotext:
+0258   419C 19              add hl, de ; addr to store
+0259   419D 54              ld d, h
+0260   419E 5D              ld e, l
+0261   419F                 ;lots of stuff missing
+0262   419F             invalidroom:
+0263   419F 01 00 00        ld bc, 0
+0264   41A2 C5              push bc ;store return code on stack
+0265   41A3 C9              ret
+0266   41A4             print_current_room:
+0267   41A4                 ;print the buffer
+0268   41A4 21 2C 45        ld hl, currentrooomtext
+0269   41A7 CD 53 41        call printline
+0270   41AA                 
+0271   41AA                 ;copy in the room number
+0272   41AA 2A 0C 40        ld hl, (D_FILE)
+0273   41AD 01 A6 02        ld bc, 678 ; 621 + 17
+0274   41B0 09              add hl, bc 
+0275   41B1                 
+0276   41B1 E5              push hl ; move hl into de
+0277   41B2 2A AB 44        ld hl, (currroomaddr)
+0278   41B5 D1              pop de
+0279   41B6                 
+0280   41B6 ED A0           ldi ; copy from hl (memory) to screen (de)
+0281   41B8 ED A0           ldi    
+0282   41BA                  
+0283   41BA CD 6A 42        call scroll
+0284   41BD                 
+0285   41BD CD 2D 42        call get_flags_byte; a
+0286   41C0 F5              push af
+0287   41C1                 ;check for wumpus
+0288   41C1 E6 01           and 1
+0289   41C3 CA D6 41        jp z, no_wumpus_death
+0290   41C6                 ;wumpus death
+0291   41C6 21 C6 45        ld hl, playereatenmessage
+0292   41C9 CD 53 41        call printline;
+0293   41CC 3E 01           ld a, 1
+0294   41CE 32 AD 44        ld (gameover), a
+0295   41D1 CD 6A 42        call scroll
+0296   41D4 F1              pop af
+0297   41D5 C9              ret
+0298   41D6             no_wumpus_death:    
+0299   41D6                 ;check for pit
+0300   41D6 F1              pop af
+0301   41D7 F5              push af
+0302   41D8 E6 10           and 16
+0303   41DA CA ED 41        jp z, no_pit_death
+0304   41DD 21 94 45        ld hl, pitdeathmessage
+0305   41E0 CD 53 41        call printline;
+0306   41E3 CD 6A 42        call scroll
+0307   41E6 3E 01           ld a, 1
+0308   41E8 32 AD 44        ld (gameover), a
+0309   41EB F1              pop af
+0310   41EC C9              ret
+0311   41ED             no_pit_death:
+0312   41ED F1              pop af
+0313   41EE CD F5 41        call print_tunnels; calls scroll
+0314   41F1 CD 36 42        call print_flags;
+0315   41F4                 
+0316   41F4 C9              ret
+0317   41F5                 
+0318   41F5             print_tunnels:
+0319   41F5                 ;print the buffer
+0320   41F5 21 3F 45        ld hl, tunnelstext
+0321   41F8 CD 53 41        call printline
+0322   41FB                 
+0323   41FB                 ;11,15,22
+0324   41FB ED 5B AB 44     ld de, (currroomaddr) ; load addr of byte with tunnel
+0325   41FF 13              inc de
+0326   4200 13              inc de
+0327   4201                
+0328   4201             
+0329   4201 2A 0C 40        ld hl, (D_FILE) ;1st
+0330   4204 01 A1 02        ld bc, 673
+0331   4207 09              add hl, bc
+0332   4208 1A              ld a, (de)
+0333   4209 D5              push de
+0334   420A CD 09 44        call itoa
+0335   420D D1              pop de
+0336   420E                 
+0337   420E 2A 0C 40        ld hl, (D_FILE) ;2nd
+0338   4211 01 A5 02        ld bc, 677
+0339   4214 09              add hl, bc
+0340   4215 13              inc de
+0341   4216 1A              ld a, (de)
+0342   4217 D5              push de
+0343   4218 CD 09 44        call itoa
+0344   421B D1              pop de
+0345   421C                 
+0346   421C 2A 0C 40        ld hl, (D_FILE) ;3rd
+0347   421F 01 AC 02        ld bc, 684
+0348   4222 09              add hl, bc
+0349   4223 13              inc de
+0350   4224 1A              ld a, (de)
+0351   4225 CD 09 44        call itoa
+0352   4228 CD 6A 42        call scroll
+0353   422B C9              ret
+0354   422C             handle_wumpus:
+0355   422C             
+0356   422C C9              ret
+0357   422D                 
+0358   422D             get_flags_byte:
+0359   422D 2A AB 44        ld hl, (currroomaddr) ; load addr of byte with tunnel
+0360   4230 11 05 00        ld de, 5 ; 5 byte offset
+0361   4233 19              add hl, de
+0362   4234 7E              ld a, (hl) ; get flags bytes
+0363   4235 C9              ret
+0364   4236             ;prints bat, wumpus, and draft messages
+0365   4236             print_flags:
+0366   4236 CD 2D 42        call get_flags_byte
+0367   4239 F5              push af ; save flags
+0368   423A E6 20           and 32
+0369   423C CA 48 42        jp z, nopit;
+0370   423F 21 71 45        ld hl, pitwarning
+0371   4242 CD 53 41        call printline
+0372   4245 CD 6A 42        call scroll
+0373   4248             nopit:
+0374   4248 F1              pop af ; restore flag byte
+0375   4249 F5              push af ; save it
+0376   424A E6 08           and 8
+0377   424C CA 58 42        jp z, nobats;
+0378   424F 21 58 45        ld hl, batswarning
+0379   4252 CD 53 41        call printline
+0380   4255 CD 6A 42        call scroll
+0381   4258             nobats:
+0382   4258 F1              pop af; restore flag byte
+0383   4259 F5              push af
+0384   425A E6 02           and 2; bit 2 = next to wumpus
+0385   425C CA 68 42        jp z, nowumpus;
+0386   425F 21 7D 45        ld hl, wumpuswarning
+0387   4262 CD 53 41        call printline
+0388   4265 CD 6A 42        call scroll
+0389   4268             nowumpus:
+0390   4268 F1              pop af;
+0391   4269 C9              ret
+0392   426A             
+0393   426A             ;this subroutine scrolls the display file up (assumes its full)
+0394   426A             scroll:
+0395   426A ED 5B 0C 40     ld de, (D_FILE)
+0396   426E 13              inc de ; don't overwrite 1st cr in d_file
+0397   426F 62              ld h, d ; de -> hl
+0398   4270 6B              ld l, e
+0399   4271 01 21 00        ld bc, 33; 33 chars per line
+0400   4274 09              add hl, bc; hl is next line
+0401   4275 06 00           ld b,0
+0402   4277 0E 15           ld c, 21; bc no contains loop counter (20 lines)
+0403   4279              
+0404   4279             scrloop:
+0405   4279 C5              push bc ; save loop counter
+0406   427A 01 21 00        ld bc, 33; 33 chars per line
+0407   427D ED B0           ldir ; copies hl to de until bc is 0
+0408   427F C1              pop bc ; restore loop counter
+0409   4280 0D              dec c
+0410   4281 79              ld a, c
+0411   4282 FE 00           cp 0 ; is loop done
+0412   4284 C2 79 42        jp nz, scrloop
+0413   4287 C9              ret
+0414   4288                 
+0415   4288             handle_command_input:
+0416   4288             
+0417   4288                 ;save the command that was entered
+0418   4288                 ;make sure buffer[0] is m or s
+0419   4288 3A 9B 44        ld a, (buffer)
+0420   428B              
+0421   428B                 ;now that we saved the buffer, we can clear it
+0422   428B F5              push af
+0423   428C CD 6A 42        call scroll;
+0424   428F CD 6F 41        call clearbuf;
+0425   4292 F1              pop af
+0426   4293                 
+0427   4293 FE 32           cp $32 ;  'm'
+0428   4295 CA A1 42        jp z, validcommand
+0429   4298 FE 38           cp $38 ;  's'
+0430   429A CA A1 42        jp z, validcommand 
+0431   429D             
+0432   429D             ;bad command
+0433   429D CD 24 41        call promptcommand;
+0434   42A0 C9              ret    ; valid input was not entered
+0435   42A1                 
+0436   42A1             validcommand:    
+0437   42A1 32 A8 44        ld (command), a ;store command
+0438   42A4                 
+0439   42A4                 ;set the flag that we are taking room input
+0440   42A4 3E 01           ld a, $01
+0441   42A6 32 A7 44        ld (inputstate),a
+0442   42A9                 
+0443   42A9 CD 2E 41        call promptroom;
+0444   42AC C9              ret    
+0445   42AD             
+0446   42AD             ;convert the room that was enter to an int
+0447   42AD             ;this function t akes the address of the rightmost
+0448   42AD             ;hl address of rightmost byte
+0449   42AD             ;c number of bytes in the buffer
+0450   42AD             ;result is returned in bc
+0451   42AD             
+0452   42AD             handle_room_input:
+0453   42AD                 ;set up hl to be the buffer addr + num chars entered
+0454   42AD 21 9B 44        ld hl, buffer
+0455   42B0 ED 4B A5 44     ld bc, (bufferix)
+0456   42B4                 ;ld c,b
+0457   42B4              
+0458   42B4 16 00           ld d, 0
+0459   42B6 59              ld e, c
+0460   42B7 19              add hl, de
+0461   42B8 2B              dec hl
+0462   42B9 CD 46 44        call atoi ; result in bc
+0463   42BC                 
+0464   42BC CD 52 43        call validate_move;
+0465   42BF FE 00           cp 0
+0466   42C1 CA EF 42        jp z, invalid_room
+0467   42C4             
+0468   42C4 79              ld a, c
+0469   42C5             ;    dec a
+0470   42C5 32 AA 44        ld (roomentry), a
+0471   42C8                 
+0472   42C8 CD 6A 42        call scroll;
+0473   42CB                 
+0474   42CB                 ;now we have to look at what the last option was
+0475   42CB 3A A8 44        ld a, (command)
+0476   42CE F5              push af
+0477   42CF FE 32           cp $32
+0478   42D1 CC 67 43        call z, move_player
+0479   42D4 F1              pop af
+0480   42D5 FE 38           cp $38
+0481   42D7 CC FC 42        call z, shoot_arrow
+0482   42DA                 
+0483   42DA                 ;did moving the player result in death?
+0484   42DA 3A AD 44        ld a, (gameover)
+0485   42DD FE 01           cp 1
+0486   42DF C8              ret z
+0487   42E0                 
+0488   42E0                 ;reset input state to taking a command
+0489   42E0 3E 00           ld a, 0
+0490   42E2 32 A7 44        ld (inputstate), a
+0491   42E5                 
+0492   42E5 CD 6A 42        call scroll    
+0493   42E8 CD 6F 41        call clearbuf;
+0494   42EB CD 24 41        call promptcommand;
+0495   42EE C9              ret
+0496   42EF             invalid_room:
+0497   42EF CD 6A 42        call scroll    
+0498   42F2 CD 6F 41        call clearbuf;
+0499   42F5 CD F5 41        call print_tunnels;
+0500   42F8 CD 2E 41        call promptroom;
+0501   42FB C9              ret
+0502   42FC              
+0503   42FC             shoot_arrow
+0504   42FC 21 DF 45        ld hl, shootarrowmessage
+0505   42FF CD 53 41        call printline
+0506   4302 CD 6A 42        call scroll
+0507   4305                 
+0508   4305                 ;set the game over flag
+0509   4305 3E 01           ld a, 1
+0510   4307 32 AD 44        ld (gameover), a
+0511   430A                 
+0512   430A                 
+0513   430A                 ;was the wumpus in that room
+0514   430A 3A AA 44        ld a, (roomentry)
+0515   430D 4F              ld c, a
+0516   430E CD 74 43        call get_room_ptr ; result in hl
+0517   4311 11 05 00        ld de, 5 ; 5 byte offset
+0518   4314 19              add hl, de
+0519   4315 7E              ld a, (hl) ; get flags bytes
+0520   4316 E6 01           and 1
+0521   4318 C2 25 43        jp nz, arrow_hit
+0522   431B             arrow_miss:
+0523   431B 21 C6 45        ld hl, playereatenmessage
+0524   431E CD 53 41        call printline
+0525   4321 CD 6A 42        call scroll
+0526   4324 C9              ret
+0527   4325             arrow_hit:
+0528   4325 21 EC 45        ld hl, victorymessage
+0529   4328 CD 53 41        call printline
+0530   432B CD 6A 42        call scroll
+0531   432E C9              ret
+0532   432F                 
+0533   432F             ;this subrountine converts the room number its address
+0534   432F             ;the address is returned in hl
+0535   432F             set_room_addr
+0536   432F F5              push af
+0537   4330 C5              push bc
+0538   4331 D5              push de
+0539   4332 E5              push hl
+0540   4333 3A A9 44        ld a, (curroom) ; room number (1 based)
+0541   4336 3D              dec a
+0542   4337 16 00           ld d, 0
+0543   4339 5F              ld e, a
+0544   433A 3E 06           ld a, 6; size of room in bytes (2 byte name, 3 rooms, 1 flags)
+0545   433C CD F0 43        call DE_Times_A ; result in hl now add it to base
+0546   433F 01 08 46        ld bc, room1; load base addr
+0547   4342 09              add hl, bc ; add offset to base
+0548   4343                 
+0549   4343 E5              push hl ;switch hl, bc'
+0550   4344 C5              push bc
+0551   4345 E1              pop hl
+0552   4346 C1              pop bc
+0553   4347 21 AB 44        ld hl, currroomaddr
+0554   434A 71              ld (hl), c
+0555   434B 23              inc hl
+0556   434C 70              ld (hl), b
+0557   434D E1              pop hl
+0558   434E D1              pop de
+0559   434F C1              pop bc
+0560   4350 F1              pop af
+0561   4351 C9              ret
+0562   4352             ;this subroutine checks if the player can go in specified direction
+0563   4352             ;c - the room to move to
+0564   4352             validate_move:
+0565   4352 2A AB 44        ld hl, (currroomaddr)
+0566   4355 23              inc hl
+0567   4356 23              inc hl
+0568   4357 06 03           ld b, 3
+0569   4359             validate_move_loop:    
+0570   4359 7E              ld a, (hl)
+0571   435A B9              cp c
+0572   435B CA 64 43        jp z, valid_move
+0573   435E 23              inc hl
+0574   435F 10 F8           djnz validate_move_loop
+0575   4361 3E 00           ld a, 0
+0576   4363 C9              ret
+0577   4364             valid_move:
+0578   4364 3E 01           ld a, 1
+0579   4366 C9              ret
+0580   4367             ;moves the player to the selected room
+0581   4367             move_player:
+0582   4367                 ;make sure the selected room is attached to the current room
+0583   4367 3A AA 44        ld a, (roomentry)
+0584   436A 32 A9 44        ld (curroom), a
+0585   436D CD 2F 43        call set_room_addr
+0586   4370
+
+
+
+
+0587   4370             ;    call scroll
+0588   4370 CD A4 41        call print_current_room;
+0589   4373             
+0590   4373 C9              ret
+0591   4374             ;
+0592   4374             ;compute the pointer for the room
+0593   4374             ;room number in register c
+0594   4374             ;address returned in hl
+0595   4374             get_room_ptr:
+0596   4374 F5              push af
+0597   4375 C5              push bc
+0598   4376 D5              push de
+0599   4377 0D              dec c
+0600   4378 16 00           ld d, 0
+0601   437A 59              ld e, c ;room number
+0602   437B 3E 06           ld a, 6 ; size of room data
+0603   437D CD F0 43        call DE_Times_A ; result in HL
+0604   4380 11 08 46        ld de, room1
+0605   4383 19              add hl, de
+0606   4384 D1              pop de
+0607   4385 C1              pop bc
+0608   4386 F1              pop af
+0609   4387 C9              ret
+0610   4388             
+0611   4388                 
+0612   4388             set_up_game:
+0613   4388                 
+0614   4388                 ;clear buffer
+0615   4388 CD 6F 41        call clearbuf
+0616   438B                 
+0617   438B                 ;clear death byte
+0618   438B 3E 00           ld a, 0
+0619   438D 32 AD 44        ld (gameover), a
+0620   4390             
+0621   4390                 ;clear the last commadn
+0622   4390 32 A8 44        ld (command), a
+0623   4393 32 A7 44        ld (inputstate), a
+0624   4396             
+0625   4396                 ;put player at start
+0626   4396 3E 01           ld a, 1
+0627   4398 32 A9 44        ld (curroom), a
+0628   439B             
+0629   439B CD 2F 43        call set_room_addr
+0630   439E                 
+0631   439E             ;    call random_20 ; put random in a
+0632   439E 0E 01           ld c, 1; wumpus bit
+0633   43A0 3E 02           ld a, 2; 
+0634   43A2 CD C2 43        call set_room_flag  ; room in c, flag in a
+0635   43A5             
+0636   43A5             ;    call random_20 ; put random in a
+0637   43A5 0E 04           ld c, 4; bat bit
+0638   43A7 3E 04           ld a, 4; 
+0639   43A9 CD C2 43        call set_room_flag  ; room in c, flag in a
+0640   43AC             
+0641   43AC              ;   call random_20 ; put random in a
+0642   43AC 0E 04           ld c, 4; bat bit
+0643   43AE 3E 06           ld a, 6; 
+0644   43B0 CD C2 43        call set_room_flag  ; room in c, flag in a
+0645   43B3             
+0646   43B3              ;   call random_20 ; put random in a
+0647   43B3 0E 10           ld c, 16;pit bit
+0648   43B5 3E 0F           ld a, 15;  
+0649   43B7 CD C2 43        call set_room_flag  ; room in c, flag in a
+0650   43BA             
+0651   43BA              ;   call random_20 ; put random in a
+0652   43BA 0E 10           ld c, 16;  pit bit
+0653   43BC 3E 10           ld a, 16;  room#    
+0654   43BE CD C2 43        call set_room_flag  ; room in c, flag in a
+0655   43C1                 
+0656   43C1 C9              ret
+0657   43C2             ;This subroutine set the flag in a room then sets teh flags in the adjacent rooms
+0658   43C2             ;a contains room number to set flag for
+0659   43C2             ;c contains the bit flag to OR onto the room
+0660   43C2             ;1 = wumpus | 2 = next to wumpus | 4 = bat | 8 = next to bats | 16 = pit | 32 = next to pit
+0661   43C2             set_room_flag:
+0662   43C2                 
+0663   43C2                 ;convert it to a ptr
+0664   43C2                  
+0665   43C2 C5              push bc
+0666   43C3 4F              ld c, a
+0667   43C4 CD 74 43        call get_room_ptr ; takes # in c, puts addr in hl
+0668   43C7 C1              pop bc
+0669   43C8 E5              push hl; save room address
+0670   43C9                 
+0671   43C9 16 00           ld d, 0
+0672   43CB 1E 05           ld e, 5; add 5 bytes to get the flags byte
+0673   43CD 19              add hl, de
+0674   43CE                 
+0675   43CE                 ;set the requested bit
+0676   43CE 7E              ld a, (hl)
+0677   43CF B1              or c
+0678   43D0 77              ld (hl), a; store the bat bit
+0679   43D1                 
+0680   43D1                 ;shift the bit left and appy the flag to the adjacent rooms
+0681   43D1 CB 21           sla c
+0682   43D3 E1              pop hl; restore room address for subroutine
+0683   43D4 CD D8 43        call set_adjacent_room_flags
+0684   43D7                 
+0685   43D7 C9              ret
+0686   43D8             ;This subroutine set the flags adjacent in the room adjacent to one that has bats
+0687   43D8             ;addr of room is in hl
+0688   43D8             ;c = value to OR onto the flags
+0689   43D8             set_adjacent_room_flags:
+0690   43D8                 ;add 2 bytes to room addr to get to the adjacent rooms
+0691   43D8 23              inc hl
+0692   43D9 23              inc hl
+0693   43DA                 ;loop three times
+0694   43DA 06 03           ld b, 3 ; loop counter
+0695   43DC             flag_loop:
+0696   43DC E5              push hl; save addr of adjacent room byte
+0697   43DD C5              push bc; save loop counter
+0698   43DE 4E              ld c, (hl);get the number of the room that is adjacent to hl
+0699   43DF                 
+0700   43DF                 ;convert it to a ptr
+0701   43DF CD 74 43        call get_room_ptr ; addr in hl
+0702   43E2                 
+0703   43E2 16 00           ld d,0;add five bytes to get the flags offset
+0704   43E4 1E 05           ld e,5
+0705   43E6 19              add hl, de
+0706   43E7 7E              ld a, (hl) ; get the flags byte
+0707   43E8 C1              pop bc ; restore loop counter or bit to OR
+0708   43E9 B1              or c ; set bit
+0709   43EA 77              ld (hl), a ;store it back
+0710   43EB E1              pop hl ;restore addr of adjacent room byte
+0711   43EC                 
+0712   43EC 23              inc hl ; increment src add
+0713   43ED 10 ED           djnz flag_loop
+0714   43EF C9              ret
+0715   43F0                 
+0716   43F0             DE_Times_A:
+0717   43F0             ;Inputs:
+0718   43F0             ;     DE and A are factors
+0719   43F0             ;Outputs:
+0720   43F0             ;     A is not changed
+0721   43F0             ;     B is 0
+0722   43F0             ;     C is not changed
+0723   43F0             ;     DE is not changed
+0724   43F0             ;     HL is the product
+0725   43F0             ;Time:
+0726   43F0             ;     342+6x
+0727   43F0             ;
+0728   43F0 06 08            ld b,8          ;7           7
+0729   43F2 21 00 00         ld hl,0         ;10         10
+0730   43F5 29                 add hl,hl     ;11*8       88
+0731   43F6 07                 rlca          ;4*8        32
+0732   43F7 30 01              jr nc,$+3     ;(12|18)*8  96+6x
+0733   43F9 19                   add hl,de   ;--         --
+0734   43FA 10 F9              djnz $-5      ;13*7+8     99
+0735   43FC C9               ret             ;10         10    
+0736   43FD             Multiply:                        ; this routine performs the operation HL=D*E
+0737   43FD 21 00 00      ld hl,0                        ; HL is used to accumulate the result
+0738   4400 7A            ld a,d                         ; checking one of the factors; returning if it is zero
+0739   4401 B7            or a
+0740   4402 C8            ret z
+0741   4403 42            ld b,d                         ; one factor is in B
+0742   4404 54            ld d,h                         ; clearing D (H is zero), so DE holds the other factor
+0743   4405             MulLoop:                         ; adding DE to HL exactly B times
+0744   4405 19            add hl,de
+0745   4406 10 FD         djnz MulLoop
+0746   4408 C9            ret
+0747   4409               
+0748   4409             ;this subroutine will convert a number in 'a' to a chars
+0749   4409             ;a - the number to convert
+0750   4409             ;hl - the result will be placed in memory at the destination address (right justified)
+0751   4409             itoa:
+0752   4409                 ;push af
+0753   4409 4F              ld c, a
+0754   440A 16 0A           ld d, 10
+0755   440C CD 38 44        call C_Div_D ; puts remainder in a
+0756   440F                 
+0757   440F                 ;convert a to a char code
+0758   440F 5F              ld e, a; save quotient
+0759   4410 C5              push bc ; save quotient
+0760   4411 C6 1C           add a, $1c ; convert remainder to a char code
+0761   4413 77              ld (hl), a ; store char
+0762   4414 2B              dec hl
+0763   4415                 
+0764   4415 C1              pop bc  ; retore queotient  
+0765   4416 79              ld a, c
+0766   4417 FE 00           cp 0 ;if a is 0, well are done
+0767   4419 C2 09 44        jp nz, itoa
+0768   441C C9              ret
+0769   441D             
+0770   441D             ;take char in c
+0771   441D             ;puts code into c
+0772   441D             ;c = $FF if char is invalid
+0773   441D             char_to_num:
+0774   441D F5              push af
+0775   441E D5              push de
+0776   441F E5              push hl
+0777   4420                      
+0778   4420 1E 1C           ld e, $1C   ; subtract off $1C to convert it to a number
+0779   4422 79              ld a, c     ; load char into accumulator
+0780   4423 93              sub e   ;subract $1C from char
+0781   4424 FA 32 44        jp m, badchar  ; char was less than "0"
+0782   4427                 
+0783   4427                 ; char is still loaded into d
+0784   4427                 ; load char code for "9"
+0785   4427                 ; subtract that from the char
+0786   4427 57              ld d, a;  
+0787   4428 3E 09           ld a, $09 ; char code for 9
+0788   442A 92              sub d;
+0789   442B FA 32 44        jp m, badchar; char was greater than "9"
+0790   442E                 
+0791   442E                 ;char (in d) is valid and is 0-9
+0792   442E 4A              ld c, d;
+0793   442F C3 34 44        jp goodchar
+0794   4432             badchar:
+0795   4432 0E FF           ld c, $ff
+0796   4434             goodchar:
+0797   4434 E1              pop hl
+0798   4435 D1              pop de
+0799   4436 F1              pop af
+0800   4437 C9              ret
+0801   4438                 
+0802   4438              
+0803   4438             ;this code taken from http://z80-heaven.wikidot.com/math#toc39    
+0804   4438             C_Div_D:
+0805   4438             ;Inputs:
+0806   4438             ;     C is the numerator
+0807   4438             ;     D is the denominator
+0808   4438             ;Outputs:
+0809   4438             ;     A is the remainder
+0810   4438             ;     B is 0
+0811   4438             ;     C is the result of C/D
+0812   4438             ;     D,E,H,L are not changed
+0813   4438             ;
+0814   4438 06 08           ld b,8
+0815   443A AF              xor a
+0816   443B CB 21           sla c
+0817   443D 17              rla
+0818   443E BA              cp d
+0819   443F 38 02           jr c,$+4
+0820   4441 0C              inc c
+0821   4442 92              sub d
+0822   4443 10 F6           djnz $-8
+0823   4445 C9              ret
+0824   4446                 ;converts text in a buffer to an integer
+0825   4446             ;this function t akes the address of the rightmost
+0826   4446             ;hl address of rightmost byte
+0827   4446             ;c number of bytes in the buffer
+0828   4446             ;result is returned in bc
+0829   4446             atoi:
+0830   4446                 ;bc will be the sum
+0831   4446                 ;de will be the place value (power of 10)
+0832   4446                 ;hl will contain the src address
+0833   4446                 ;a will be loop counter
+0834   4446 79              ld a, c    
+0835   4447 01 00 00        ld bc, $0000
+0836   444A 11 01 00        ld de, $0001
+0837   444D             atoiloop:
+0838   444D F5              push af ; save loop counter
+0839   444E E5              push hl ; save src addr (free up hl)
+0840   444F C5              push bc ; save sum (free up bc)
+0841   4450                 
+0842   4450 4E              ld c, (hl)
+0843   4451 CD 1D 44        call char_to_num;
+0844   4454 79              ld a, c
+0845   4455 FE FF           cp $FF
+0846   4457 CA 74 44        jp z, invalid
+0847   445A                 
+0848   445A                 ;multiply de * the place value (de)
+0849   445A D5              push de
+0850   445B CD 78 44        call Mul8 ; HL=DE*A
+0851   445E D1              pop de
+0852   445F                 
+0853   445F                 ;move temp to bc
+0854   445F 44              ld b, h
+0855   4460 4D              ld c, l
+0856   4461                 
+0857   4461                 ;add to the sum
+0858   4461 E1              pop hl ; restore sum to hl
+0859   4462 09              add hl, bc
+0860   4463 44              ld b, h ; copy sum back into bc
+0861   4464 4D              ld c, l
+0862   4465                 
+0863   4465                 ;multiply the place value x 10
+0864   4465 3E 0A           ld a, 10
+0865   4467 CD 78 44        call Mul8 ; HL=DE*A
+0866   446A 54              ld d, h
+0867   446B 5D              ld e, l
+0868   446C                 
+0869   446C E1              pop hl ; restore addr
+0870   446D 2B              dec hl
+0871   446E                 
+0872   446E F1              pop af ; restore loop counter
+0873   446F 3D              dec a
+0874   4470 C2 4D 44        jp nz, atoiloop;
+0875   4473             
+0876   4473                 ;finished loop - number was valid
+0877   4473               ;  ld hl, $01
+0878   4473              ;   push hl
+0879   4473 C9              ret
+0880   4474             invalid:
+0881   4474 C1              pop bc
+0882   4475 E1              pop hl
+0883   4476 F1              pop af
+0884   4477             ;    ld bc, $FFFF
+0885   4477             ;  push bc
+0886   4477 C9              ret
+0887   4478             
+0888   4478             Mul8:                            ; this routine performs the operation HL=DE*A
+0889   4478 21 00 00      ld hl,0                        ; HL is used to accumulate the result
+0890   447B 06 08         ld b,8                         ; the multiplier (A) is 8 bits wide
+0891   447D             Mul8Loop:
+0892   447D 0F            rrca                           ; putting the next bit into the carry
+0893   447E D2 82 44      jp nc,Mul8Skip                 ; if zero, we skip the addition (jp is used for speed)
+0894   4481 19            add hl,de                      ; adding to the product if necessary
+0895   4482               
+0896   4482             Mul8Skip:
+0897   4482 CB 23         sla e                          ; calculating the next auxiliary product by shifting
+0898   4484 CB 12         rl d                           ; DE one bit leftwards (refer to the shift instructions!)
+0899   4486 10 F5         djnz Mul8Loop
+0900   4488 C9            ret
+0901   4489             
+0902   4489             ;return a random number < 20 in a
+0903   4489             random_20
+0904   4489 ED 5F           ld a, r;
+0905   448B E6 7F           and $7f ;01111111
+0906   448D 0E 14           ld c, 20
+0907   448F             toobig:
+0908   448F 91              sub c
+0909   4490 FA 96 44        jp m, rnd_done ; jump on no minus sign
+0910   4493 C3 8F 44        jp toobig;
+0911   4496             rnd_done:
+0912   4496 81              add a, c
+0913   4497 C9              ret
+0914   4498             
+0915   4498             ;;;;;;;;;;;;;;;;;;;;;;;;;;VARIABlES;;;;;;;;;;;;;;;;;;;;;;;;;    
+0916   4498             kbstatus:
+0917   4498 FF FF           DEFB $ff, $ff;
+0918   449A             keydown:
+0919   449A 00              DEFB $00;
+0920   449B             buffer:
+0921   449B FF FF FF FF     DEFB $ff, $ff, $ff, $ff, $ff, $ff,$ff, $ff,$ff, $ff; storage for the 2 keyboard code bytes
+0921   449F FF FF FF FF 
+0921   44A3 FF FF 
+0922   44A5             bufferix:
+0923   44A5 00 00           DEFB $00, $00
+0924   44A7             inputstate:
+0925   44A7 00              DEFB $00 ; 0 = accepting m | s,  1 = accepting room
+0926   44A8             command:
+0927   44A8 00              DEFB $00 ;   m = move s = shoot
+0928   44A9             curroom:
+0929   44A9 01              DEFB $01 ;  
+0930   44AA             roomentry:
+0931   44AA 00              DEFB $00    
+0932   44AB             currroomaddr:
+0933   44AB 00 00           DEFB $00, $00
+0934   44AD             gameover:
+0935   44AD 00              DEFB $00
+0936   44AE             welcome:
+0937   44AE 3C 2A 31 28     DEFB _W, _E, _L, _C, _O, _M, _E, $00, _T, _O, $00, _H, _U, _N, _T, $00, _T, _H, _E, $00, _W, _U, _M, _P, _U, _S, $FF;
+0937   44B2 34 32 2A 00 
+0937   44B6 39 34 00 2D 
+0937   44BA 3A 33 39 00 
+0937   44BE 39 2D 2A 00 
+0937   44C2 3C 3A 32 35 
+0937   44C6 3A 38 FF 
+0938   44C9             welcome2:
+0939   44C9 34 37 2E 2C     DEFB _O, _R, _I, _G, _I, _N, _A, _L, $00, _V, _E, _R, _S, _I, _O, _N, $00, _B, _Y, $00, _G, _R, _E, _G, $00, _Y, _O, _B, $FF
+0939   44CD 2E 33 26 31 
+0939   44D1 00 3B 2A 37 
+0939   44D5 38 2E 34 33 
+0939   44D9 00 27 3E 00 
+0939   44DD 2C 37 2A 2C 
+0939   44E1 00 3E 34 27 
+0939   44E5 FF 
+0940   44E6             welcome3:
+0941   44E6 3F 3D 24 1D     DEFB _Z, _X, _8, _1, $00, _P, _O, _R, _T, $00, _B, _Y, $00, _E, _V, _A, _N, $00, _C, $1B, $00, _W, _R, _I, _G, _H, _T, $00, _2, _0, _1, _5, $FF
+0941   44EA 00 35 34 37 
+0941   44EE 39 00 27 3E 
+0941   44F2 00 2A 3B 26 
+0941   44F6 33 00 28 1B 
+0941   44FA 00 3C 37 2E 
+0941   44FE 2C 2D 39 00 
+0941   4502 1E 1C 1D 21 
+0941   4506 FF 
+0942   4507             msprompt:
+0943   4507 32 34 3B 2A     DEFB $32, $34, $3B, $2A, $00, $34, $37, $00, $38, $2D, $34, $34, $39, $0F, $00, $10, $32, $1A, $38, $11, $FF;
+0943   450B 00 34 37 00 
+0943   450F 38 2D 34 34 
+0943   4513 39 0F 00 10 
+0943   4517 32 1A 38 11 
+0943   451B FF 
+0944   451C             roomprompt:
+0945   451C 3C 2D 2E 28     DEFB $3C, $2D, $2E, $28, $2D, $00, $37, $34, $34, $32, $0F, $00, $00, $00, $00, $FF;
+0945   4520 2D 00 37 34 
+0945   4524 34 32 0F 00 
+0945   4528 00 00 00 FF 
+0946   452C             currentrooomtext:
+0947   452C 3E 34 3A 00     DEFB $3E, $34, $3A, $00, $26, $37, $2A, $00, $2E, $33, $00, $37, $34, $34, $32, $00, $00, $00, $FF
+0947   4530 26 37 2A 00 
+0947   4534 2E 33 00 37 
+0947   4538 34 34 32 00 
+0947   453C 00 00 FF 
+0948   453F             tunnelstext:
+0949   453F 39 3A 33 33     DEFB $39, $3A, $33, $33, $2A, $31, $38, $00, $39, $34, $00, $00, $00, $1A, $00, $00, $00, $1A, $26, $33, $29, $00, $00, $00, $FF 
+0949   4543 2A 31 38 00 
+0949   4547 39 34 00 00 
+0949   454B 00 1A 00 00 
+0949   454F 00 1A 26 33 
+0949   4553 29 00 00 00 
+0949   4557 FF 
+0950   4558             batswarning:
+0951   4558             ;    DEFB $39, $3A, $33, $33, $2A, $31, $38, $00, $39, $34, $00, $00, $00, $1A, $00, $00, $00, $1A, $26, $33, $29, $00, $00, $00, $FF 
+0952   4558 38 36 3A 2A     DEFB $38, $36, $3A, $2A, $26, $30, $16, $27, $26, $39, $38, $00, $33, $2A, $26, $37, $27, $3E, $00, $02, $06, $00, $02, $06, $FF
+0952   455C 26 30 16 27 
+0952   4560 26 39 38 00 
+0952   4564 33 2A 26 37 
+0952   4568 27 3E 00 02 
+0952   456C 06 00 02 06 
+0952   4570 FF 
+0953   4571             pitwarning:
+0954   4571             ;    DEFB $39, $3A, $33, $33, $2A, $31, $38, $00, $39, $34, $00, $00, $00, $1A, $00, $00, $00, $1A, $26, $33, $29, $00, $00, $00, $FF 
+0955   4571 11 11 11 29     DEFB $11, $11, $11, $29, $37, $26, $2B, $39, $11, $11, $11, $FF
+0955   4575 37 26 2B 39 
+0955   4579 11 11 11 FF 
+0956   457D             wumpuswarning:
+0957   457D 17 17 17 2E     DEFB _AS,_AS,_AS,_I, $00, $38, $32, $2A, $31, $31, $00, $26, $00, $3C, $3A, $32, $35, $3A, $38, _AS,_AS,_AS,$FF
+0957   4581 00 38 32 2A 
+0957   4585 31 31 00 26 
+0957   4589 00 3C 3A 32 
+0957   458D 35 3A 38 17 
+0957   4591 17 17 FF 
+0958   4594             pitdeathmessage:
+0959   4594 17 17 17 26     DEFB _AS, _AS, _AS, $26, $26, $26, $26, $26, $26, $26, $26, $16, $35, $2E, $39, _AS, _AS, _AS, $FF
+0959   4598 26 26 26 26 
+0959   459C 26 26 26 16 
+0959   45A0 35 2E 39 17 
+0959   45A4 17 17 FF 
+0960   45A7             bats_fly_message:
+0961   45A7 27 26 39 38     DEFB _B, _A, _T, _S, $00, _H, _A, _V, _E, $00, _F, _L, _O, _W, _N, $00, _Y, _O, _U , $00, _T, _O, $00, _R, _O, _O, _M, $00, $00, $00, $FF    
+0961   45AB 00 2D 26 3B 
+0961   45AF 2A 00 2B 31 
+0961   45B3 34 3C 33 00 
+0961   45B7 3E 34 3A 00 
+0961   45BB 39 34 00 37 
+0961   45BF 34 34 32 00 
+0961   45C3 00 00 FF 
+0962   45C6             playereatenmessage:
+0963   45C6 17 17 17 39     DEFB _AS, _AS, _AS, _T, _H, _E, $00, $_W, _U, _M, _P, _U, _S, $00, _A, _T, _E, $00, _Y, _O, _U, _AS, _AS, _AS, $FF
+0963   45CA 2D 2A 00 3C 
+0963   45CE 3A 32 35 3A 
+0963   45D2 38 00 26 39 
+0963   45D6 2A 00 3E 34 
+0963   45DA 3A 17 17 17 
+0963   45DE FF 
+0964   45DF             shootarrowmessage:
+0965   45DF 17 17 17 39     DEFB _AS, _AS, _AS, _T, _H, _W, _A, _N, _G, _AS, _AS, _AS, $FF
+0965   45E3 2D 3C 26 33 
+0965   45E7 2C 17 17 17 
+0965   45EB FF 
+0966   45EC             victorymessage:
+0967   45EC 17 17 17 3E     DEFB _AS, _AS, _AS, _Y, _O, _U, $00, _K, _I, _L, _L, _E, _D, $00, _T, _H, _E, $00, _W, _U, _M, _P, _U, _S, _AS, _AS , _AS, $FF
+0967   45F0 34 3A 00 30 
+0967   45F4 2E 31 31 2A 
+0967   45F8 29 00 39 2D 
+0967   45FC 2A 00 3C 3A 
+0967   4600 32 35 3A 38 
+0967   4604 17 17 17 FF 
+0968   4608             ;2byte label, three bytes for the number of the connecting rooms, one byte for flags
+0969   4608             ;bits from left to right
+0970   4608             ; |0|0|next to pit|has pit|next to bats|has bats|next to wumpus|has wumpus|
+0971   4608             room1:
+0972   4608 00 1D 02 05     DEFB $00, $1D, $02, $05, $06, $00
+0972   460C 06 00 
+0973   460E             room2:
+0974   460E 00 1E 01 03     DEFB $00, $1E, $01, $03, $08, $00 
+0974   4612 08 00 
+0975   4614             room3:
+0976   4614 00 1F 02 04     DEFB $00, $1F, $02, $04, $0A, $00
+0976   4618 0A 00 
+0977   461A             room4:
+0978   461A 00 20 04 05     DEFB $00, $20, $04, $05, $12, $00
+0978   461E 12 00 
+0979   4620             room5:
+0980   4620 00 21 01 04     DEFB $00, $21, $01, $04, $14, $00 
+0980   4624 14 00 
+0981   4626             room6:
+0982   4626 00 22 01 07     DEFB $00, $22, $01, $07, $0F, $00
+0982   462A 0F 00 
+0983   462C             room7:
+0984   462C 00 23 06 08     DEFB $00, $23, $06, $08, $0F, $00 
+0984   4630 0F 00 
+0985   4632             room8:
+0986   4632 00 24 07 09     DEFB $00, $24, $07, $09, $02, $00
+0986   4636 02 00 
+0987   4638             room9:
+0988   4638 00 25 08 0A     DEFB $00, $25, $08, $0A, $11, $00 
+0988   463C 11 00 
+0989   463E             room10:
+0990   463E 1D 1C 03 09     DEFB $1D, $1C, $03, $09, $0B, $00 
+0990   4642 0B 00 
+0991   4644             room11:
+0992   4644 1D 1D 0A 0C     DEFB $1D, $1D, $0A, $0C, $12, $00 
+0992   4648 12 00 
+0993   464A             room12:
+0994   464A 1D 1E 04 0B     DEFB $1D, $1E, $04, $0B, $0D, $00 
+0994   464E 0D 00 
+0995   4650             room13:
+0996   4650 1D 1F 0C 0E     DEFB $1D, $1F, $0C, $0E, $13, $00
+0996   4654 13 00 
+0997   4656             room14:
+0998   4656 1D 20 05 0D     DEFB $1D, $20, $05, $0D, $0F, $00
+0998   465A 0F 00 
+0999   465C             room15:
+1000   465C 1D 21 06 0E     DEFB $1D, $21, $06, $0E, $14, $00
+1000   4660 14 00 
+1001   4662             room16:
+1002   4662 1D 22 07 12     DEFB $1D, $22, $07, $12, $14, $00
+1002   4666 14 00 
+1003   4668             room17:
+1004   4668 1D 23 09 10     DEFB $1D, $23, $09, $10, $12, $00
+1004   466C 12 00 
+1005   466E             room18:
+1006   466E 1D 24 0B 11     DEFB $1D, $24, $0B, $11, $13, $00 
+1006   4672 13 00 
+1007   4674             room19:
+1008   4674 1D 25 0D 12     DEFB $1D, $25, $0D, $12, $14, $00 
+1008   4678 14 00 
+1009   467A             room20:
+1010   467A 1E 1C 0E 10     DEFB $1E, $1C, $0E, $10, $13, $00 
+1010   467E 13 00 
+1011   4680                 
+1012   4680             ;delaycounter:
+1013   4680             ;    DEFB $80; 128d
+1014   4680                 
+1015   4680                 
+1016   4680             ; ===========================================================
+1017   4680             ; code ends
+1018   4680             ; ===========================================================
+1019   4680             ;end the REM line and put in the RAND USR line to call our 'hex code'
+1020   4680             #include "line2.asm"
+0001+  4680             ;this is the end of line 1 - the REM			
+0002+  4680 76          				DEFB $76                        ; Newline				
+0003+  4681             ;followed by the the RAND USR line				
+0004+  4681             Line1End       
+0005+  4681 00 0A       Line2			DEFB $00,$0a
+0006+  4683 0E 00                       DEFW Line2End-Line2Text
+0007+  4685 F9 D4       Line2Text     	DEFB $F9,$D4                    ; RAND USR
+0008+  4687 1D 22 21 1D 				DEFB $1D,$22,$21,$1D,$20        ; 16514                
+0008+  468B 20 
+0009+  468C 7E                          DEFB $7E                        ; Number
+0010+  468D 8F 01 04 00                 DEFB $8F,$01,$04,$00,$00        ; Numeric encoding
+0010+  4691 00 
+0011+  4692 76                          DEFB $76                        ; Newline
+0012+  4693             Line2End 
+1021   4693             
+1022   4693             ;display file defintion
+1023   4693             #include "screen.asm"               
+0001+  4693             ;ZX81 screens
+0002+  4693             ; Display file (ZX81 screen) - low res screen
+0003+  4693 76          Display        	DEFB $76     
+0004+  4694 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 0
+0004+  4698 00 00 00 00 
+0004+  469C 00 00 00 00 
+0004+  46A0 00 00 00 00 
+0004+  46A4 00 00 00 00 
+0004+  46A8 00 00 00 00 
+0004+  46AC 00 00 00 00 
+0004+  46B0 00 00 00 00 
+0004+  46B4 76 
+0005+  46B5 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 1
+0005+  46B9 00 00 00 00 
+0005+  46BD 00 00 00 00 
+0005+  46C1 00 00 00 00 
+0005+  46C5 00 00 00 00 
+0005+  46C9 00 00 00 00 
+0005+  46CD 00 00 00 00 
+0005+  46D1 00 00 00 00 
+0005+  46D5 76 
+0006+  46D6 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 2
+0006+  46DA 00 00 00 00 
+0006+  46DE 00 00 00 00 
+0006+  46E2 00 00 00 00 
+0006+  46E6 00 00 00 00 
+0006+  46EA 00 00 00 00 
+0006+  46EE 00 00 00 00 
+0006+  46F2 00 00 00 00 
+0006+  46F6 76 
+0007+  46F7 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 3
+0007+  46FB 00 00 00 00 
+0007+  46FF 00 00 00 00 
+0007+  4703 00 00 00 00 
+0007+  4707 00 00 00 00 
+0007+  470B 00 00 00 00 
+0007+  470F 00 00 00 00 
+0007+  4713 00 00 00 00 
+0007+  4717 76 
+0008+  4718 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 4
+0008+  471C 00 00 00 00 
+0008+  4720 00 00 00 00 
+0008+  4724 00 00 00 00 
+0008+  4728 00 00 00 00 
+0008+  472C 00 00 00 00 
+0008+  4730 00 00 00 00 
+0008+  4734 00 00 00 00 
+0008+  4738 76 
+0009+  4739 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 5
+0009+  473D 00 00 00 00 
+0009+  4741 00 00 00 00 
+0009+  4745 00 00 00 00 
+0009+  4749 00 00 00 00 
+0009+  474D 00 00 00 00 
+0009+  4751 00 00 00 00 
+0009+  4755 00 00 00 00 
+0009+  4759 76 
+0010+  475A 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 6
+0010+  475E 00 00 00 00 
+0010+  4762 00 00 00 00 
+0010+  4766 00 00 00 00 
+0010+  476A 00 00 00 00 
+0010+  476E 00 00 00 00 
+0010+  4772 00 00 00 00 
+0010+  4776 00 00 00 00 
+0010+  477A 76 
+0011+  477B 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 7
+0011+  477F 00 00 00 00 
+0011+  4783 00 00 00 00 
+0011+  4787 00 00 00 00 
+0011+  478B 00 00 00 00 
+0011+  478F 00 00 00 00 
+0011+  4793 00 00 00 00 
+0011+  4797 00 00 00 00 
+0011+  479B 76 
+0012+  479C 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 8
+0012+  47A0 00 00 00 00 
+0012+  47A4 00 00 00 00 
+0012+  47A8 00 00 00 00 
+0012+  47AC 00 00 00 00 
+0012+  47B0 00 00 00 00 
+0012+  47B4 00 00 00 00 
+0012+  47B8 00 00 00 00 
+0012+  47BC 76 
+0013+  47BD 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 9
+0013+  47C1 00 00 00 00 
+0013+  47C5 00 00 00 00 
+0013+  47C9 00 00 00 00 
+0013+  47CD 00 00 00 00 
+0013+  47D1 00 00 00 00 
+0013+  47D5 00 00 00 00 
+0013+  47D9 00 00 00 00 
+0013+  47DD 76 
+0014+  47DE 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 10
+0014+  47E2 00 00 00 00 
+0014+  47E6 00 00 00 00 
+0014+  47EA 00 00 00 00 
+0014+  47EE 00 00 00 00 
+0014+  47F2 00 00 00 00 
+0014+  47F6 00 00 00 00 
+0014+  47FA 00 00 00 00 
+0014+  47FE 76 
+0015+  47FF 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 11
+0015+  4803 00 00 00 00 
+0015+  4807 00 00 00 00 
+0015+  480B 00 00 00 00 
+0015+  480F 00 00 00 00 
+0015+  4813 00 00 00 00 
+0015+  4817 00 00 00 00 
+0015+  481B 00 00 00 00 
+0015+  481F 76 
+0016+  4820 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 12
+0016+  4824 00 00 00 00 
+0016+  4828 00 00 00 00 
+0016+  482C 00 00 00 00 
+0016+  4830 00 00 00 00 
+0016+  4834 00 00 00 00 
+0016+  4838 00 00 00 00 
+0016+  483C 00 00 00 00 
+0016+  4840 76 
+0017+  4841 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 13
+0017+  4845 00 00 00 00 
+0017+  4849 00 00 00 00 
+0017+  484D 00 00 00 00 
+0017+  4851 00 00 00 00 
+0017+  4855 00 00 00 00 
+0017+  4859 00 00 00 00 
+0017+  485D 00 00 00 00 
+0017+  4861 76 
+0018+  4862 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 14
+0018+  4866 00 00 00 00 
+0018+  486A 00 00 00 00 
+0018+  486E 00 00 00 00 
+0018+  4872 00 00 00 00 
+0018+  4876 00 00 00 00 
+0018+  487A 00 00 00 00 
+0018+  487E 00 00 00 00 
+0018+  4882 76 
+0019+  4883 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 15
+0019+  4887 00 00 00 00 
+0019+  488B 00 00 00 00 
+0019+  488F 00 00 00 00 
+0019+  4893 00 00 00 00 
+0019+  4897 00 00 00 00 
+0019+  489B 00 00 00 00 
+0019+  489F 00 00 00 00 
+0019+  48A3 76 
+0020+  48A4 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 16
+0020+  48A8 00 00 00 00 
+0020+  48AC 00 00 00 00 
+0020+  48B0 00 00 00 00 
+0020+  48B4 00 00 00 00 
+0020+  48B8 00 00 00 00 
+0020+  48BC 00 00 00 00 
+0020+  48C0 00 00 00 00 
+0020+  48C4 76 
+0021+  48C5 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 17
+0021+  48C9 00 00 00 00 
+0021+  48CD 00 00 00 00 
+0021+  48D1 00 00 00 00 
+0021+  48D5 00 00 00 00 
+0021+  48D9 00 00 00 00 
+0021+  48DD 00 00 00 00 
+0021+  48E1 00 00 00 00 
+0021+  48E5 76 
+0022+  48E6 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 18
+0022+  48EA 00 00 00 00 
+0022+  48EE 00 00 00 00 
+0022+  48F2 00 00 00 00 
+0022+  48F6 00 00 00 00 
+0022+  48FA 00 00 00 00 
+0022+  48FE 00 00 00 00 
+0022+  4902 00 00 00 00 
+0022+  4906 76 
+0023+  4907 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 19
+0023+  490B 00 00 00 00 
+0023+  490F 00 00 00 00 
+0023+  4913 00 00 00 00 
+0023+  4917 00 00 00 00 
+0023+  491B 00 00 00 00 
+0023+  491F 00 00 00 00 
+0023+  4923 00 00 00 00 
+0023+  4927 76 
+0024+  4928 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 20
+0024+  492C 00 00 00 00 
+0024+  4930 00 00 00 00 
+0024+  4934 00 00 00 00 
+0024+  4938 00 00 00 00 
+0024+  493C 00 00 00 00 
+0024+  4940 00 00 00 00 
+0024+  4944 00 00 00 00 
+0024+  4948 76 
+0025+  4949 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 21
+0025+  494D 00 00 00 00 
+0025+  4951 00 00 00 00 
+0025+  4955 00 00 00 00 
+0025+  4959 00 00 00 00 
+0025+  495D 00 00 00 00 
+0025+  4961 00 00 00 00 
+0025+  4965 00 00 00 00 
+0025+  4969 76 
+0026+  496A 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 22
+0026+  496E 00 00 00 00 
+0026+  4972 00 00 00 00 
+0026+  4976 00 00 00 00 
+0026+  497A 00 00 00 00 
+0026+  497E 00 00 00 00 
+0026+  4982 00 00 00 00 
+0026+  4986 00 00 00 00 
+0026+  498A 76 
+0027+  498B 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 23
+0027+  498F 00 00 00 00 
+0027+  4993 00 00 00 00 
+0027+  4997 00 00 00 00 
+0027+  499B 00 00 00 00 
+0027+  499F 00 00 00 00 
+0027+  49A3 00 00 00 00 
+0027+  49A7 00 00 00 00 
+0027+  49AB 76 
+0028+  49AC             
+1024   49AC             
+1025   49AC             ;close out the basic program
+1026   49AC             #include "endbasic.asm"0001+  49AC             ; close out the BASIC program structure
+0002+  49AC             ; BASIC Variables area
+0003+  49AC             Variables:      
+0004+  49AC 80          VariablesEnd:   DEFB $80
+0005+  49AD             BasicEnd:                              
+0006+  49AD             
+0007+  49AD             
+0008+  49AD             #END
+tasm: Number of errors = 0

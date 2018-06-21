@@ -1,0 +1,62 @@
+;printing
+
+ ;prints the string whose index is in 'a'
+;sets (strAddr) to the start of the string to print
+;tableAddr needs to have the table name set
+printix
+@lp		cpy a
+		beq @x
+@c		clc
+		psa
+		lda (tableAddr+1)
+		adc a   ; add strlen bits to table addr
+		sta (tableAddr+1)
+		lda (tableAddr)
+		adc #1  ; high bits to table addr (add 1 to skip null, too)
+		sta (tableAddr) ; store hi byte
+		pla
+		iny ; increment loop counter
+		jp @lp
+@x		clc
+		lda (tableAddr+1)	; //add 1 to skip len byte
+		add #1
+		sta $tableAddr+1
+		lda (tableAddr)
+		adc #0				; add carry byte
+		sta $tableAddr
+		jsr printstr
+		rts
+
+;prints the string whose addr is stored in strAddr
+printstr	
+		psha
+		tya
+		psha
+		ldy #0
+@lp		lda (strAddr),y
+		cmpa #0
+		beq @x
+		call cout
+		iny
+		jmp @lp
+@x		pla
+		tay
+		pla
+		rts
+		
+printcr
+		psha
+		lda #ODh
+		call cout
+		pla
+		rts
+		
+printstrcr
+		call printstr
+		call printcr
+		rts
+
+		
+
+cout DW EDFD	 ; prints char in a
+strAddr DW $CE  ; A free zero page addr

@@ -1,0 +1,268 @@
+                00001 ;main file for trs-80 shell
+                00002  
+                00003 *INCLUDE objdefsZ80.asm ; equs
+main.asm(3): unable to include file
+                00004  
+                00005 ;QINPUT equ 1bb3h               ; ROM ROUTINES
+    = 0033      00006 CRTBYTE equ  0033H
+    = 41E8      00007 INBUF equ 41e8h
+    = 01C9      00008 CLS equ 01c9h
+                00009 ;OUTLIN equ 28a7h               ; src str in HL/
+                00010 
+                00011         ORG 5200H
+                00012 START
+5200  CDC901    00013                 call CLS
+5203  210000    00014                 ld hl,welcome ; print welcome,author,version
+main.asm(14): undefined symbol
+5206  CD6152    00015                 call OUTLIN
+5209  CDD652    00016                 call printcr
+520C  210000    00017                 ld hl,author
+main.asm(17): undefined symbol
+520F  CD6152    00018                 call OUTLIN
+5212  CDD652    00019                 call printcr
+5215  210000    00020                 ld hl,version
+main.asm(20): undefined symbol
+5218  CD6152    00021                 call OUTLIN
+521B  CDD652    00022                 call printcr
+521E  CDD652    00023                 call printcr
+5221  CD0000    00024                 call look_sub
+main.asm(24): undefined symbol
+5224  CD2B52    00025 $inp?   call getcommand
+5227  C32452    00026                 jp $inp?
+522A  C9        00027                 ret
+                00028                 
+                00029 getcommand
+                00030                 ;call QINPUT
+522B  CD4952    00031                 call getlin
+522E  CD0000    00032                 call parse                              ; get the words
+main.asm(32): undefined symbol
+5231  3A0000    00033                 ld a,(sentence)
+main.asm(33): undefined symbol
+5234  FE00      00034                 cp 0
+5236  CA2452    00035                 jp z,$inp?
+5239  CD0000    00036                 call validate_words             ; make sure verb,io,do are in tables
+main.asm(36): undefined symbol
+523C  CD0000    00037                 call encode                             ; try to map words to objects
+main.asm(37): undefined symbol
+523F  CD0000    00038                 call validate_encode    ; make sure it worked
+main.asm(38): undefined symbol
+5242  CD0000    00039                 call run_sentence
+main.asm(39): undefined symbol
+5245  CD0000    00040                 call do_events
+main.asm(40): undefined symbol
+5248  C9        00041                 ret
+                00042 
+                00043 *INCLUDE doeventsZ80.asm                
+main.asm(43): unable to include file
+                00044 *INCLUDE io.asm 
+    = 0030      00045 BUFSIZE EQU 48
+    = 0040      00046 KEYIN EQU 40H
+    = 0040      00047 SCR_WIDTH EQU 64
+                00048 *MOD
+                00049 getlin
+5249  C5        00050                 push bc
+524A  D5        00051                 push de
+524B  E5        00052                 push hl
+                00053 ;               call clrbuf
+524C  21E841    00054                 ld hl,INBUF
+524F  0630      00055                 ld b,BUFSIZE
+5251  CD4000    00056                 call KEYIN ; returns len in 'b'
+5254  48        00057                 ld c,b
+5255  0600      00058                 ld b,0
+5257  09        00059                 add hl,bc
+5258  3600      00060                 ld (hl),0  ; delete cr
+525A  E1        00061                 pop hl
+525B  D1        00062                 pop de
+525C  C1        00063                 pop bc
+525D  CDD652    00064                 call printcr
+5260  C9        00065                 ret
+                00066 
+                00067 
+                00068         ;hl = str
+                00069 OUTLIN
+5261  F5        00070                 push af
+5262  C5        00071                 push bc
+5263  D5        00072                 push de
+5264  E5        00073                 push hl
+5265  DDE5      00074                 push ix
+5267  FDE5      00075                 push iy
+5269  7E        00076 $lpA    ld a,(hl)
+526A  FE00      00077                 cp 0
+526C  CA9B52    00078                 jp z,$xA
+526F  FE20      00079                 cp 32 ; space;
+5271  C28B52    00080                 jp nz,$cA
+5274  CD0000    00081                 call word_len ;len->b
+io.asm(37): undefined symbol
+                00082                 ;is there room left on line
+5277  3AEB52    00083                 ld a,(hcur)
+527A  4F        00084                 ld c,a
+527B  3E40      00085                 ld a,SCR_WIDTH
+527D  91        00086                 sub c ; a has remaining len
+527E  B8        00087                 cp b
+527F  F28952    00088                 jp p,$spA
+5282  CDD652    00089                 call printcr
+5285  23        00090                 inc hl
+5286  C36952    00091                 jp $lpA
+5289  3E20      00092 $spA    ld a,32 ; reload space
+528B  23        00093 $cA             inc hl
+528C  CD3300    00094                 call CRTBYTE
+528F  E5        00095                 push hl
+5290  2AEB52    00096                 ld hl,(hcur)
+5293  23        00097                 inc hl
+5294  22EB52    00098                 ld (hcur),hl
+5297  E1        00099                 pop hl
+5298  C36952    00100                 jp $lpA 
+529B  FDE1      00101 $xA             pop iy
+529D  DDE1      00102                 pop ix
+529F  E1        00103                 pop hl
+52A0  D1        00104                 pop de
+52A1  C1        00105                 pop bc
+52A2  F1        00106                 pop af
+52A3  C9        00107                 ret
+                00108                 
+                00109 *MOD
+                00110 OUTLINCR
+52A4  F5        00111                 push af
+52A5  C5        00112                 push bc
+52A6  D5        00113                 push de
+52A7  E5        00114                 push hl
+52A8  DDE5      00115                 push ix
+52AA  FDE5      00116                 push iy
+52AC  7E        00117 $lpB    ld a,(hl)
+52AD  FE00      00118                 cp 0
+52AF  CAB952    00119                 jp z,$xB
+52B2  23        00120                 inc hl
+52B3  CD3300    00121                 call CRTBYTE
+52B6  C3AC52    00122                 jp $lpB 
+52B9  CDD652    00123 $xB             call printcr
+52BC  FDE1      00124                 pop iy
+52BE  DDE1      00125                 pop ix
+52C0  E1        00126                 pop hl
+52C1  D1        00127                 pop de
+52C2  C1        00128                 pop bc
+52C3  F1        00129                 pop af
+52C4  C9        00130                 ret
+                00131 
+                00132                 
+                00133                 
+                00134 *MOD
+                00135 clrbuf
+52C5  3EFF      00136                 LD A,255
+52C7  77        00137                 LD (HL),A
+52C8  21E841    00138                 LD HL,INBUF
+52CB  70        00139 $lpC    ld (hl),b
+52CC  23        00140                 inc hl
+52CD  3D        00141                 dec a
+52CE  FE00      00142                 cp 0
+52D0  C2CB52    00143                 jp nz,$lpC
+52D3  EDB0      00144                 LDIR    
+52D5  C9        00145                 ret
+                00146 
+                00147 
+                00148 ;prints a space (registers are preserved)
+                00149 printcr
+52D6  F5        00150         push af
+52D7  C5        00151         push bc
+52D8  D5        00152         push de
+52D9  FDE5      00153         push iy
+52DB  3E0D      00154         ld a,0dh ; carriage return
+52DD  CD3300    00155         call CRTBYTE
+52E0  3E00      00156         ld a,0
+52E2  32EB52    00157         ld (hcur),a
+52E5  FDE1      00158         pop iy
+52E7  D1        00159         pop de
+52E8  C1        00160         pop bc
+52E9  F1        00161         pop af
+52EA  C9        00162         ret
+                00163 
+52EB  0000      00164 hcur dw 0
+                00165         
+                00166 *INCLUDE parser.asm
+main.asm(45): unable to include file
+                00167 *INCLUDE look.asm
+main.asm(46): unable to include file
+                00168 *INCLUDE tables.asm
+main.asm(47): unable to include file
+                00169 *INCLUDE strings.asm
+main.asm(48): unable to include file
+                00170 *INCLUDE checksZ80.asm
+main.asm(49): unable to include file
+                00171 *INCLUDE sentencesZ80.asm
+main.asm(50): unable to include file
+                00172 *INCLUDE movementZ80.asm
+main.asm(51): unable to include file
+                00173 *INCLUDE containersZ80.asm
+main.asm(52): unable to include file
+                00174 *INCLUDE routinesZ80.asm
+main.asm(53): unable to include file
+                00175 *INCLUDE inventoryZ80.asm
+main.asm(54): unable to include file
+                00176 *INCLUDE open_close.asm
+main.asm(55): unable to include file
+                00177 *INCLUDE put.asm
+main.asm(56): unable to include file
+                00178 *INCLUDE miscZ80.asm
+main.asm(57): unable to include file
+                00179 *INCLUDE wear_sub.asm
+main.asm(58): unable to include file
+                00180 *INCLUDE print_rets.asm
+main.asm(59): unable to include file
+                00181 *INCLUDE EventsZ80.asm
+main.asm(60): unable to include file
+                00182 *INCLUDE articlesZ80.asm
+main.asm(61): unable to include file
+                00183 *INCLUDE PrepTableZ80.asm
+main.asm(62): unable to include file
+                00184 *INCLUDE StringTableZ80.asm
+main.asm(63): unable to include file
+                00185 *INCLUDE DictionaryZ80.asm
+main.asm(64): unable to include file
+                00186 *INCLUDE VerbTableZ80.asm
+main.asm(65): unable to include file
+                00187 *INCLUDE ObjectTableZ80.asm
+main.asm(66): unable to include file
+                00188 *INCLUDE ObjectWordTableZ80.asm
+main.asm(67): unable to include file
+                00189 *INCLUDE NogoTableZ80.asm
+main.asm(68): unable to include file
+                00190 *INCLUDE BackDropTableZ80.asm
+main.asm(69): unable to include file
+                00191 *INCLUDE before_table_Z80.asm
+main.asm(70): unable to include file
+                00192 *INCLUDE instead_table_Z80.asm
+main.asm(71): unable to include file
+                00193 *INCLUDE after_table_Z80.asm
+main.asm(72): unable to include file
+                00194 *INCLUDE CheckRulesZ80.asm
+main.asm(73): unable to include file
+                00195 *INCLUDE sentence_tableZ80.asm
+main.asm(74): unable to include file
+                00196 *INCLUDE WelcomeZ80.asm
+main.asm(75): unable to include file
+                00197 *INCLUDE UserVarsZ80.asm
+main.asm(76): unable to include file
+52ED  00        00198 score DB 0
+52EE  00        00199 gameOver DB 0
+52EF  00        00200 moves DB 0
+                00201 ;turns_without_light DB 0
+52F0  00        00202 turnsWithoutLight DB 0
+52F1  64        00203 health DB 100
+52F2  0000      00204 stacksav DW 0
+                00205 
+                00206         END START
+
+
+$CA             528B  $INP?           5224  $LPA            5269  
+$LPB            52AC  $LPC            52CB  $SPA            5289  
+$XA             529B  $XB             52B9  AUTHOR          0000  
+BUFSIZE         0030  CLRBUF          52C5  CLS             01C9  
+CRTBYTE         0033  DO_EVENTS       0000  ENCODE          0000  
+GAMEOVER        52EE  GETCOMMAND      522B  GETLIN          5249  
+HCUR            52EB  HEALTH          52F1  INBUF           41E8  
+KEYIN           0040  LOOK_SUB        0000  MOVES           52EF  
+OUTLIN          5261  OUTLINCR        52A4  PARSE           0000  
+PRINTCR         52D6  RUN_SENTENCE    0000  SCORE           52ED  
+SCR_WIDTH       0040  SENTENCE        0000  STACKSAV        52F2  
+START           5200  TURNSWITHOUTLIG 52F0  VALIDATE_ENCODE 0000  
+VALIDATE_WORDS  0000  VERSION         0000  WELCOME         0000  
+WORD_LEN        0000  

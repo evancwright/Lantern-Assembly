@@ -1,0 +1,822 @@
+0001   0000             ;
+0002   0000             ; To assembly this, either use the zxasm.bat file:
+0003   0000             ;
+0004   0000             ; zxasm hello
+0005   0000             ;
+0006   0000             ; or... assemble with the following options:
+0007   0000             ;
+0008   0000             ; tasm -80 -b -s hello.asm hello.p
+0009   0000             ;
+0010   0000             ;==============================================
+0011   0000             ;    ZX81 assembler 'Truck ' 
+0012   0000             ;==============================================
+0013   0000             ;
+0014   0000             ;defs
+0015   0000             #include "zx81defs.asm"
+0001+  0000             ;defines to make us feel more at home
+0002+  0000             #define         DEFB .BYTE
+0003+  0000             #define         DEFW .WORD
+0004+  0000             #define         DEFM .TEXT
+0005+  0000             #define         ORG  .ORG
+0006+  0000             #define         EQU  .EQU
+0016   0000             ;EQUs for ROM routines
+0017   0000             #include "zx81rom.asm"
+0001+  0000             ;ZX81 ROM routines
+0002+  0000             PRINT			EQU $10
+0003+  0000             PRINTAT			EQU $08F5
+0004+  0000             DISPROUT		EQU $0281
+0005+  0000             DISPLAY_3		EQU $0292 ;restore registers after a 'slow' display
+0006+  0000             DISPLAY_5		EQU $02B5
+0007+  0000             PLOT			EQU $0BB2 	; note ROM plot is 0baf - however first thing it does try to pull BC from the calculator stack
+0008+  0000             							; so we'll skip past that and set BC ourselves
+0009+  0000             CLS				EQU $0A2A
+0010+  0000             KSCAN           EQU $02BB 
+0011+  0000             FINDCHR         EQU $07BD
+0012+  0000             COPY            EQU $0869
+0013+  0000             FAST            EQU $0F23
+0014+  0000             SLOW            EQU $0F2B
+0015+  0000             SLOWORFAST		EQU $0207
+0016+  0000             ;sys vars
+0017+  0000             ERR_NR			EQU $40000018   0000             ;ZX81 char codes/how to survive without ASCII
+0019   0000             #include "charcodes.asm"
+0001+  0000             ; ZX81 Characters.
+0002+  0000             __:				EQU	$00	;spacja
+0003+  0000             _QT:			EQU	$0B	;"
+0004+  0000             _PD:			EQU	$0C	;funt
+0005+  0000             _SD:			EQU	$0D	;$
+0006+  0000             _CL:			EQU	$0E	;:
+0007+  0000             _QM:			EQU	$0F	;?
+0008+  0000             _OP:			EQU	$10	;(
+0009+  0000             _CP:			EQU	$11	;)
+0010+  0000             _GT:			EQU	$12	;>
+0011+  0000             _LT:			EQU	$13	;<
+0012+  0000             _EQ:			EQU	$14	;=
+0013+  0000             _PL:			EQU	$15	;+
+0014+  0000             _MI:			EQU	$16	;-
+0015+  0000             _AS:			EQU	$17	;*
+0016+  0000             _SL:			EQU	$18	;/
+0017+  0000             _SC:			EQU	$19	;;
+0018+  0000             _CM:			EQU	$1A	;,
+0019+  0000             _DT:			EQU	$1B	;.
+0020+  0000             _NL:			EQU	$76	;NEWLINE
+0021+  0000             
+0022+  0000             _0				EQU $1C
+0023+  0000             _1				EQU $1D
+0024+  0000             _2				EQU $1E
+0025+  0000             _3				EQU $1F
+0026+  0000             _4				EQU $20
+0027+  0000             _5				EQU $21
+0028+  0000             _6				EQU $22
+0029+  0000             _7				EQU $23
+0030+  0000             _8				EQU $24
+0031+  0000             _9				EQU $25
+0032+  0000             _A				EQU $26
+0033+  0000             _B				EQU $27
+0034+  0000             _C				EQU $28
+0035+  0000             _D				EQU $29
+0036+  0000             _E				EQU $2A
+0037+  0000             _F				EQU $2B
+0038+  0000             _G				EQU $2C
+0039+  0000             _H				EQU $2D
+0040+  0000             _I				EQU $2E
+0041+  0000             _J				EQU $2F
+0042+  0000             _K				EQU $30
+0043+  0000             _L				EQU $31
+0044+  0000             _M				EQU $32
+0045+  0000             _N				EQU $33
+0046+  0000             _O				EQU $34
+0047+  0000             _P				EQU $35
+0048+  0000             _Q				EQU $36
+0049+  0000             _R				EQU $37
+0050+  0000             _S				EQU $38
+0051+  0000             _T				EQU $39
+0052+  0000             _U				EQU $3A
+0053+  0000             _V				EQU $3B
+0054+  0000             _W				EQU $3C
+0055+  0000             _X				EQU $3D
+0056+  0000             _Y				EQU $3E
+0057+  0000             _Z				EQU $3F
+0020   0000             ;system variables
+0021   0000             #include "zx81sys.asm"
+0001+  0000             ;system variables
+0002+  0000             ;Origin of a ZX81 file is always 16393
+0003+  0000             
+0004+  4009                             ORG 16393
+0005+  4009                             
+0006+  4009             ; System variables live here
+0007+  4009 00          VERSN:          DEFB 0
+0008+  400A 02 00       E_PPC:          DEFW 2
+0009+  400C E2 42       D_FILE:         DEFW Display
+0010+  400E E3 42       DF_CC:          DEFW Display+1                  ; First character of display
+0011+  4010 FB 45       VARS:           DEFW Variables
+0012+  4012 00 00       DEST:           DEFW 0
+0013+  4014 FC 45       E_LINE:         DEFW BasicEnd 
+0014+  4016 00 46       CH_ADD:         DEFW BasicEnd+4                 ; Simulate SAVE "X"
+0015+  4018 00 00       X_PTR:          DEFW 0
+0016+  401A 01 46       STKBOT:         DEFW BasicEnd+5
+0017+  401C 01 46       STKEND:         DEFW BasicEnd+5                 ; Empty stack
+0018+  401E 00          BREG:           DEFB 0
+0019+  401F 5D 40       MEM:            DEFW MEMBOT
+0020+  4021 00          UNUSED1:        DEFB 0
+0021+  4022 02          DF_SZ:          DEFB 2
+0022+  4023 02 00       S_TOP:          DEFW $0002                      ; Top program line number
+0023+  4025 BF FD       LAST_K:         DEFW $fdbf
+0024+  4027 0F          DEBOUN:         DEFB 15
+0025+  4028 37          MARGIN:         DEFB 55
+0026+  4029 D0 42       NXTLIN:         DEFW Line2                      ; Next line address
+0027+  402B 00 00       OLDPPC:         DEFW 0
+0028+  402D 00          FLAGX:          DEFB 0
+0029+  402E 00 00       STRLEN:         DEFW 0
+0030+  4030 8D 0C       T_ADDR:         DEFW $0c8d
+0031+  4032 00 00       SEED:           DEFW 0
+0032+  4034 A3 F5       FRAMES:         DEFW $f5a3
+0033+  4036 00 00       COORDS:         DEFW 0
+0034+  4038 BC          PR_CC:          DEFB $bc
+0035+  4039 21 18       S_POSN:         DEFW $1821
+0036+  403B 40          CDFLAG:         DEFB $40
+0037+  403C 00 00 00 00 PRBUFF:         DEFB 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,$76 ; 32 Spaces + Newline
+0037+  4040 00 00 00 00 
+0037+  4044 00 00 00 00 
+0037+  4048 00 00 00 00 
+0037+  404C 00 00 00 00 
+0037+  4050 00 00 00 00 
+0037+  4054 00 00 00 00 
+0037+  4058 00 00 00 00 
+0037+  405C 76 
+0038+  405D 00 00 00 00 MEMBOT:         DEFB 0,0,0,0,0,0,0,0,0,0,$84,$20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ; 30 zeros
+0038+  4061 00 00 00 00 
+0038+  4065 00 00 84 20 
+0038+  4069 00 00 00 00 
+0038+  406D 00 00 00 00 
+0038+  4071 00 00 00 00 
+0038+  4075 00 00 00 00 
+0038+  4079 00 00 
+0039+  407B 00 00       UNUNSED2:       DEFW 0
+0040+  407D             
+0041+  407D             ; End of system variables
+0042+  407D             
+0022   407D             
+0023   407D             ;the standard REM statement that will contain our 'hex' code
+0024   407D             #include "line1.asm"
+0001+  407D             ;Line 1
+0002+  407D             ;this is the REM statement...
+0003+  407D 00 00       Line1:          DEFB $00,$00                    ; Line 1
+0004+  407F 4F 02                       DEFW Line1End-Line1Text         ; Line 1 length
+0005+  4081 EA          Line1Text:      DEFB $ea                        ; REM             
+0006+  4082             
+0025   4082             
+0026   4082             ;------------------------------------------------------------
+0027   4082             ; code starts here and gets added to the end of the REM 
+0028   4082             ;------------------------------------------------------------
+0029   4082              
+0030   4082                 ;call CLS
+0031   4082                 ;;call $0A $2A
+0032   4082                 
+0033   4082                
+0034   4082                 ;draw the truck
+0035   4082 CD 31 41        call drawtruck;
+0036   4085                 
+0037   4085                 ;draw the background
+0038   4085                 
+0039   4085                 ;draw the top black line
+0040   4085 2A 0C 40        ld hl, (D_FILE) ; addr to print to
+0041   4088 01 85 00        ld bc, 133; load offset
+0042   408B 09              add hl, bc; add it to hl
+0043   408C 54              ld d, h ; copy hl into de
+0044   408D 5D              ld e, l ;copy addr back to de
+0045   408E 21 6C 42        ld hl, cityline1
+0046   4091 CD 5A 41        call printline;
+0047   4094             
+0048   4094 13              inc de; skip newline
+0049   4095 21 8D 42        ld hl, cityline2
+0050   4098 CD 5A 41        call printline;
+0051   409B             
+0052   409B             
+0053   409B 13              inc de; skip newline
+0054   409C 21 6C 42        ld hl, cityline1
+0055   409F CD 5A 41        call printline;
+0056   40A2                 
+0057   40A2 13              inc de; skip newline
+0058   40A3 21 8D 42        ld hl, cityline2
+0059   40A6 CD 5A 41        call printline;
+0060   40A9             
+0061   40A9 13              inc de; skip newline
+0062   40AA 21 AE 42        ld hl, cityline3
+0063   40AD CD 5A 41        call printline;
+0064   40B0             
+0065   40B0             
+0066   40B0                 ;draw the top black line
+0067   40B0 13              inc de;
+0068   40B1 21 2A 42        ld hl, blackline
+0069   40B4 CD 5A 41        call printline;
+0070   40B7                 
+0071   40B7                 ;draw the bottom black line
+0072   40B7 2A 0C 40        ld hl, (D_FILE) ; addr to print to
+0073   40BA 01 F0 01        ld bc, 496; load offset
+0074   40BD 09              add hl, bc; add it to hl
+0075   40BE 54              ld d, h ; copy hl into de
+0076   40BF 5D              ld e, l ;copy addr back to de
+0077   40C0 21 2A 42        ld hl, blackline
+0078   40C3 CD 5A 41        call printline;
+0079   40C6                 
+0080   40C6 13              inc de; skip newline
+0081   40C7 21 4B 42        ld hl, inversespaces
+0082   40CA CD 5A 41        call printline;
+0083   40CD             
+0084   40CD 13              inc de; skip newline
+0085   40CE 21 4B 42        ld hl, inversespaces
+0086   40D1 CD 5A 41        call printline;
+0087   40D4                 
+0088   40D4 13              inc de; skip newline
+0089   40D5 21 E8 41        ld hl, titletext1;
+0090   40D8 CD 5A 41        call printline;
+0091   40DB                 
+0092   40DB 13              inc de; skip newline
+0093   40DC 21 09 42        ld hl, titletext2;
+0094   40DF CD 5A 41        call printline;
+0095   40E2                 ;draw the instructions
+0096   40E2             
+0097   40E2             mainloop:
+0098   40E2             
+0099   40E2                ;increment and flip the tire flag
+0100   40E2 E5              push hl
+0101   40E3 D5              push de
+0102   40E4 F5              push af
+0103   40E5 1E 36           ld e, $36; 'O' character for tires
+0104   40E7 2A E6 41        ld hl, (tireflag)
+0105   40EA 23              inc hl
+0106   40EB 7D              ld a, l
+0107   40EC FE 02           cp $02;
+0108   40EE C2 F6 40        jp nz, noreset;
+0109   40F1 21 00 00        ld hl, $00; //reset back to 0
+0110   40F4 1E 1C           ld e, $1c; '0' character for tires    
+0111   40F6             noreset:
+0112   40F6                 ;store flag back
+0113   40F6 22 E6 41        ld (tireflag), hl
+0114   40F9                 
+0115   40F9 CD 48 41        call drawtires;
+0116   40FC D1              pop de
+0117   40FD E1              pop hl
+0118   40FE F1              pop af
+0119   40FF             
+0120   40FF                 ;check to see if 'q' was pressed, if so return
+0121   40FF                 ;check the keyboard routine
+0122   40FF                 ;this routine calls the kscan subroutine
+0123   40FF                 ;kscan wipes out HL - so that needs to be saved
+0124   40FF             
+0125   40FF D5              push de ;save de
+0126   4100 11 E1 41        ld de, kbstatus
+0127   4103 CD 20 41        call checkquit
+0128   4106 D1              pop de ;restore de
+0129   4107                 
+0130   4107                 ;now we can check kbstatus
+0131   4107                 
+0132   4107 3A E2 41        ld a, (kbstatus+1)
+0133   410A 06 FB           ld b, $fb  ;0xFB  if section 2 (QWERT) pressed 
+0134   410C B8              cp b ; compare A to 0xFB  4099
+0135   410D C2 1A 41        jp nz, skip
+0136   4110 3A E1 41        ld a, (kbstatus)    
+0137   4113 06 FD           ld b, $fd  ;0xFD if section 1 (1QA) pressed
+0138   4115 B8              cp b ; compare A to 0xFD
+0139   4116 C2 1A 41        jp nz, skip
+0140   4119 C9              ret ;Q was pressed, return 
+0141   411A             
+0142   411A             skip:
+0143   411A             
+0144   411A CD 9A 41        call decdrawpos;    
+0145   411D                 
+0146   411D C3 E2 40        jp mainloop ; end of main loop
+0147   4120             
+0148   4120             ;----------------------------
+0149   4120             ;THIS ROUTINE CALL KSCAN AT 02BB, THEN STORES
+0150   4120             ;THE STATUS CODE IN THE ADDRESS STORED IN DE
+0151   4120             checkquit: ; 40A0
+0152   4120 E5              push hl    ;save HL to stack
+0153   4121 C5              push bc    ;save BC
+0154   4122 D5              push de
+0155   4123 CD BB 02        call KSCAN    ;call ROM subroutine at address 02BB, result put in HL
+0156   4126 D1              pop de
+0157   4127 44              ld b, h  ;move hl to bc (because we're about to need HL)
+0158   4128 4D              ld c, l
+0159   4129 62              ld h, d  ;copy kb status flag address into HL (so we can store it)
+0160   412A 6B              ld l, e
+0161   412B 70              ld (hl), b ;store B in (HL)
+0162   412C 2C              inc l
+0163   412D 71              ld (hl), c ;store C in (HL)+1
+0164   412E C1              pop bc
+0165   412F E1              pop hl
+0166   4130 C9              ret
+0167   4131                 
+0168   4131             ;draw truck to screen - assumes dfile is full
+0169   4131             drawtruck:
+0170   4131 E5              push hl
+0171   4132 C5              push bc
+0172   4133 2A 0C 40        ld hl,(D_FILE) ;+ (33 * 10) + 10  ; ten rows down, 10 spaces over
+0173   4136 01 54 01        ld bc, 340;33 * 10 + 10;
+0174   4139 09              add hl, bc
+0175   413A 36 81           ld (hl), $81;
+0176   413C 23              inc hl
+0177   413D 36 85           ld (hl), $85;
+0178   413F 23              inc hl
+0179   4140 36 80           ld (hl), $80;
+0180   4142 23              inc hl
+0181   4143 36 80           ld (hl), $80;
+0182   4145 C1              pop bc
+0183   4146 E1              pop hl
+0184   4147 C9              ret
+0185   4148             
+0186   4148             ; char to draw in de    
+0187   4148             drawtires:
+0188   4148                 ; draw the tires
+0189   4148 E5              push hl
+0190   4149 C5              push bc
+0191   414A 2A 0C 40        ld hl, (D_FILE)
+0192   414D 01 75 01        ld bc, 340 + 33;33 * 10 + 10;
+0193   4150 09              add hl, bc
+0194   4151 73              ld (hl), e; draw a tire
+0195   4152 23              inc hl  ; skip a space
+0196   4153 23              inc hl  ; skip a space
+0197   4154 73              ld (hl), e; draw a tire
+0198   4155 23              inc hl  ; skip a space
+0199   4156 73              ld (hl), e; draw a tire
+0200   4157              ;   ld (hl), $80;
+0201   4157                 
+0202   4157 C1              pop bc
+0203   4158 E1              pop hl
+0204   4159 C9              ret
+0205   415A             ;accepts the address of the text to print in hl, and the D_FILE location to print in DE
+0206   415A             ;printing stops when the char 0xFF is hit
+0207   415A             printline:
+0208   415A C5              push bc
+0209   415B F5              push af
+0210   415C             prloop:    
+0211   415C 7E              ld a, (hl)  ; //get a char
+0212   415D FE FF           cp $ff      ; hit the end?
+0213   415F CA 68 41        jp z, done
+0214   4162 12              ld (de), a; copy char in 'a' to D_FILE
+0215   4163 23              inc hl ; increment addr to copy to
+0216   4164 13              inc de ; get addr of next character
+0217   4165 C3 5C 41        jp prloop
+0218   4168             done:
+0219   4168 F1              pop af
+0220   4169 C1              pop bc
+0221   416A C9              ret
+0222   416B             
+0223   416B             ;this subroutine will draw a line of the background
+0224   416B             ;hl will be the offset from the start of the screen file to draw to
+0225   416B             ;bc will contain the address of the line to copy
+0226   416B             ;there will be a variable (drawpos) which is the start position to draw from (starting at 0)
+0227   416B             ;1. the routine will copy characters  drawpos  to 32 - drawpos to the start of the screen
+0228   416B             ;2. the routine will copy characters 0 from drawpos to startline + drawpos
+0229   416B             ;ldir will be used for the block copying
+0230   416B             ;drawpos will be getting decremented
+0231   416B             drawline:
+0232   416B             
+0233   416B                 ;step 1
+0234   416B C5              push bc; save line to copy
+0235   416C                 
+0236   416C                 ;bc (counter)
+0237   416C                 ;de (dest)
+0238   416C                 ;hl (src)
+0239   416C ED 5B 0C 40     ld de, (D_FILE); ; src
+0240   4170                 ;ld hl, 100; start of line
+0241   4170 19              add hl, de
+0242   4171 54              ld d, h  ; copy hl to de (because ldir needs it that way)
+0243   4172 5D              ld e, l
+0244   4173                 
+0245   4173                 ;setup src address
+0246   4173             ;    ld hl, cityline1
+0247   4173 60              ld h, b; copy addr of line to draw
+0248   4174 69              ld l, c
+0249   4175 ED 4B E3 41     ld bc, (drawpos)
+0250   4179 09              add hl, bc
+0251   417A                 
+0252   417A                 ; bc needs to be 32-drawpos
+0253   417A E5              push hl
+0254   417B                 
+0255   417B 2A E3 41        ld hl, (drawpos)
+0256   417E 3E 20           ld a, 32
+0257   4180 95              sub l
+0258   4181 06 00           ld b, 0
+0259   4183 4F              ld c, a    
+0260   4184 E1              pop hl
+0261   4185                 
+0262   4185                 ;if a==0 skip to step2
+0263   4185 FE 00           cp 0
+0264   4187 CA 8C 41        jp z, step2;
+0265   418A                 
+0266   418A ED B0           ldir ; copy until bc=0
+0267   418C             
+0268   418C                 ;step 2
+0269   418C                 ;2. the routine will copy characters 0 from drawpos to startline + drawpos
+0270   418C                 ;bc (counter)
+0271   418C                 ;de (dest) ;2. the routine will copy characters 0 from drawpos to startline + drawpos
+0272   418C                 ;hl (src) - this should still be set up     
+0273   418C             step2:
+0274   418C                 
+0275   418C                 ;stack contain line to draw
+0276   418C                  
+0277   418C                 ;bc should be drawpos    
+0278   418C              ;   ld hl, (drawpos)
+0279   418C              ;   ld b, h 
+0280   418C              ;   ld c, l
+0281   418C ED 4B E3 41      ld bc, (drawpos)
+0282   4190              
+0283   4190                 
+0284   4190 E1              pop hl ; setup src address
+0285   4191                 
+0286   4191                 ;if drawpos is 0, don't do the second part of the loop
+0287   4191 79              ld a, c;
+0288   4192 FE 00           cp 0
+0289   4194 CA 99 41        jp z, enddrawline;
+0290   4197                 
+0291   4197                 ;setup src address
+0292   4197                 ;ld hl, cityline1
+0293   4197                 
+0294   4197 ED B0           ldir ; copy until bc=0    
+0295   4199             enddrawline:    
+0296   4199 C9              ret    
+0297   419A             
+0298   419A             ;this subroutine decrements the drawing position
+0299   419A             ;if it become negative it is set to 32
+0300   419A             decdrawpos:
+0301   419A                 
+0302   419A 3A E5 41        ld a, (delaycounter)
+0303   419D 3D              dec a;
+0304   419E 32 E5 41        ld (delaycounter), a ; store it back
+0305   41A1 FE 00           cp 0
+0306   41A3 C0              ret nz ; not time to draw yet
+0307   41A4             
+0308   41A4 3E 80           ld a, $80 ; loop counter was 0 reset it
+0309   41A6 32 E5 41        ld (delaycounter), a; store it
+0310   41A9             
+0311   41A9 ED 5B E3 41     ld de, (drawpos)
+0312   41AD 1B              dec de     
+0313   41AE 7B              ld a, e
+0314   41AF FE FF           cp $FF  ;did the flag flip and go to -1
+0315   41B1 C2 B8 41        jp nz, noflip
+0316   41B4 16 00           ld d,0  ; reset drawpos back to 32
+0317   41B6 1E 20           ld e,32    
+0318   41B8             noflip 
+0319   41B8 ED 53 E3 41     ld (drawpos), de; store it back
+0320   41BC             
+0321   41BC                 ;redraw the city
+0322   41BC 21 85 00        ld hl, 133
+0323   41BF 01 6C 42        ld bc, cityline1
+0324   41C2 CD 6B 41        call drawline
+0325   41C5                 
+0326   41C5 21 A6 00        ld hl, 166
+0327   41C8 01 8D 42        ld bc, cityline2
+0328   41CB CD 6B 41        call drawline
+0329   41CE                 
+0330   41CE 21 C7 00        ld hl, 199
+0331   41D1 01 6C 42        ld bc, cityline1
+0332   41D4 CD 6B 41        call drawline
+0333   41D7                 
+0334   41D7 21 E8 00        ld hl, 232
+0335   41DA 01 8D 42        ld bc, cityline2
+0336   41DD CD 6B 41        call drawline
+0337   41E0             
+0338   41E0 C9              ret
+0339   41E1             
+0340   41E1             ;;;;;;;;;;;;;;;;;;;;;;;;;;VARIABlES;;;;;;;;;;;;;;;;;;;;;;;;;    
+0341   41E1             kbstatus:
+0342   41E1 FF 00           DEFW $ff $ff;storage for the 2 keyboard code bytes
+0343   41E3             drawpos:
+0344   41E3 01 00           DEFW $00 $01
+0345   41E5             delaycounter:
+0346   41E5 80              DEFB $80; 128d
+0347   41E6             tireflag:    
+0348   41E6 00 00           DEFW $00 $00
+0349   41E8                 
+0350   41E8             titletext1:
+0351   41E8 B5 B7 B4 AC     DEFB $B5,$B7,$B4,$AC,$B7,$A6,$B2,$B2,$AA,$A9,$80,$AE,$B3,$80,$A6,$B8
+0351   41EC B7 A6 B2 B2 
+0351   41F0 AA A9 80 AE 
+0351   41F4 B3 80 A6 B8 
+0352   41F8 B8 AA B2 A7     DEFB $B8,$AA,$B2,$A7,$B1,$AA,$B7,$80,$80,$80,$80,$80,$80,$80,$80,$80, $FF
+0352   41FC B1 AA B7 80 
+0352   4200 80 80 80 80 
+0352   4204 80 80 80 80 
+0352   4208 FF 
+0353   4209             titletext2:
+0354   4209 A7 BE 80 AA     DEFB $A7,$BE,$80,$AA,$BB,$A6,$B3,$80,$A8,$9B,$80,$BC,$B7,$AE,$AC,$AD,
+0354   420D BB A6 B3 80 
+0354   4211 A8 9B 80 BC 
+0354   4215 B7 AE AC AD 
+0355   4219 B9 9A 80 9E     DEFB $B9,$9A,$80,$9E,$9C,$9D,$A1,$80,$80,$80,$B6,$94,$B6,$BA,$AE,$B9, $FF
+0355   421D 9C 9D A1 80 
+0355   4221 80 80 B6 94 
+0355   4225 B6 BA AE B9 
+0355   4229 FF 
+0356   422A             ;    $27, $3E, $00, $2A, $3B, $26, $33, $00, $28, $1B, $00, $3C, $37
+0357   422A             ;    DEFB $2E, $2C, $2D, $39, $FF
+0358   422A             blackline:
+0359   422A 03 03 03 03     DEFB $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03, $03
+0359   422E 03 03 03 03 
+0359   4232 03 03 03 03 
+0359   4236 03 03 03 03 
+0360   423A 03 03 03 03     DEFB $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03, $03, $FF
+0360   423E 03 03 03 03 
+0360   4242 03 03 03 03 
+0360   4246 03 03 03 03 
+0360   424A FF 
+0361   424B             inversespaces:
+0362   424B 80 80 80 80     DEFB $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, $80
+0362   424F 80 80 80 80 
+0362   4253 80 80 80 80 
+0362   4257 80 80 80 80 
+0363   425B 80 80 80 80     DEFB $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, $80, $FF
+0363   425F 80 80 80 80 
+0363   4263 80 80 80 80 
+0363   4267 80 80 80 80 
+0363   426B FF 
+0364   426C             
+0365   426C             cityline1: ;no windows
+0366   426C 00 00 88 88     DEFB $00,$00,$88,$88,$88,$88,$88,$00,$00,$00,$88,$88,$88,$88,$88,$88
+0366   4270 88 88 88 00 
+0366   4274 00 00 88 88 
+0366   4278 88 88 88 88 
+0367   427C 88 00 88 88     DEFB $88,$00,$88,$88,$88,$88,$00,$00,$00,$00,$88,$88,$88,$88,$88,$88, $FF
+0367   4280 88 88 00 00 
+0367   4284 00 00 88 88 
+0367   4288 88 88 88 88 
+0367   428C FF 
+0368   428D             
+0369   428D             cityline2: ; windows
+0370   428D 00 00 88 03     DEFB $00,$00,$88,$03,$88,$03,$88,$00,$00,$00,$88,$95,$88,$95,$88,$95
+0370   4291 88 03 88 00 
+0370   4295 00 00 88 95 
+0370   4299 88 95 88 95 
+0371   429D 88 00 88 88     DEFB $88,$00,$88,$88,$88,$88,$00,$00,$00,$00,$88,$80,$88,$88,$80,$88, $FF
+0371   42A1 88 88 00 00 
+0371   42A5 00 00 88 80 
+0371   42A9 88 88 80 88 
+0371   42AD FF 
+0372   42AE             
+0373   42AE             cityline3:
+0374   42AE 88 88 88 88     DEFB $88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88
+0374   42B2 88 88 88 88 
+0374   42B6 88 88 88 88 
+0374   42BA 88 88 88 88 
+0375   42BE 88 88 88 88     DEFB $88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88,$88, $FF
+0375   42C2 88 88 88 88 
+0375   42C6 88 88 88 88 
+0375   42CA 88 88 88 88 
+0375   42CE FF 
+0376   42CF                 
+0377   42CF             ;    defb $ff ;storage for keyboard code hi-byte
+0378   42CF             
+0379   42CF             ; ===========================================================
+0380   42CF             ; code ends
+0381   42CF             ; ===========================================================
+0382   42CF             ;end the REM line and put in the RAND USR line to call our 'hex code'
+0383   42CF             #include "line2.asm"
+0001+  42CF             ;this is the end of line 1 - the REM			
+0002+  42CF 76          				DEFB $76                        ; Newline				
+0003+  42D0             ;followed by the the RAND USR line				
+0004+  42D0             Line1End       
+0005+  42D0 00 0A       Line2			DEFB $00,$0a
+0006+  42D2 0E 00                       DEFW Line2End-Line2Text
+0007+  42D4 F9 D4       Line2Text     	DEFB $F9,$D4                    ; RAND USR
+0008+  42D6 1D 22 21 1D 				DEFB $1D,$22,$21,$1D,$20        ; 16514                
+0008+  42DA 20 
+0009+  42DB 7E                          DEFB $7E                        ; Number
+0010+  42DC 8F 01 04 00                 DEFB $8F,$01,$04,$00,$00        ; Numeric encoding
+0010+  42E0 00 
+0011+  42E1 76                          DEFB $76                        ; Newline
+0012+  42E2             Line2End 
+0384   42E2             
+0385   42E2             ;display file defintion
+0386   42E2             #include "screen.asm"               
+0001+  42E2             ;ZX81 screens
+0002+  42E2             ; Display file (ZX81 screen) - low res screen
+0003+  42E2 76          Display        	DEFB $76     
+0004+  42E3 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 0
+0004+  42E7 00 00 00 00 
+0004+  42EB 00 00 00 00 
+0004+  42EF 00 00 00 00 
+0004+  42F3 00 00 00 00 
+0004+  42F7 00 00 00 00 
+0004+  42FB 00 00 00 00 
+0004+  42FF 00 00 00 00 
+0004+  4303 76 
+0005+  4304 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 1
+0005+  4308 00 00 00 00 
+0005+  430C 00 00 00 00 
+0005+  4310 00 00 00 00 
+0005+  4314 00 00 00 00 
+0005+  4318 00 00 00 00 
+0005+  431C 00 00 00 00 
+0005+  4320 00 00 00 00 
+0005+  4324 76 
+0006+  4325 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 2
+0006+  4329 00 00 00 00 
+0006+  432D 00 00 00 00 
+0006+  4331 00 00 00 00 
+0006+  4335 00 00 00 00 
+0006+  4339 00 00 00 00 
+0006+  433D 00 00 00 00 
+0006+  4341 00 00 00 00 
+0006+  4345 76 
+0007+  4346 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 3
+0007+  434A 00 00 00 00 
+0007+  434E 00 00 00 00 
+0007+  4352 00 00 00 00 
+0007+  4356 00 00 00 00 
+0007+  435A 00 00 00 00 
+0007+  435E 00 00 00 00 
+0007+  4362 00 00 00 00 
+0007+  4366 76 
+0008+  4367 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 4
+0008+  436B 00 00 00 00 
+0008+  436F 00 00 00 00 
+0008+  4373 00 00 00 00 
+0008+  4377 00 00 00 00 
+0008+  437B 00 00 00 00 
+0008+  437F 00 00 00 00 
+0008+  4383 00 00 00 00 
+0008+  4387 76 
+0009+  4388 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 5
+0009+  438C 00 00 00 00 
+0009+  4390 00 00 00 00 
+0009+  4394 00 00 00 00 
+0009+  4398 00 00 00 00 
+0009+  439C 00 00 00 00 
+0009+  43A0 00 00 00 00 
+0009+  43A4 00 00 00 00 
+0009+  43A8 76 
+0010+  43A9 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 6
+0010+  43AD 00 00 00 00 
+0010+  43B1 00 00 00 00 
+0010+  43B5 00 00 00 00 
+0010+  43B9 00 00 00 00 
+0010+  43BD 00 00 00 00 
+0010+  43C1 00 00 00 00 
+0010+  43C5 00 00 00 00 
+0010+  43C9 76 
+0011+  43CA 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 7
+0011+  43CE 00 00 00 00 
+0011+  43D2 00 00 00 00 
+0011+  43D6 00 00 00 00 
+0011+  43DA 00 00 00 00 
+0011+  43DE 00 00 00 00 
+0011+  43E2 00 00 00 00 
+0011+  43E6 00 00 00 00 
+0011+  43EA 76 
+0012+  43EB 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 8
+0012+  43EF 00 00 00 00 
+0012+  43F3 00 00 00 00 
+0012+  43F7 00 00 00 00 
+0012+  43FB 00 00 00 00 
+0012+  43FF 00 00 00 00 
+0012+  4403 00 00 00 00 
+0012+  4407 00 00 00 00 
+0012+  440B 76 
+0013+  440C 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 9
+0013+  4410 00 00 00 00 
+0013+  4414 00 00 00 00 
+0013+  4418 00 00 00 00 
+0013+  441C 00 00 00 00 
+0013+  4420 00 00 00 00 
+0013+  4424 00 00 00 00 
+0013+  4428 00 00 00 00 
+0013+  442C 76 
+0014+  442D 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 10
+0014+  4431 00 00 00 00 
+0014+  4435 00 00 00 00 
+0014+  4439 00 00 00 00 
+0014+  443D 00 00 00 00 
+0014+  4441 00 00 00 00 
+0014+  4445 00 00 00 00 
+0014+  4449 00 00 00 00 
+0014+  444D 76 
+0015+  444E 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 11
+0015+  4452 00 00 00 00 
+0015+  4456 00 00 00 00 
+0015+  445A 00 00 00 00 
+0015+  445E 00 00 00 00 
+0015+  4462 00 00 00 00 
+0015+  4466 00 00 00 00 
+0015+  446A 00 00 00 00 
+0015+  446E 76 
+0016+  446F 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 12
+0016+  4473 00 00 00 00 
+0016+  4477 00 00 00 00 
+0016+  447B 00 00 00 00 
+0016+  447F 00 00 00 00 
+0016+  4483 00 00 00 00 
+0016+  4487 00 00 00 00 
+0016+  448B 00 00 00 00 
+0016+  448F 76 
+0017+  4490 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 13
+0017+  4494 00 00 00 00 
+0017+  4498 00 00 00 00 
+0017+  449C 00 00 00 00 
+0017+  44A0 00 00 00 00 
+0017+  44A4 00 00 00 00 
+0017+  44A8 00 00 00 00 
+0017+  44AC 00 00 00 00 
+0017+  44B0 76 
+0018+  44B1 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 14
+0018+  44B5 00 00 00 00 
+0018+  44B9 00 00 00 00 
+0018+  44BD 00 00 00 00 
+0018+  44C1 00 00 00 00 
+0018+  44C5 00 00 00 00 
+0018+  44C9 00 00 00 00 
+0018+  44CD 00 00 00 00 
+0018+  44D1 76 
+0019+  44D2 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 15
+0019+  44D6 00 00 00 00 
+0019+  44DA 00 00 00 00 
+0019+  44DE 00 00 00 00 
+0019+  44E2 00 00 00 00 
+0019+  44E6 00 00 00 00 
+0019+  44EA 00 00 00 00 
+0019+  44EE 00 00 00 00 
+0019+  44F2 76 
+0020+  44F3 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 16
+0020+  44F7 00 00 00 00 
+0020+  44FB 00 00 00 00 
+0020+  44FF 00 00 00 00 
+0020+  4503 00 00 00 00 
+0020+  4507 00 00 00 00 
+0020+  450B 00 00 00 00 
+0020+  450F 00 00 00 00 
+0020+  4513 76 
+0021+  4514 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 17
+0021+  4518 00 00 00 00 
+0021+  451C 00 00 00 00 
+0021+  4520 00 00 00 00 
+0021+  4524 00 00 00 00 
+0021+  4528 00 00 00 00 
+0021+  452C 00 00 00 00 
+0021+  4530 00 00 00 00 
+0021+  4534 76 
+0022+  4535 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 18
+0022+  4539 00 00 00 00 
+0022+  453D 00 00 00 00 
+0022+  4541 00 00 00 00 
+0022+  4545 00 00 00 00 
+0022+  4549 00 00 00 00 
+0022+  454D 00 00 00 00 
+0022+  4551 00 00 00 00 
+0022+  4555 76 
+0023+  4556 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 19
+0023+  455A 00 00 00 00 
+0023+  455E 00 00 00 00 
+0023+  4562 00 00 00 00 
+0023+  4566 00 00 00 00 
+0023+  456A 00 00 00 00 
+0023+  456E 00 00 00 00 
+0023+  4572 00 00 00 00 
+0023+  4576 76 
+0024+  4577 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 20
+0024+  457B 00 00 00 00 
+0024+  457F 00 00 00 00 
+0024+  4583 00 00 00 00 
+0024+  4587 00 00 00 00 
+0024+  458B 00 00 00 00 
+0024+  458F 00 00 00 00 
+0024+  4593 00 00 00 00 
+0024+  4597 76 
+0025+  4598 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 21
+0025+  459C 00 00 00 00 
+0025+  45A0 00 00 00 00 
+0025+  45A4 00 00 00 00 
+0025+  45A8 00 00 00 00 
+0025+  45AC 00 00 00 00 
+0025+  45B0 00 00 00 00 
+0025+  45B4 00 00 00 00 
+0025+  45B8 76 
+0026+  45B9 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 22
+0026+  45BD 00 00 00 00 
+0026+  45C1 00 00 00 00 
+0026+  45C5 00 00 00 00 
+0026+  45C9 00 00 00 00 
+0026+  45CD 00 00 00 00 
+0026+  45D1 00 00 00 00 
+0026+  45D5 00 00 00 00 
+0026+  45D9 76 
+0027+  45DA 00 00 00 00                 DEFB $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$76 ; Line 23
+0027+  45DE 00 00 00 00 
+0027+  45E2 00 00 00 00 
+0027+  45E6 00 00 00 00 
+0027+  45EA 00 00 00 00 
+0027+  45EE 00 00 00 00 
+0027+  45F2 00 00 00 00 
+0027+  45F6 00 00 00 00 
+0027+  45FA 76 
+0028+  45FB             
+0387   45FB             
+0388   45FB             ;close out the basic program
+0389   45FB             #include "endbasic.asm"0001+  45FB             ; close out the BASIC program structure
+0002+  45FB             ; BASIC Variables area
+0003+  45FB             Variables:      
+0004+  45FB 80          VariablesEnd:   DEFB $80
+0005+  45FC             BasicEnd:                              
+0006+  45FC             
+0007+  45FC             
+0008+  45FC             #END
+tasm: Number of errors = 0

@@ -1,0 +1,413 @@
+                00001 ; TRS-80 SAVE TEST
+                00002 ; Assemble with: z80asm -nh save.asm
+                00003 
+    = 0040      00004 KEYIN EQU 40H
+    = 0033      00005 CRTBYTE EQU  0033H
+                00006 
+                00007         ;CLS EQU 01C9H
+                00008         ORG 5200H
+                00009         
+                00010 START
+5200  CD1352    00011         call restore_game
+5203  CD0952    00012         call save_game
+5206  C32D40    00013         jp 402DH  ; return when using cmd
+                00014                 
+                00015 save_game
+5209  CD1D52    00016         call open_file
+520C  CDB252    00017         call write_data
+520F  CD7152    00018         call close_file
+5212  C9        00019         ret     
+                00020 
+                00021 *MOD
+                00022 restore_game
+5213  CD1D52    00023         call open_file
+5216  CDF752    00024         call read_data
+5219  CD7152    00025         call close_file
+521C  C9        00026         ret
+                00027         
+                00028 *MOD
+                00029 open_file
+521D  219F53    00030         ld hl,GETOFNAME ; print welcome,author,version
+5220  CD8152    00031         call OUTLINCR
+                00032         ;read a line
+5223  216453    00033         ld hl,INBUF
+5226  0601      00034         ld b,1 ; BUFSIZE
+5228  213954    00035         ld hl,IOBUF
+522B  0601      00036         ld b,1
+522D  CD4000    00037         call KEYIN
+5230  7E        00038         ld a,(hl)
+5231  FE31      00039         cp 49d; 'ascii '0'
+5233  DA5C52    00040         jp c,$bf
+5236  FE36      00041         cp 54d; 'ascii '6'
+5238  D25C52    00042         jp nc,$bf
+                00043 
+                00044         
+523B  218053    00045         ld hl, FCB+4
+523E  77        00046         ld (hl),a    ; overwrite char in filename
+                00047         
+523F  217C53    00048         ld hl,FCB
+5242  CD8152    00049         call OUTLINCR
+                00050         
+                00051         ; open the files
+5245  210454    00052         ld hl,OPNING
+5248  CD8152    00053         call OUTLINCR
+                00054         
+524B  117C53    00055         ld de,FCB ;Point to the File Control Block
+524E  213954    00056         ld hl,IOBUF ;Point to the disk file I/O buffer
+5251  0600      00057         ld b,0 ;Specify the Logical Record Length (255)
+5253  CD2044    00058         call 4420h ; call open/create new sub
+5256  C46552    00059         call nz,IOERR ;Transfer on a returned error
+5259  C37052    00060         jp $x
+525C  21D253    00061 $bf     ld hl,BADSLOT ; print welcome,author,version
+525F  CD8152    00062         call OUTLINCR
+5262  33        00063         inc sp
+5263  33        00064         inc sp
+5264  C9        00065         ret
+                00066 IOERR
+5265  C641      00067         add a,65  ; convert err to an ascii letter
+5267  CD3300    00068         call CRTBYTE
+526A  216853    00069         ld hl,IOERRSTR ; print err msg
+526D  CD8152    00070         call OUTLINCR   
+5270  C9        00071 $x      ret
+                00072 
+                00073 *MOD
+                00074 close_file
+5271  211454    00075         ld hl,CLSNG ; PRINT "CLOSING"
+5274  CD8152    00076         call OUTLINCR
+                00077 
+                00078         ; @CLOSE SVC-60 Close an open disk file 
+5277  117C53    00079         ld de,FCB ;Point to the open File Control Block
+                00080         ;ld a,SVCCLOSE ;Identify the SVC
+                00081         ;rst 40 ;Invoke the SVC
+527A  CD2844    00082         call 4428h ; close
+527D  C26552    00083         jp nz,IOERR ;Transfer on a returned error
+5280  C9        00084         ret
+                00085                 
+                00086 *MOD
+                00087 OUTLINCR
+5281  F5        00088                 push af
+5282  C5        00089                 push bc
+5283  D5        00090                 push de
+5284  E5        00091                 push hl
+5285  DDE5      00092                 push ix
+5287  FDE5      00093                 push iy
+5289  7E        00094 $lpD    ld a,(hl)
+528A  FE00      00095                 cp 0
+528C  CA9652    00096                 jp z,$xD
+528F  23        00097                 inc hl
+5290  CD3300    00098                 call CRTBYTE
+5293  C38952    00099                 jp $lpD 
+5296  CDA252    00100 $xD             call printcr
+5299  FDE1      00101                 pop iy
+529B  DDE1      00102                 pop ix
+529D  E1        00103                 pop hl
+529E  D1        00104                 pop de
+529F  C1        00105                 pop bc
+52A0  F1        00106                 pop af
+52A1  C9        00107                 ret     
+                00108 
+                00109 ;prints a cr (registers are preserved)
+                00110 printcr
+52A2  F5        00111         push af
+52A3  C5        00112         push bc
+52A4  D5        00113         push de
+52A5  FDE5      00114         push iy
+52A7  3E0D      00115         ld a,0dh ; carriage return
+52A9  CD3300    00116         call CRTBYTE
+52AC  FDE1      00117         pop iy
+52AE  D1        00118         pop de
+52AF  C1        00119         pop bc
+52B0  F1        00120         pop af
+                00121 
+52B1  C9        00122         ret             
+                00123         
+                00124 *MOD
+                00125 write_data
+                00126 
+52B2  212454    00127         ld hl,WRITING  ;print "WRITING"
+52B5  CD8152    00128         call OUTLINCR 
+                00129         
+                00130         ;write the object table
+52B8  3A3955    00131         ld a,(ObjTblSize)
+52BB  47        00132         ld b,a
+                00133 
+52BC  DD213A55  00134         ld ix,obj_table  
+                00135 $olpE
+52C0  C5        00136         push bc ; save loop counter
+52C1  0613      00137         ld b,19 ; size of obj_table rec 
+                00138 $ilpE   
+52C3  C5        00139         push bc ; save inner
+52C4  DD7E00    00140         ld a,(ix)
+52C7  CD4653    00141         call write_byte         
+52CA  DD23      00142         inc ix  
+52CC  C1        00143         pop bc ; restore inner
+52CD  10F4      00144         djnz $ilpE
+                00145         
+52CF  C1        00146         pop bc  ; restore outer loop counter
+52D0  10EE      00147         djnz $olpE
+                00148         
+                00149         ; get number of built in vars (loop counter)
+52D2  DD7E00    00150         ld a,(ix) 
+52D5  47        00151         ld b,a
+52D6  DD23      00152         inc ix ; skip over it
+                00153         
+                00154 $bvlpE  
+52D8  C5        00155         push bc ; save inner
+52D9  DD7E00    00156         ld a,(ix)
+52DC  CD4653    00157         call write_byte         
+52DF  DD23      00158         inc ix  
+52E1  C1        00159         pop bc ; restore inner
+52E2  10F4      00160         djnz $bvlpE
+                00161 
+                00162         ; write user vars (THIS IS A TOTAL DUPLICATE!!!)
+52E4  DD7E00    00163         ld a,(ix) ; num vars
+52E7  47        00164         ld b,a
+52E8  DD23      00165         inc ix  ; skip len byte
+                00166         
+                00167 $uvlpE  
+52EA  C5        00168         push bc ; save inner
+52EB  DD7E00    00169         ld a,(ix)
+52EE  CD4653    00170         call write_byte         
+52F1  DD23      00171         inc ix  
+52F3  C1        00172         pop bc ; restore inner
+52F4  10F4      00173         djnz $uvlpE
+                00174         
+52F6  C9        00175         ret
+                00176         
+                00177 *MOD    
+                00178 read_data
+52F7  212E54    00179         ld hl,LOADING  ;print "LOADING"
+52FA  CD8152    00180         call OUTLINCR 
+                00181         
+52FD  3A3955    00182         ld a,(ObjTblSize)
+5300  47        00183         ld b,a
+5301  DD213A55  00184         ld ix,obj_table  
+                00185 $olpF
+5305  C5        00186         push bc ; save loop counter
+5306  0613      00187         ld b,19 ; size of obj_table rec 
+                00188 $ilpF   
+5308  C5        00189         push bc ; save inner
+5309  CD5553    00190         call read_byte          
+530C  DD7700    00191         ld (ix),a  ; overwrite data table
+530F  DD23      00192         inc ix  
+5311  C1        00193         pop bc ; restore inner
+5312  10F4      00194         djnz $ilpF
+                00195         
+5314  C1        00196         pop bc  ; restore outer loop counter
+5315  10EE      00197         djnz $olpF
+                00198         
+                00199         ; read built-in  vars
+5317  21F753    00200         ld hl,RDVARS
+531A  CD8152    00201         call OUTLINCR
+                00202         
+531D  3AB656    00203         ld a,(numBuiltInVars)
+5320  47        00204         ld b,a
+5321  DD21B756  00205         ld ix,builtInVars;
+                00206 $bvlpF  
+5325  C5        00207         push bc ; save inner
+5326  CD5553    00208         call read_byte          
+5329  DD7700    00209         ld (ix),a
+532C  DD23      00210         inc ix  
+532E  C1        00211         pop bc ; restore inner
+532F  10F4      00212         djnz $bvlpF
+                00213 
+                00214         ; read user vars (THIS IS A TOTAL DUPLICATE!!!)
+5331  3AC056    00215         ld a,(numUserVars) ; size of obj_table rec 
+5334  47        00216         ld b,a
+5335  DD21C156  00217         ld ix,userVars;
+                00218 $uvlpF  
+5339  C5        00219         push bc ; save loop counter
+533A  CD5553    00220         call read_byte          
+533D  DD7700    00221         ld (ix),a       
+5340  DD23      00222         inc ix  
+5342  C1        00223         pop bc ; restore loop counter
+5343  10F4      00224         djnz $uvlpF
+5345  C9        00225         ret     
+                00226         
+                00227 *MOD
+                00228 write_byte
+5346  117C53    00229         ld de,FCB       ;fbc ptr in de
+5349  CD1B00    00230         call 1bh ; put char
+534C  CA5453    00231         jp z,$xG
+534F  33        00232         inc sp
+5350  33        00233         inc sp
+5351  C36552    00234         jp IOERR ;Transfer on a returned error
+5354  C9        00235 $xG     ret
+                00236 
+                00237 *MOD
+                00238 read_byte
+5355  117C53    00239         ld de,FCB       ;fbc ptr in de
+5358  CD1300    00240         call 13h ; get char
+535B  CA6353    00241         jp z,$xH
+535E  33        00242         inc sp
+535F  33        00243         inc sp
+5360  C36552    00244         jp IOERR ;Transfer on a returned error
+5363  C9        00245 $xH     ret
+                00246         
+5364  000000    00247 INBUF DB 0,0,0
+5367  00        00248 IORES DB 0
+5368  492F4F20  00249 IOERRSTR DB "I/O ERROR",0               
+      45 52 52 4F 52 00      
+5372  08        00250 BYTES DB 8
+5373  61626364  00251 DATA DB "abcdABCD",0h
+      41 42 43 44 00         
+                00252 
+                00253 ;FILE CONTROL BLOCK IS A 32 BYTE BLOCK
+                00254 ;WITH THE FILE NAME FOLLOWED BY AN EXT CHAR
+                00255 
+                00256 FCB
+537C  53415645  00257         DB "SAVE0/SAV:0",3h
+      30 2F 53 41 56 3A 30 03
+5388  00000000  00258         DB 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00               
+                00259                 
+539F  456E7465  00260 GETOFNAME DB "Enter save slot (1-5):",0
+      72 20 73 61 76 65 20 73
+      6C 6F 74 20 28 31 2D 35
+      29 3A 00               
+53B6  00        00261         db 0
+53B7  456E7465  00262 GETIFNAME DB "Enter restore slot (1-5):",0
+      72 20 72 65 73 74 6F 72
+      65 20 73 6C 6F 74 20 28
+      31 2D 35 29 3A 00      
+53D1  00        00263         DB 0
+53D2  62616420  00264 BADSLOT DB "bad slot number",0
+      73 6C 6F 74 20 6E 75 6D
+      62 65 72 00            
+53E2  72656164  00265 RDOBJTB DB "reading object table",0
+      69 6E 67 20 6F 62 6A 65
+      63 74 20 74 61 62 6C 65
+      00                     
+53F7  72656164  00266 RDVARS DB "reading vars",0
+      69 6E 67 20 76 61 72 73
+      00                     
+                00267 
+5404  4F50454E  00268 OPNING DB "OPENING FILE...",0
+      49 4E 47 20 46 49 4C 45
+      2E 2E 2E 00            
+5414  434C4F53  00269 CLSNG DB "CLOSING FILE...",0
+      49 4E 47 20 46 49 4C 45
+      2E 2E 2E 00            
+5424  53415649  00270 WRITING DB "SAVING...",0
+      4E 47 2E 2E 2E 00      
+542E  4C4F4144  00271 LOADING DB "LOADING...",0
+      49 4E 47 2E 2E 2E 00   
+                00272 IOBUF 
+5439  0A0A0A0A  00273         DC 256,0ah ; must be 256
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A 0A 0A 0A 0A
+      0A 0A 0A 0A            
+                00274 ObjTblSize 
+5539  14        00275         db 20   
+                00276 obj_table
+553A  00000000  00277         DC 380,0h ; must be 256 (20 fake objects)
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+      00 00 00 00 00 00 00 00
+56B6  09        00278 numBuiltInVars db 9
+                00279 builtInVars
+                00280 ;       db 1,2,3,4,5,6,7,8,9    
+                00281 ;       db 9,8,7,6,5,4,3,2,1
+56B7  FFFFFFFF  00282         db 255,255,255,255,255,255,255,255,255
+      FF FF FF FF FF         
+56C0  0A        00283 numUserVars db 10
+                00284 userVars
+                00285 ;       db 9,8,7,6,5,4,3,2,1,0
+                00286 ;       db 0,1,2,3,4,5,6,7,8,9
+56C1  FFFFFFFF  00287         db 255,255,255,255,255,255,255,255,255,255
+      FF FF FF FF FF FF      
+                00288         END START               
+
+
+$BF             525C  $BVLPE          52D8  $BVLPF          5325  
+$ILPE           52C3  $ILPF           5308  $LPD            5289  
+$OLPE           52C0  $OLPF           5305  $UVLPE          52EA  
+$UVLPF          5339  $X              5270  $XD             5296  
+$XG             5354  $XH             5363  BADSLOT         53D2  
+BUILTINVARS     56B7  BYTES           5372  CLOSE_FILE      5271  
+CLSNG           5414  CRTBYTE         0033  DATA            5373  
+FCB             537C  GETIFNAME       53B7  GETOFNAME       539F  
+INBUF           5364  IOBUF           5439  IOERR           5265  
+IOERRSTR        5368  IORES           5367  KEYIN           0040  
+LOADING         542E  NUMBUILTINVARS  56B6  NUMUSERVARS     56C0  
+OBJTBLSIZE      5539  OBJ_TABLE       553A  OPEN_FILE       521D  
+OPNING          5404  OUTLINCR        5281  PRINTCR         52A2  
+RDOBJTB         53E2  RDVARS          53F7  READ_BYTE       5355  
+READ_DATA       52F7  RESTORE_GAME    5213  SAVE_GAME       5209  
+START           5200  USERVARS        56C1  WRITE_BYTE      5346  
+WRITE_DATA      52B2  WRITING         5424  
