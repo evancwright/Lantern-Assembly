@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <project>
+    <projname>NEW_PROJECT</projname>
+    <welcome>SHORT WELCOME MESSAGE.</welcome>
+    <author>YOUR NAME</author>
+    <version>VERSION 1.0</version>
+    <preps>
+      <prep>in</prep>
+      <prep>on</prep>
+      <prep>at</prep>
+      <prep>under</prep>
+      <prep>into</prep>
+      <prep>inside</prep>
+      <prep>through</prep>
+      <prep>out</prep>
+      <prep>behind</prep>
+      <prep>off</prep>
+      <prep>up</prep>
+      <prep>with</prep>
+      <prep>to</prep>
+      <prep>off</prep>
+    </preps>
+    <verbs>
+      <builtinverbs>
+        <verb>n,go north,north</verb>
+        <verb>s,go south,south</verb>
+        <verb>e,go east,east</verb>
+        <verb>w,go west,west</verb>
+        <verb>ne,go northeast,northeast</verb>
+        <verb>se,go southeast,southeast</verb>
+        <verb>sw,go southwest,southwest</verb>
+        <verb>nw,go northwest,northwest</verb>
+        <verb>up,go up,u</verb>
+        <verb>down,go down,d</verb>
+        <verb>enter,go in,go into,go inside</verb>
+        <verb>out</verb>
+        <verb>get,take,grab,pick up</verb>
+        <verb>give</verb>
+        <verb>inventory,i</verb>
+        <verb>kill</verb>
+        <verb>drop</verb>
+        <verb>light</verb>
+        <verb>look,l</verb>
+        <verb>examine,x,look at,inspect</verb>
+        <verb>look in,search</verb>
+        <verb>open</verb>
+        <verb>lock</verb>
+        <verb>unlock</verb>
+        <verb>close,shut</verb>
+        <verb>eat</verb>
+        <verb>drink</verb>
+        <verb>put,place</verb>
+        <verb>quit</verb>
+        <verb>smell,sniff</verb>
+        <verb>listen</verb>
+        <verb>wait</verb>
+        <verb>climb</verb>
+        <verb>yell,scream,shout</verb>
+        <verb>jump</verb>
+        <verb>talk to</verb>
+        <verb>turn on</verb>
+        <verb>wear</verb>
+        <verb>turn off</verb>
+        <verb>save</verb>
+        <verb>restore</verb>
+      </builtinverbs>
+      <userverbs />
+    </verbs>
+    <objects>
+      <object id="0" holder="0" name="OFFSCREEN" printedname="OFFSCREEN">
+        <description>OFFSTAGE.  MOVE OBJECTS HERE TO REMOVE THEM FROM THE WORLD.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="1" holder="2" name="PLAYER" printedname="PLAYER">
+        <description>YOU'RE A WONDERFUL PERSON. YOU SHOULDN'T CARE WHAT YOU LOOK LIKE.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms names="ME,SELF" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="2" holder="0" name="ROOM 1" printedname="ROOM 1">
+        <description>THIS IS THE END OF A DIRT ROAD.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+    </objects>
+    <checks>
+      <check verb="close" check="check_dobj_supplied" />
+      <check verb="drink" check="check_dobj_supplied" />
+      <check verb="drink" check="check_have_dobj" />
+      <check verb="drop" check="check_dobj_supplied" />
+      <check verb="drop" check="check_have_dobj" />
+      <check verb="eat" check="check_dobj_supplied" />
+      <check verb="enter" check="check_dobj_supplied" />
+      <check verb="examine" check="check_dobj_supplied" />
+      <check verb="get" check="check_dobj_supplied" />
+      <check verb="get" check="check_dont_have_dobj" />
+      <check verb="get" check="check_dobj_portable" />
+      <check verb="kill" check="check_dobj_supplied" />
+      <check verb="light" check="check_dobj_supplied" />
+      <check verb="light" check="check_have_dobj" />
+      <check verb="open" check="check_dobj_supplied" />
+      <check verb="open" check="check_dobj_opnable" />
+      <check verb="open" check="check_dobj_unlocked" />
+      <check verb="put" check="check_dobj_supplied" />
+      <check verb="put" check="check_prep_supplied" />
+      <check verb="put" check="check_iobj_supplied" />
+      <check verb="put" check="check_not_self_or_child" />
+      <check verb="talk to" check="check_dobj_supplied" />
+      <check verb="turn on" check="check_dobj_supplied" />
+      <check verb="unlock" check="check_dobj_supplied" />
+      <check verb="look in" check="check_dobj_supplied" />
+    </checks>
+    <sentences>
+      <sentence verb="examine" do="*" prep="" io="" type="before" sub="get_portable" />
+      <sentence verb="take" do="PLAYER" prep="" io="" type="instead" sub="not_possible" />
+      <sentence verb="kill" do="PLAYER" prep="" io="" type="instead" sub="kill_self" />
+      <sentence verb="kill" do="*" prep="" io="" type="instead" sub="default_kill" />
+      <sentence verb="kill" do="*" prep="with" io="*" type="instead" sub="default_kill" />
+      <sentence verb="talk to" do="PLAYER" prep="" io="" type="instead" sub="talk_to_self" />
+      <sentence verb="talk to" do="*" prep="" io="" type="instead" sub="default_talk" />
+      <sentence verb="listen" do="" prep="" io="" type="instead" sub="listen" />
+      <sentence verb="smell" do="" prep="" io="" type="instead" sub="smell" />
+      <sentence verb="wait" do="" prep="" io="" type="instead" sub="wait" />
+      <sentence verb="yell" do="" prep="" io="" type="instead" sub="yell" />
+      <sentence verb="jump" do="" prep="" io="" type="instead" sub="jump" />
+      <sentence verb="eat" do="*" prep="" io="" type="instead" sub="default_eat" />
+      <sentence verb="drink" do="*" prep="" io="" type="instead" sub="default_drink" />
+      <sentence verb="wear" do="*" prep="" io="" type="before" sub="get_portable" />
+    </sentences>
+    <routines>
+      <routine name="not_possible">if (dobj == player)
+{
+     println("NOT PHYSICALLY POSSIBLE.");
+} </routine>
+      <routine name="get_portable">if (dobj.portable == 1) { if ($dobj.holder != player) { println("(TAKEN)"); dobj.holder = player;}  } </routine>
+      <routine name="kill_self">println("IF YOU ARE EXPERIENCING SUICIDAL THOUGHTS, YOU SHOULD SEEK PSYCHIATRIC HELP.");</routine>
+      <routine name="default_kill">println("PERHAPS YOU SHOULD COUNT TO 3 AND CALM DOWN.");</routine>
+      <routine name="kill_player">println("***YOU HAVE DIED***.");player.holder=2;
+</routine>
+      <routine name="talk_to_self">println("TALKING TO YOURSELF IS A SIGN OF IMPENDING MENTAL COLLAPSE.");</routine>
+      <routine name="default_talk">println("THAT DOES PRODUCE AN EXCITING CONVERSATION.");</routine>
+      <routine name="listen">println("YOU HEAR NOTHING UNEXPECTED.");</routine>
+      <routine name="smell">println("YOU SMELL NOTHING UNEXPECTED.");</routine>
+      <routine name="wait">println("TIME PASSES...");</routine>
+      <routine name="yell">println("AAAAAAAAAAAAARRRRGGGGGG!");</routine>
+      <routine name="jump">println("WHEEEEEE!");</routine>
+      <routine name="default_eat">println("THAT'S NOT PART OF A HEALTHY DIET.");</routine>
+      <routine name="default_drink">println("THAT'S HARDLY A REFRESHING DRINK.");</routine>
+    </routines>
+    <events />
+    <variables>
+      <builtin>
+        <var name="dobj" addr="sentence+1" value="0" />
+        <var name="iobj" addr="sentence+3" value="0" />
+        <var name="score" addr="score" value="0" />
+        <var name="moves" addr="moves" value="0" />
+        <var name="health" addr="health" value="100" />
+        <var name="turnsWithoutLight" addr="turnsWithoutLight" value="0" />
+        <var name="gameOver" addr="gameOver" value="0" />
+      </builtin>
+      <user />
+    </variables>
+  </project>
+</xml>

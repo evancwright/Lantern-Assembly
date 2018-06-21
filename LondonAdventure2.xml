@@ -1,0 +1,866 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <project>
+    <projname>London_Adventure</projname>
+    <welcome>WELCOME TO LONDON ADVENTURE.</welcome>
+    <author>AUTHORS: ELLIOT AND EVAN WRIGHT</author>
+    <version>VERSION 1.0, 2017</version>
+    <preps>
+      <prep>in</prep>
+      <prep>on</prep>
+      <prep>at</prep>
+      <prep>under</prep>
+      <prep>into</prep>
+      <prep>inside</prep>
+      <prep>through</prep>
+      <prep>out</prep>
+      <prep>behind</prep>
+      <prep>off</prep>
+      <prep>up</prep>
+      <prep>with</prep>
+    </preps>
+    <verbs>
+      <builtinverbs>
+        <verb>n,go north,north</verb>
+        <verb>s,go south,south</verb>
+        <verb>e,go east,east</verb>
+        <verb>w,go west,west</verb>
+        <verb>ne,go northeast,northeast</verb>
+        <verb>se,go southeast,southeast</verb>
+        <verb>sw,go southwest,southwest</verb>
+        <verb>nw,go northwest,northwest</verb>
+        <verb>up,go up,u</verb>
+        <verb>down,go down,d</verb>
+        <verb>enter,go in,go into,go inside</verb>
+        <verb>out</verb>
+        <verb>get,take,grab,pick up</verb>
+        <verb>inventory,i</verb>
+        <verb>kill</verb>
+        <verb>drop</verb>
+        <verb>light</verb>
+        <verb>look,l</verb>
+        <verb>examine,x,look at</verb>
+        <verb>look in,inspect,search</verb>
+        <verb>open</verb>
+        <verb>lock</verb>
+        <verb>unlock</verb>
+        <verb>close,shut</verb>
+        <verb>eat</verb>
+        <verb>drink</verb>
+        <verb>put,place</verb>
+        <verb>quit</verb>
+        <verb>smell,sniff</verb>
+        <verb>listen</verb>
+        <verb>wait</verb>
+        <verb>climb</verb>
+        <verb>yell,scream,shout</verb>
+        <verb>jump</verb>
+        <verb>talk to</verb>
+        <verb>turn on</verb>
+      </builtinverbs>
+      <userverbs>
+        <verb>hit,strike</verb>
+        <verb>read</verb>
+        <verb>wear</verb>
+        <verb>push,press</verb>
+        <verb>throw</verb>
+      </userverbs>
+    </verbs>
+    <objects>
+      <object id="0" holder="0" name="OFFSCREEN">
+        <description>OFFSTAGE.  MOVE OBJECTS HERE TO REMOVE THEM FROM THE WORLD.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms names="" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="1" holder="2" name="PLAYER">
+        <description>YOU ARE SPORTING A SKINNY BLACK AND MATCHING CONVERSE SNEAKERS.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms names="ME,SELF" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="2" holder="0" name="NARROW ALLEY">
+        <description>THIS IS A NARROW ALLEY.  TO THE NORTH, YOU CAN SEE TRAFFIC.</description>
+        <initialdescription />
+        <directions n="6" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo>
+          <s>HIGH WALLS BLOCK ALL DIRECTIONS EXCEPT NORTH.</s>
+          <w>HIGH WALLS BLOCK ALL DIRECTIONS EXCEPT NORTH.</w>
+          <ne>HIGH WALLS BLOCK ALL DIRECTIONS EXCEPT NORTH.</ne>
+          <nw>HIGH WALLS BLOCK ALL DIRECTIONS EXCEPT NORTH.</nw>
+          <e>HIGH WALLS BLOCK ALL DIRECTIONS EXCEPT NORTH.</e>
+          <se>HIGH WALLS BLOCK ALL DIRECTIONS EXCEPT NORTH.</se>
+          <sw>HIGH WALLS BLOCK ALL DIRECTIONS EXCEPT NORTH.</sw>
+          <n />
+          <up />
+          <down />
+        </nogo>
+        <backdrop />
+      </object>
+      <object id="3" holder="2" name="TARDIS">
+        <description>THE BLUE POLICE BOX IS ABOUT THE SIZE OF AN OLD TELEPHONE BOOTH.</description>
+        <initialdescription>A BLUE POLICE BOX STANDS NEARBY.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="1" supporter="0" transparent="0" openable="1" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms names="BLUE,POLICE,BOX" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="4" holder="0" name="INSIDE TARDIS">
+        <description>AS YOU ENTER THE TARDIS, YOU REALIZE THAT IT IS MUCH BIGGER ON THE INSIDE THAN OUT.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="2" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="2" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="5" holder="4" name="NOTE">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription>A SMALL NOTE LIES ON ONE OF THE CONSOLES.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="6" holder="0" name="BUSY INTERSECTION">
+        <description>THIS IS A BUSY INTERSECTION.  STREETS LEAD NORTH AND EAST.  AN ALLEY LEADS SOUTH.  TRAFFIC BLOCKS THE WAY WEST.</description>
+        <initialdescription />
+        <directions n="7" s="2" e="8" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo>
+          <s />
+          <w>THE TRAFFIC IS TOO CONGESTED IN THAT DIRECTION.</w>
+          <ne />
+          <nw />
+          <e />
+          <se />
+          <sw />
+          <n />
+          <up />
+          <down />
+        </nogo>
+        <backdrop />
+      </object>
+      <object id="7" holder="0" name="NORTH STREET">
+        <description>THIS IS A BUSY LONDON STREET.  ROSE'S APT. BUILDING IS TO THE WEST.</description>
+        <initialdescription />
+        <directions n="255" s="6" e="255" w="14" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo>
+          <s />
+          <w />
+          <ne>THE TRAFFIC IS TOO CONGESTED IN THAT DIRECTION.</ne>
+          <nw>THE TRAFFIC IS TOO CONGESTED IN THAT DIRECTION.</nw>
+          <e />
+          <se />
+          <sw />
+          <n>THE TRAFFIC IS TOO CONGESTED IN THAT DIRECTION.</n>
+          <up />
+          <down />
+        </nogo>
+        <backdrop />
+      </object>
+      <object id="8" holder="0" name="EAST STREET">
+        <description>THIS A CONGESTED EAST-WEST STREET.  ON THE NORTH SIDE OF THE STREET IS HERRICK'S DEPARTMENT STORE.</description>
+        <initialdescription />
+        <directions n="9" s="255" e="255" w="6" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms names="" />
+        <nogo>
+          <s />
+          <w />
+          <ne>THE TRAFFIC IS TOO CONGESTED IN THAT DIRECTION.</ne>
+          <nw />
+          <e>THE TRAFFIC IS TOO CONGESTED IN THAT DIRECTION.</e>
+          <se>THE TRAFFIC IS TOO CONGESTED IN THAT DIRECTION.</se>
+          <sw />
+          <n />
+          <up />
+          <down />
+        </nogo>
+        <backdrop />
+      </object>
+      <object id="9" holder="0" name="1ST FLOOR">
+        <description>THIS IS THE GROUND FLOOR OF HERRICK'S DEPARTMENT STORE.  WIDE STAIRCASES LEAD UP AND DOWN. GLASS DOORS LEAD OUTSIDE TO THE SOUTH.</description>
+        <initialdescription />
+        <directions n="255" s="8" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="10" down="11" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="10" holder="0" name="2ND FLOOR">
+        <description>THIS IS THE UPSTAIRS OF HERRICK'S, WHICH HOUSES THE SPORTING GOODS SECTION.  STAIRS LEAD DOWN.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="9" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="11" holder="0" name="BASEMENT">
+        <description>THIS IS THE BASEMENT UP HERRICK'S. STAIRS LEAD UP.  A ROOM LABELED 'EMPLOYEES ONLY IS TO THE SOUTH'.</description>
+        <initialdescription />
+        <directions n="255" s="13" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="9" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="12" holder="0" name="INVENTORY ROOM">
+        <description>THIS IS ROOM USED FOR STOCKING INVENTORY.  A DOOR LEADS OUT TO THE NORTH</description>
+        <initialdescription />
+        <directions n="11" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="13" holder="11" name="DOOR">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="12" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="1" open="0" backdrop="0" emittinglight="0" locked="1" lockable="1" lightable="0" door="1" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="14" holder="0" name="LOBBY">
+        <description>THIS IS THE LOBBY OF ROSE'S APT. BUILDING. TO THE WEST IS AN ELEVATOR. TO THE EAST, A DOOR LEADS OUTSIDE.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="7" w="15" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="15" holder="0" name="ELEVATOR">
+        <description>THIS IS A SMALL ELEVATOR.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="14" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="16" holder="15" name="BUTTON">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription>A SINGLE BUTTON  IS NEXT TO THE DOOR.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="17" holder="0" name="HALLWAY">
+        <description>THIS IS CRAMPED, DINGY HALLWAY.  ROSE'S FLAT IS TO THE EAST, TO THE WEST IS THE ELEVATOR.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="29" w="15" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="18" holder="0" name="ROSE'S APARTMENT">
+        <description>THIS IS ROSES SMALL APARTMENT.  TO THE WEST IS THE HALL.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="17" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="17" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="19" holder="9" name="MANNEQUIN">
+        <description>THOUGH OBVIOUSLY PLASTIC, THE MANNEQUIN IS EERILY LIFE-LIKE.</description>
+        <initialdescription>A PLASTIC MANNEQUIN STANDS ON A  SMALL PEDESTAL.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="20" holder="10" name="CRICKET BAT">
+        <description>THE BAT IS SOLID WILLOW.  DEFINITELY GOOD FOR GETTING A FEW 'OVERS'.</description>
+        <initialdescription>A CRICKET BAT LIES AMONG THE ASSORTED ITEMS.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="21" holder="12" name="ROSE">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription>ROSE IS LYING ON THE GROUND UNCONSCIOUS.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="22" holder="0" name="DALEK">
+        <description>THE DALEK RESEMBLES A GARBAGE CAN WITH A TOILET PLUNGER STICKOUT.</description>
+        <initialdescription>A HOSTILE DALEK IS WHEELING AROUND, SCREAMING 'EXTERMINATE!'</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="1" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms names="" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="23" holder="9" name="STYLISH HAT">
+        <description>THE HAT IS A STYLISH FEDORA.</description>
+        <initialdescription>A STYLISH HAT RESTS ATOP THE MANNEQUIN.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="1" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms names="FEDORA" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="24" holder="0" name="PLASTIC HEAD">
+        <description>THE HEAD STARES BLANKLY BACK AT YOU.</description>
+        <initialdescription>A PLASTIC HEAD LIES ON THE GROUND.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="25" holder="0" name="TORSO">
+        <description>LOOKING DOWN THE NECK, YOU CAN SEE SOPHISTICATED ROBOTICS.</description>
+        <initialdescription>A LIFELESS TORSO LIES CRUMPLED ON THE GROUND.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="26" holder="18" name="SONIC SCREWDRIVER">
+        <description>THE SONIC SCREWDRIVER HAS SEVERAL BUTTONS, THOUGH NONE OF THEM ARE LABELED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms names="SCREW,DRIVER" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="27" holder="22" name="EYESTALK">
+        <description>THE PLUNGER LIKE APPENDAGE PERMITS THE DALEK A LIMITED FIELD OF VISION.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms names="PLUNGER,EYE,STALK" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="28" holder="0" name="TRENZALORE">
+        <description>WELCOME TO TRENZALORE, WHERE TIME LORDS GO WHEN THEY ARE OUT OF LIVES. NEXT TIME, PERHAPS, WE'LL FIND A WAY PAST THAT DALEK.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="1" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms names="" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="29" holder="17" name="ROSE'S DOOR">
+        <description>THIS IS THE DOOR TO ROSES APT.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="18" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="1" open="0" backdrop="0" emittinglight="0" locked="1" lockable="1" lightable="0" door="1" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="30" holder="0" name="KEY">
+        <description>THIS IS NON-DESCRIPT STEEL KEY.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="31" holder="2" name="TRAFFIC">
+        <description>THE TRAFFIC IS DENSELY PACKED MASS OF CARS AND THE OCCAISIONAL DOUBLE-DECKER BUS AND BLACK CAB.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="1" emittinglight="0" locked="0" lockable="0" lightable="0" door="0" unused="0" />
+        <synonyms names="" />
+        <nogo />
+        <backdrop rooms="6,7,8" />
+      </object>
+    </objects>
+    <checks>
+      <check verb="close" check="check_dobj_supplied" />
+      <check verb="close" check="check_see_dobj" />
+      <check verb="drink" check="check_dobj_supplied" />
+      <check verb="drink" check="check_see_dobj" />
+      <check verb="drink" check="check_have_dobj" />
+      <check verb="drop" check="check_dobj_supplied" />
+      <check verb="drop" check="check_see_dobj" />
+      <check verb="drop" check="check_have_dobj" />
+      <check verb="eat" check="check_dobj_supplied" />
+      <check verb="eat" check="check_see_dobj" />
+      <check verb="enter" check="check_dobj_supplied" />
+      <check verb="enter" check="check_see_dobj" />
+      <check verb="examine" check="check_dobj_supplied" />
+      <check verb="examine" check="check_see_dobj" />
+      <check verb="get" check="check_dobj_supplied" />
+      <check verb="get" check="check_see_dobj" />
+      <check verb="get" check="check_dont_have_dobj" />
+      <check verb="get" check="check_dobj_portable" />
+      <check verb="kill" check="check_dobj_supplied" />
+      <check verb="kill" check="check_see_dobj" />
+      <check verb="light" check="check_dobj_supplied" />
+      <check verb="light" check="check_see_dobj" />
+      <check verb="light" check="check_have_dobj" />
+      <check verb="open" check="check_dobj_supplied" />
+      <check verb="open" check="check_see_dobj" />
+      <check verb="put" check="check_dobj_supplied" />
+      <check verb="put" check="check_see_dobj" />
+      <check verb="put" check="check_prep_supplied" />
+      <check verb="put" check="check_iobj_supplied" />
+      <check verb="put" check="check_not_self_or_child" />
+      <check verb="talk to" check="check_dobj_supplied" />
+      <check verb="talk to" check="check_see_dobj" />
+      <check verb="turn on" check="check_dobj_supplied" />
+      <check verb="turn on" check="check_see_dobj" />
+      <check verb="turn on" check="check_have_dobj" />
+      <check verb="unlock" check="check_dobj_supplied" />
+      <check verb="unlock" check="check_see_dobj" />
+      <check verb="push,press" check="check_see_dobj" />
+      <check verb="hit,strike" check="check_see_dobj" />
+      <check verb="wear" check="check_have_dobj" />
+      <check verb="read" check="check_see_dobj" />
+      <check verb="open" check="check_dobj_opnable" />
+      <check verb="open" check="check_dobj_closed" />
+      <check verb="close,shut" check="check_dobj_open" />
+      <check verb="get,take,grab,pick up" check="check_light" />
+      <check verb="put,place" check="check_iobj_container" />
+    </checks>
+    <sentences>
+      <sentence verb="kill" do="PLAYER" prep="" io="" type="instead" sub="kill_self" />
+      <sentence verb="talk to" do="PLAYER" prep="" io="" type="instead" sub="talk_to_self" />
+      <sentence verb="listen" do="" prep="" io="" type="instead" sub="listen" />
+      <sentence verb="smell" do="" prep="" io="" type="instead" sub="smell" />
+      <sentence verb="wait" do="" prep="" io="" type="instead" sub="wait" />
+      <sentence verb="yell" do="" prep="" io="" type="instead" sub="yell" />
+      <sentence verb="jump" do="" prep="" io="" type="instead" sub="jump" />
+      <sentence verb="read" do="NOTE" prep="" io="" type="instead" sub="read_note" />
+      <sentence verb="read" do="*" prep="" io="" type="instead" sub="read_anything" />
+      <sentence verb="hit" do="MANNEQUIN" prep="with" io="CRICKET BAT" type="instead" sub="hit_mannequin_with_bat" />
+      <sentence verb="read" do="NOTE" prep="" io="" type="before" sub="before_read" />
+      <sentence verb="enter" do="TARDIS" prep="" io="" type="instead" sub="enter_tardis" />
+      <sentence verb="push" do="BUTTON" prep="" io="" type="instead" sub="push_button" />
+      <sentence verb="unlock" do="TARDIS" prep="with" io="SONIC SCREWDRIVER" type="instead" sub="unlock_tardis_with_sonicscrewdriver" />
+      <sentence verb="open" do="TARDIS" prep="with" io="SONIC SCREWDRIVER" type="instead" sub="unlock_tardis_with_sonicscrewdriver" />
+      <sentence verb="put" do="STYLISH HAT" prep="on" io="EYESTALK" type="instead" sub="cover_eye" />
+      <sentence verb="unlock" do="ROSE'S DOOR" prep="with" io="KEY" type="instead" sub="unlock_door_with_key" />
+      <sentence verb="unlock" do="ROSE'S DOOR" prep="" io="" type="instead" sub="unlock_door" />
+      <sentence verb="open" do="TARDIS" prep="" io="" type="after" sub="after_open_tardis" />
+      <sentence verb="hit" do="*" prep="" io="" type="instead" sub="hit_anything" />
+      <sentence verb="read" do="*" prep="" io="" type="instead" sub="read_anything" />
+    </sentences>
+    <routines>
+      <routine name="kill_self">println("IF YOU ARE EXPERIENCING SUICIDAL THOUGHTS, YOU SHOULD SEEK PHSYCIATRIC HELP.");
+</routine>
+      <routine name="kill_player">println("***YOU HAVE DIED***.");
+player.holder=1;
+
+</routine>
+      <routine name="talk_to_self">println("TALKING TO YOURSELF IS A SIGN OF IMPENDING MENTAL COLLAPSE.");</routine>
+      <routine name="listen">println("YOU HEAR NOTHING UNEXPECTED.");</routine>
+      <routine name="smell">println("YOU SMELL NOTHING UNEXPECTED.");</routine>
+      <routine name="wait">println("TIME PASSES...");</routine>
+      <routine name="yell">println("AAAAAAAAAAAAARRRRGGGGGG!");</routine>
+      <routine name="jump">println("WHEEEEE!");</routine>
+      <routine name="take_portable">if ($dobj.portable==1)
+
+
+
+
+
+{
+
+
+
+
+
+    if ($dobj.holder != player)
+
+
+
+
+
+{
+
+
+
+
+
+println("(TAKEN)");
+
+
+
+
+
+   $dobj.holder = player;
+
+
+
+
+
+}
+
+
+
+
+
+}</routine>
+      <routine name="read_note">println("THE NOTE READS...");println("'DEAR DR., I STILL HAVE YOUR SONIC SCREWDRIVER. SERIOUSLY, YOU CAN BE SO FORGETFUL SOMETIMES.'");if (readNote == 0)
+{
+   readNote = 1;  add(score, 5);
+}
+</routine>
+      <routine name="hit_anything">println("WOULD PUNCHING RANDOM THINGS MAKE YOU FEEL BETTER?");
+</routine>
+      <routine name="hit_mannequin_with_bat">println("WITH A PRECISE BLOW, YOU NEATLY DECAPITATE THE MANNEQUIN.");
+println("ROSE STAGGERS TO HER FEET.");
+mannequin.holder = 0;
+torso.holder=inventory room;
+plastic head.holder=inventory room;
+rose.initial_description = "ROSE IS HERE CHECKING THE INVENTORY.";
+add(score,10);
+println("ROSE HANDS YOU THE KEY TO HER FLAT.");
+key.holder = player;
+</routine>
+      <routine name="hit_dalek_with_bat">println("TBD");
+</routine>
+      <routine name="read_anything">println("THAT'S A STRANGE THING TO READ.");
+</routine>
+      <routine name="before_read">if ($dobj.portable==1)
+{
+     if ($dobj.holder != player)
+     {
+          println("(TAKEN)");
+          $dobj.holder = player;
+     }
+}
+</routine>
+      <routine name="enter_tardis">if (tardis.open == 1)
+{
+     player.holder = inside tardis;
+     look();
+}
+else
+{
+     println("THE TARDIS IS CLOSED.");
+}
+</routine>
+      <routine name="push_button">if (elevator.e == lobby)
+{
+   println("THE LIFT SLOWLY RISES TO THE UPPER FLOOR.");   println("THE DOOR OPENS, LEADING EAST TO A HALLWAY.");   elevator.e = hallway;
+}
+else
+{
+   println("THE LIFT SLOWLY DESCENDS.");   println("THE DOOR OPENS, LEADING EAST TO THE LOBBY.");   elevator.e = lobby;
+}
+</routine>
+      <routine name="unlock_tardis_with_sonicscrewdriver">if (tardis.locked==1)
+
+
+
+
+
+
+
+
+
+
+
+{
+
+
+
+
+
+
+
+
+
+
+
+   println("AFTER SOME CLICKS AND BUZZES, THE TARDIS POPS OPEN.");
+
+
+   tardis.open = 1;
+
+
+
+
+
+
+
+
+
+
+
+   tardis.locked=0;
+
+
+
+
+
+
+
+
+
+
+
+   tardis.lockable=0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+else
+
+
+
+
+
+
+
+
+
+
+
+{
+
+
+
+
+
+
+
+
+
+
+
+   println("THE TARDIS IS ALREADY OPEN.");
+
+
+
+
+
+
+
+
+
+
+
+}</routine>
+      <routine name="unlock_tardis">if (sonic screwdriver.holder==player)
+
+
+
+
+
+{
+
+
+
+
+
+println("(WITH SONIC SCREWDRIVER)");
+
+
+
+
+
+call unlock_tardis_with_sonicscrewdriver();
+
+
+
+
+
+}
+
+
+
+
+
+else
+
+
+
+
+
+{
+
+
+
+
+
+ println("YOU HAVE NOTHING TO UNLOCK IT WITH.");  
+
+
+
+
+
+}</routine>
+      <routine name="throw_hat_at_dalek">call cover_eye();
+</routine>
+      <routine name="cover_eye">println("YOU DEFTLY TOSS THE FEDORA ONTO THE DALEK'S EYESTALK.");
+println("IN AN ATTEMPT TO DESTROY THE HAT, THE DALEK FIRES A LASER AT IT,  ACCIDENTALLY VAPORIZING ITS OWN EYE.");
+println("'IMPOSSIBLE! IMPOSSIBLE! MUST DESTROY IMPERFECTION!'");
+println("THE DALEK, HAVING ACTIVATED A SELF DESTRUCT MECHANISM IS NOW GLOWING BRIGHT RED.");
+eyestalk.holder=0;
+add(score,25);
+set(activated,1);
+</routine>
+      <routine name="unlock_door_with_key">println("THE DOOR IS NOW UNLOCKED");
+29.open = 1;
+29.locked = 0;
+</routine>
+      <routine name="unlock_door">if (key.holder == player)
+{
+println("THE DOOR IS NOW UNLOCKED");29.open = 1;29.locked = 0;
+}
+else
+{
+println("YOU NEED THE KEY.");
+}</routine>
+      <routine name="after_open_tardis">println("THE TARDIS CREAKS OPEN.");
+</routine>
+      <routine name="hit_mannequin">println("PUNCHING THE MANNEQUIN HURTS ONLY YOUR FISTS.");
+</routine>
+    </routines>
+    <events>
+      <event name="move_mannequin">if (player.holder == 2nd floor)
+{
+     if (mannequinMoved == 0)
+     {
+          dalek.holder = inside tardis;
+          tardis.locked=1;
+          tardis.open=0;
+          tardis.lockable=0;
+          mannequinMoved=1;
+          mannequin.holder=inventory room;
+          door.locked = 0;
+          door.lockable = 0;
+          mannequin.description = "THE MANNEQUIN IS OBVIOUSLY ALIVE AND VERY DANGEROUS.";
+          mannequin.initial_description = "THE MANNEQUIN IS STANDING OVER ROSE'S BODY.";
+          if (stylish hat.holder == 1st floor)
+          {
+               stylish hat.initial_description = "A STYLISH HAT LIES ON THE FLOOR.";
+          }
+     }
+}
+</event>
+      <event name="countdown">if (activated==1)
+{
+  if (countDown != 3) 
+{
+ add(countDown,1);   if (countDown==3)   
+{
+       println("AS THE SELF DESTRUCT ACTIVATES, THE DALEK IS SHATTERED BY A POWERFUL INTERNAL EXPLOSION.");      dalek.holder=0;      if (player.holder == inside tardis)     
+{
+         println("THE MASSIVE CONCUSSSION, TRAPPED INSIDE THE TARDIS, KILLS YOU INSTANTLY.");    player.holder=trenzalore; look(); 
+}
+      
+}
+
+}
+
+}
+</event>
+      <event name="follow_player">if (activated==1)
+{
+   if (dalek.holder != 0)  
+{
+      println("THE DALEK IS FOLLOWING YOU.");  
+dalek.holder = player.holder;  
+}
+
+}
+</event>
+      <event name="judoon_rule">if (player.holder == lobby)
+{
+   if (mannequin.holder != 0)   
+{
+      println("AS YOU ENTER THE LOBBY, A HULKING JUDOON WALKS BY, KNOCKING YOU BACK OUTSIDE.";      player.holder = north street;   
+}
+
+}
+</event>
+      <event name="game_won">if ($gameOver==0) {if (player.holder == inside tardis)
+{
+   if (countDown == 3)
+{
+    println("CONGRATULATIONS!  WITH THE DALEK DESTROYED, YOU AND THE TARDIS ARE NOW READY FOR YOUR FURTHER ADVENTURES.");   println("STORY COMPLETE.");   println("TYPE 'QUIT' TO EXIT GAME.");
+	$gameOver=1;
+}
+}
+}
+</event>
+    </events>
+    <variables>
+      <builtin>
+        <var name="$dobj" addr="sentence+1" value="0" />
+        <var name="$iobj" addr="sentence+3" value="0" />
+        <var name="$score" addr="score" value="0" />
+        <var name="$turn" addr="turn" value="0" />
+        <var name="$health" addr="health" value="100" />
+        <var name="$nolight" addr="turnsWithoutlight" value="100" />
+        <var name="$gameOver" addr="gameOver" value="0" />
+      </builtin>
+      <user>
+        <var name="mannequinMoved" addr="mannequinMoved" value="0" />
+        <var name="readNote" addr="readNote" value="0" />
+        <var name="mannequinDead" addr="mannequinDead" value="0" />
+        <var name="hatFound" addr="hatFound" value="0" />
+        <var name="countDown" addr="countDown" value="0" />
+        <var name="activated" addr="activated" value="0" />
+      </user>
+    </variables>
+  </project>
+</xml>
