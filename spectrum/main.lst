@@ -1,0 +1,1893 @@
+                00001 ;main.asm
+                00002 ;main routine for ZX Spectrum
+                00003 ;(c) Evan Wright, 2017
+                00004 
+                00005 *INCLUDE objdefsZ80.asm
+main.asm(5): unable to include file
+                00006 
+                00007 ; BASIC STARTS AT 5CCB for Spectrum
+                00008         org 25000 ; 5CCBh  
+                00009 start
+                00010 
+                00011 ;main program goes here
+                00012 main
+61A8  ED73EB6C  00013                 ld (stackSav),sp
+                00014 
+                00015                 ;set screen as output channel
+61AC  CDAF0D    00016                 call 0DAFh  ; CLS
+                00017                 ;call cls1
+                00018                 
+61AF  010000    00019                 ld bc,0
+61B2  CDC46A    00020                 call locate
+                00021                 
+61B5  CD9063    00022                 call printcr
+                00023                 
+                00024                 
+61B8  210000    00025                 ld hl,welcome ; print welcome,author,version
+main.asm(25): undefined symbol
+61BB  CD3D62    00026                 call OUTLINCR
+                00027  
+61BE  210000    00028                 ld hl,author
+main.asm(28): undefined symbol
+61C1  CD3D62    00029                 call OUTLINCR
+                00030  
+61C4  210000    00031                 ld hl,version
+main.asm(31): undefined symbol
+61C7  CD3D62    00032                 call OUTLINCR
+                00033  
+61CA  CD9063    00034                 call printcr
+61CD  CD0000    00035                 call look_sub
+main.asm(35): undefined symbol
+                00036                 
+                00037 $inp?    
+61D0  DDE5      00038                 push ix
+61D2  FDE5      00039                 push iy
+                00040                 
+61D4  CDA163    00041                 call draw_top_bar
+61D7  CDE361    00042                 call getcommand
+                00043  
+61DA  FB        00044                 ei
+                00045                 
+61DB  FDE1      00046                 pop iy
+61DD  DDE1      00047                 pop ix
+                00048  
+61DF  C3D061    00049                 jp $inp?
+                00050         
+61E2  C9        00051         ret
+                00052 
+                00053 getcommand
+                00054                 ;call QINPUT
+61E3  FB        00055                 ei
+61E4  CDFE61    00056                 call getlin
+61E7  F3        00057                 di      
+61E8  CD0000    00058                 call parse                              ; get the words
+main.asm(58): undefined symbol
+                00059 ;               ld a,(sentence)
+                00060 ;               cp 0
+                00061 ;               jp z,$inp?  ;; HIGHLY SUSPICIOUS
+                00062 ;               jp nz,$go?
+                00063 ;               inc sp
+                00064 ;               inc sp
+                00065 ;               inc sp
+                00066 ;               jp print_ret_pardon     
+61EB  CD0000    00067 $go?    call validate_words             ; make sure verb,io,do are in tables
+main.asm(67): undefined symbol
+61EE  CD0000    00068                 call encode                             ; try to map words to objects
+main.asm(68): undefined symbol
+61F1  CD0000    00069                 call validate_encode    ; make sure it worked
+main.asm(69): undefined symbol
+61F4  CD0000    00070                 call run_sentence
+main.asm(70): undefined symbol
+61F7  CD0000    00071                 call do_events
+main.asm(71): undefined symbol
+61FA  CDA163    00072                 call draw_top_bar
+61FD  C9        00073 quit    ret
+                00074 
+                00075 *INCLUDE doeventsZ80.asm                
+main.asm(75): unable to include file
+                00076 *INCLUDE io.asm 
+    = 0030      00077 BUFSIZE EQU 48
+    = 000C      00078 DELETE EQU 12 
+    = 003E      00079 PROMPT EQU 62
+    = 5CD1      00080 CURMODE EQU 23761 ; K,
+                00081 
+                00082 *MOD
+                00083 getlin
+                00084                 ;clear buffer
+61FE  CD5462    00085                 call clrbuf
+                00086                 
+                00087                 ;output the prompt
+6201  21E46C    00088                 ld hl,curstr
+6204  CD346B    00089                 call zx_printstr
+                00090                 ;ld a,PROMPT
+                00091                 ;rst 16
+                00092                 
+                00093                 ;loop until enter key is pressed
+6207  CD7B63    00094 $lp2A   call readkb
+                00095                 
+                00096                 ;convert to ASCII
+620A  CD6762    00097                 call zx_to_ascii
+                00098                 
+620D  FE0C      00099                 cp 0Ch ; delete?
+620F  C21862    00100                 jp nz,$sA
+6212  CD6C6C    00101                 call back_up
+6215  C30762    00102                 jp $lp2A
+                00103                 
+6218  FE0D      00104 $sA             cp 13   ; newline 
+621A  CA3962    00105                 jp z,$outA
+                00106 
+                00107                 ;echo the char
+                00108         
+621D  F5        00109                 push af
+621E  CDF16A    00110                 call print1_zx
+6221  F1        00111                 pop af
+                00112                 
+                00113  
+                00114                 ;store the char in the input buffer
+6222  F5        00115                 push af
+6223  217B62    00116                 ld hl,INBUF  ;add buffIx to start of buffer
+6226  1600      00117                 ld d,0
+6228  3A7A62    00118                 ld a,(bufIx)
+622B  5F        00119                 ld e,a
+622C  19        00120                 add hl,de
+622D  F1        00121                 pop af
+                00122                 
+622E  77        00123                 ld (hl),a ; now store the char
+                00124                 
+                00125                 ;increment the buffer index
+622F  3A7A62    00126                 ld a,(bufIx) 
+6232  3C        00127                 inc a
+6233  327A62    00128                 ld (bufIx),a
+                00129                                 
+6236  C30762    00130                 jp $lp2A
+                00131                 
+                00132 $outA   ;ld a,13 ; echo a newline
+                00133                 ;rst 16
+6239  CD6F6B    00134                 call zx_newline
+623C  C9        00135 $xA             ret
+                00136 
+                00137 
+                00138 ;prints the string in (hl) followed
+                00139 ;by a newline           
+                00140 *MOD
+                00141 OUTLINCR
+623D  F5        00142                 push af
+623E  C5        00143                 push bc
+623F  D5        00144                 push de
+6240  E5        00145                 push hl
+6241  DDE5      00146                 push ix
+6243  FDE5      00147                 push iy
+6245  CD8A63    00148                 call OUTLIN ; print (hl)
+6248  CD6F6B    00149                 call zx_newline  ; move cursor
+                00150                 ;ld     a,13  ; new line char
+                00151                 ;ei
+                00152                 ;rst 16  ; print char
+                00153                 ;di
+                00154                 ;call newline
+624B  FDE1      00155                 pop iy
+624D  DDE1      00156                 pop ix
+624F  E1        00157                 pop hl
+6250  D1        00158                 pop de
+6251  C1        00159                 pop bc
+6252  F1        00160                 pop af
+6253  C9        00161                 ret
+                00162 
+                00163                 
+                00164                 
+                00165 *MOD
+                00166 clrbuf
+                00167 
+                00168                 
+                00169                 ;set index to 0
+6254  3E00      00170                 ld a,0
+6256  327A62    00171                 ld (bufIx),a
+                00172                 
+                00173                 ;clear buffer
+                00174  
+6259  0600      00175                 ld b,0
+625B  217B62    00176                 ld hl,INBUF
+                00177                 
+625E  70        00178 $lpC    ld (hl),b
+625F  23        00179                 inc hl
+6260  3D        00180                 dec a
+6261  FE00      00181                 cp 0
+6263  C25E62    00182                 jp nz,$lpC
+                00183                         
+6266  C9        00184                 ret
+                00185 
+                00186                 
+                00187 ;converts the character in 'a' to 
+                00188 ;an uppercase ascii char.               
+                00189 *MOD
+                00190 zx_to_ascii
+6267  FE61      00191                 cp 97  ; bail if < lowercase a
+6269  DA7862    00192                 jp c,$xD        
+626C  FE7A      00193                 cp 122 ; if greater than lowercase z, detokenize?
+626E  D27662    00194                 jp nc,$scD
+6271  D620      00195                 sub 32          ;make it uppercase      
+6273  C37862    00196                 jp $xD
+                00197 
+                00198 $scD            
+6276  D6A5      00199                 sub 165 ; convert to ascii
+                00200 $xD             
+6278  C9        00201                 ret
+                00202 
+                00203 
+6279  00        00204           DB 0  ; padding - do not remove
+627A  00        00205 bufIx DB 0
+627B            00206 INBUF DS 256            
+                00207 ;INBUF DB 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+                00208 
+                00209         
+                00210 *INCLUDE input.asm
+                00211 ;input routines for ZX Spectrum
+                00212 ;(c) Evan Wright, 2017
+                00213 
+                00214 ;reads a single char and stores it in the
+                00215 ;keyboard input buffer
+                00216 readkb
+637B  21085C    00217        ld hl,23560         ; LAST K system variable.
+637E  3600      00218        ld (hl),0           ; put null value there.
+6380  7E        00219 loop   ld a,(hl)           ; new value of LAST K.          
+6381  FE00      00220        cp 0                ; is it still zero
+6383  28FB      00221        jr z,loop           ; yes, so no key pressed.
+6385  C9        00222            ret
+                00223                 
+                00224                 
+                00225 *INCLUDE printing.asm
+                00226 ;printing.asm
+                00227 ;print routines for ZX spectrum
+                00228 ;(c) Evan Wright, 2017
+                00229 
+    = 4000      00230 SCREEN equ 16384 ; 4000 hex
+    = 02BE      00231 SCRSIZE equ 702 ; 32*22 line
+    = 5C8D      00232 SCRCOLOR equ 23693
+                00233 
+                00234 ;output a char
+                00235 CRTBYTE
+6386  CDF16A    00236                 call print1_zx
+6389  C9        00237                 ret
+                00238  
+                00239 *MOD 
+                00240 ;prints string in HL 
+                00241 OUTLIN
+638A  F5        00242                 push af
+638B  CD346B    00243                 call zx_printstr
+638E  F1        00244                 pop af
+638F  C9        00245                 ret
+                00246 
+                00247 ;prints a space (registers are preserved)
+                00248 printcr
+6390  F5        00249         push af
+6391  C5        00250         push bc
+6392  D5        00251         push de
+6393  FDE5      00252         push iy
+                00253         ;ld a,0dh ; carriage return
+                00254         ;call CRTBYTE
+6395  CD6F6B    00255         call zx_newline
+6398  CD2D6C    00256         call repos_cursor
+639B  FDE1      00257         pop iy
+639D  D1        00258         pop de
+639E  C1        00259         pop bc
+639F  F1        00260         pop af
+63A0  C9        00261         ret     
+                00262 
+                00263 ;*MOD
+                00264 ;CLS
+                00265 ;               call 3503
+                00266 ;               
+                00267 ;               ;move cursor to top
+                00268 ;$x?            ld a,0
+                00269 ;               ld      (xcoord),a
+                00270 ;               ld  (ycoord),a
+                00271 ;               ret
+                00272 
+                00273 ;draws the bar at the top with the room and the score
+                00274 *MOD
+                00275 draw_top_bar
+63A1  F5        00276                 push af
+63A2  D5        00277                 push de
+                00278                 
+                00279                 ;save crsr x and y
+63A3  ED5BDE6C  00280                 ld de,(CRSRY)
+63A7  D5        00281                 push de
+                00282 
+63A8  010000    00283                 ld bc,0
+63AB  ED43DE6C  00284                 ld(CRSRY),bc
+63AF  CD2D6C    00285                 call repos_cursor
+                00286                 
+                00287                 ;draw 32 inverse spaces
+                00288                 
+63B2  3E1F      00289                 ld a,31
+63B4  F5        00290 $lpF    push af
+63B5  3E00      00291                 ld a,0 ; BLACK SQUARE
+63B7  CDF16A    00292                 call print1_zx
+63BA  F1        00293                 pop af
+63BB  3D        00294                 dec a
+63BC  FE00      00295                 cp 0
+63BE  C2B463    00296                 jp nz,$lpF
+                00297                 
+                00298                 ;draw room name
+63C1  0602      00299                 ld b,2
+63C3  0E00      00300                 ld c,0
+63C5  ED43DE6C  00301                 ld (CRSRY),bc
+63C9  CD2D6C    00302                 call repos_cursor
+63CC  CD0000    00303                 call get_player_room
+printing.asm(78): undefined symbol
+63CF  CD7464    00304                 call print_obj_name
+                00305                 
+                00306                 ;draw score
+63D2  061A      00307                 ld b,26
+63D4  0E00      00308                 ld c,0
+63D6  ED43DE6C  00309                 ld (CRSRY),bc
+63DA  CD2D6C    00310                 call repos_cursor
+63DD  214264    00311                 ld hl,hundred
+63E0  CD346B    00312                 call zx_printstr
+                00313                 
+63E3  CDF163    00314                 call print_score ; print actual number
+                00315                 
+                00316                 ;restore cursor
+63E6  D1        00317                 pop de
+63E7  ED53DE6C  00318                 ld (CRSRY),de
+63EB  CD2D6C    00319                 call repos_cursor
+                00320                 
+63EE  D1        00321                 pop de
+63EF  F1        00322                 pop af
+                00323                 
+63F0  C9        00324                 ret
+                00325                 
+                00326 ;prints the number to the top bar
+                00327 *MOD
+                00328 print_score
+63F1  F5        00329                 push af
+63F2  C5        00330                 push bc
+63F3  D5        00331                 push de
+                00332                 
+                00333                 ;
+63F4  0619      00334                 ld b,25
+63F6  0E00      00335                 ld c,0
+63F8  ED43DE6C  00336                 ld (CRSRY),bc
+63FC  CD2D6C    00337                 call repos_cursor
+                00338                 
+63FF  3AE66C    00339                 ld a,(SCORE)
+6402  57        00340                 ld d,a
+                00341 
+6403  7A        00342 $lpG    ld a,d
+6404  060A      00343                 ld b,10
+6406  CD0000    00344                 call mod ; a mod b
+printing.asm(119): undefined symbol
+6409  4F        00345                 ld c,a ;save char
+                00346                 
+640A  7A        00347                 ld a,d
+640B  060A      00348                 ld b,10
+640D  CD0000    00349                 call div ; a div b
+printing.asm(124): undefined symbol
+6410  57        00350                 ld d,a ; save temp score                
+                00351 
+6411  FE00      00352                 cp 0
+6413  CA2264    00353                 jp z,$xG
+                00354                 
+6416  79        00355                 ld a,c
+6417  C630      00356                 add a,48 ; to ascii
+6419  CDF16A    00357                 call print1_zx  
+641C  CD2F64    00358                 call backup_2
+                00359 
+641F  C30364    00360                 jp $lpG
+                00361         
+                00362 $xG     
+6422  79        00363                 ld a,c
+6423  C630      00364                 add a,48 ; to ascii
+6425  CDF16A    00365                 call print1_zx  
+6428  CD2F64    00366                 call backup_2
+                00367 
+642B  D1        00368                 pop de
+642C  C1        00369                 pop bc
+642D  F1        00370                 pop af
+642E  C9        00371                 ret
+                00372 
+                00373 ;backs the cursor up 2
+                00374 ;use to print the score
+                00375 backup_2
+642F  F5        00376         push af
+6430  C5        00377         push bc
+6431  D5        00378         push de
+6432  A7        00379         and a ; clr flag
+6433  3ADF6C    00380         ld a,(CRSRX)
+6436  DE02      00381         sbc a,2
+6438  32DF6C    00382         ld (CRSRX),a
+643B  CD2D6C    00383         call repos_cursor
+643E  D1        00384         pop de
+643F  C1        00385         pop bc
+6440  F1        00386         pop af
+6441  C9        00387         ret
+                00388         
+6442  2F313030  00389 hundred DB "/100",0h     
+      00                     
+                00390 ;cursorPos DW SCREEN            
+                00391 ;xcoord defb 0
+                00392 ;ycoord defb 15
+                00393  
+                00394 *INCLUDE parser.asm
+main.asm(79): unable to include file
+                00395 *INCLUDE look.asm
+main.asm(80): unable to include file
+                00396 *INCLUDE tables.asm
+                00397 ;z80 table searching routines
+                00398 
+                00399 
+                00400 ;prints an entry in the table
+                00401 ;b contains the number of the string to print
+                00402 ;ix contains table address
+                00403 *MOD
+                00404 print_table_entry
+6447  F5        00405         push af
+6448  C5        00406         push bc
+6449  D5        00407         push de
+644A  E5        00408         push hl
+644B  DDE5      00409         push ix
+644D  3E00      00410         ld a,0d ; lp counter 
+644F  B8        00411 _lp     cp b    ; compare accumulator to a
+6450  C25E64    00412         jp nz,_sk ; skip this entry
+6453  DD23      00413         inc ix  ; skip length byte
+6455  DDE5      00414         push ix ; move string addr to hl
+6457  E1        00415         pop hl
+6458  CD8A63    00416         call OUTLIN
+645B  C36D64    00417         jp _x
+645E  3C        00418 _sk     inc a           ; increment loop counter
+645F  DD5E00    00419         ld      e,(ix+0) ; load length byte
+6462  1600      00420         ld d,0
+6464  DD19      00421         add ix,de  ; add it to ix (skip string)
+6466  DD23      00422         inc ix     ; add 1 to skip length byte
+6468  DD23      00423         inc ix     ; add 1 to skip null terminator
+646A  C34F64    00424         jp _lp
+646D  DDE1      00425 _x      pop ix
+646F  E1        00426         pop hl
+6470  D1        00427         pop de
+6471  C1        00428         pop bc
+6472  F1        00429         pop af
+6473  C9        00430         ret
+                00431 
+                00432 ;prints the name of the object whose
+                00433 ;id is supplied in register 'a'
+                00434 *MOD
+                00435 print_obj_name
+6474  F5        00436                 push af
+6475  C5        00437                 push bc
+6476  D5        00438                 push de
+6477  DDE5      00439                 push ix
+6479  DD210000  00440                 ld ix,obj_word_table
+tables.asm(44): undefined symbol
+647D  110400    00441                 ld de,4         ; step amount through table
+6480  FE00      00442 _lp$    cp 0            ; done?
+6482  CA8B64    00443                 jp z,_out$
+6485  DD19      00444                 add ix,de
+6487  3D        00445                 dec a           ; dec loop counter              
+6488  C38064    00446                 jp _lp$
+648B  DD23      00447 _out$   inc ix          ; skip past the id byte to the words
+648D  0600      00448                 ld b,0
+648F  78        00449 _l2$    ld a,b
+6490  FE03      00450                 cp 3            ; hit 3 word max?
+6492  CAB464    00451                 jp z,_xI
+6495  DD7E00    00452                 ld a,(ix)       ; get word id
+6498  FEFF      00453                 cp 255d         ; done (empty entry)?
+649A  CAB464    00454                 jp z,_xI        
+649D  C5        00455                 push bc         ;save loop counter
+649E  47        00456                 ld b,a          ; put word id in b
+649F  DDE5      00457                 push ix         ; save ix
+64A1  DD210000  00458                 ld ix,dictionary        
+tables.asm(62): undefined symbol
+64A5  CD4764    00459                 call print_table_entry
+64A8  CDBA64    00460                 call print_space
+64AB  DDE1      00461                 pop ix          ; restore ix (our table index)
+64AD  DD23      00462                 inc ix          ; move to next word id
+64AF  C1        00463                 pop bc          ; restore loop counter
+64B0  04        00464                 inc b
+64B1  C38F64    00465                 jp _l2$ 
+64B4  DDE1      00466 _xI             pop ix
+64B6  D1        00467                 pop de
+64B7  C1        00468                 pop bc
+64B8  F1        00469                 pop af
+64B9  C9        00470                 ret
+                00471         
+                00472 ;prints a space (registers are preserved)
+                00473 print_space
+64BA  C5        00474         push bc
+64BB  D5        00475         push de
+64BC  FDE5      00476         push iy
+64BE  3E20      00477         ld a,20h        ; ascii space
+64C0  CD8663    00478         call CRTBYTE
+64C3  FDE1      00479         pop iy
+64C5  D1        00480         pop de
+64C6  C1        00481         pop bc
+64C7  C9        00482         ret
+                00483 
+                00484 
+                00485 ;get table index
+                00486 ;returns the table index in the word in b (or ff if not found)
+                00487 ;ix contains the address of the word to find
+                00488 ;iy contains the address of the table to search
+                00489 ;c is clobbered
+                00490 *MOD
+                00491 get_table_index
+64C8  D5        00492                 push de
+64C9  0600      00493                 ld b,0
+64CB  FD7E00    00494 $_lpJ   ld a,(iy)
+64CE  FEFF      00495                 cp 255 ; hit end
+64D0  CAF164    00496                 jp z,$_nfJ
+64D3  FD23      00497                 inc     iy ; skip len byte
+64D5  CD0000    00498                 call streq ; test equality - result in a
+tables.asm(102): undefined symbol
+64D8  FE01      00499                 cp 1    ; done - b contains index
+64DA  CAF364    00500                 jp z,$_xJ       ;jump if found
+64DD  04        00501                 inc b           ;update loop counter (index)
+64DE  FD2B      00502                 dec iy          ;back up an get length byte
+64E0  1600      00503                 ld d,0
+64E2  FD5E00    00504                 ld e,(iy)
+64E5  FD19      00505                 add iy,de       ; skip to next string
+64E7  FD23      00506                 inc iy          ; skip length byte
+64E9  FD23      00507                 inc iy          ; skip null
+64EB  C3CB64    00508                 jp $_lpJ        ;repeat
+64EE  C3F364    00509                 jp $_xJ
+64F1  06FF      00510 $_nfJ   ld b,255                
+64F3  D1        00511 $_xJ    pop de
+64F4  C9        00512                 ret
+                00513         
+                00514 ;returns the object id for the object whose
+                00515 ;'word' is supplied in b
+                00516 ;the value replaces the parameter
+                00517 ;only visible objects will be considered
+                00518 ;c is clobbered
+                00519 *MOD
+                00520 get_obj_id
+64F5  F5        00521                 push af
+64F6  D5        00522                 push de
+64F7  DDE5      00523                 push ix
+64F9  50        00524                 ld d,b ; word id to 'd'
+64FA  CD0000    00525                 call get_player_room
+tables.asm(129): undefined symbol
+64FD  47        00526                 ld b,a ; save it in b
+64FE  DD210000  00527                 ld ix,obj_word_table
+tables.asm(131): undefined symbol
+6502  DD7E00    00528 $lpK    ld a,(ix)       ; hit end of table?
+6505  FEFF      00529                 cp 255
+6507  CA3965    00530                 jp z,$nfK
+650A  4F        00531                 ld c,a ; the current object
+650B  CD0000    00532                 call b_ancestor_of_c  ; reslt->a. Note this should really check visibility
+tables.asm(136): undefined symbol
+650E  FE00      00533                 cp 0
+6510  CA2865    00534                 jp z,$cK    ; can't see it - go to next obj
+6513  DD7E01    00535                 ld a,(ix+1)     ;  get word entry
+6516  BA        00536                 cp d            ;  equal to supplied word?
+6517  CA3365    00537                 jp z, $_yK
+651A  DD7E02    00538                 ld a,(ix+2)             ; get lp counter
+651D  BA        00539                 cp d            ;  equal to supplied word?
+651E  CA3365    00540                 jp z, $_yK
+6521  DD7E03    00541                 ld a,(ix+3)     ;get object's word entry
+6524  BA        00542                 cp d            ;  equal to supplied word?
+6525  CA3365    00543                 jp z, $_yK
+6528  DD23      00544 $cK             inc ix          ; not found. increment ix to next entry
+652A  DD23      00545                 inc ix          
+652C  DD23      00546                 inc ix          
+652E  DD23      00547                 inc ix          
+6530  C30265    00548                 jp $lpK ; go to next object
+6533  DD4600    00549 $_yK    ld b,(ix)       ; they match! back up put the id in b
+6536  C33B65    00550                 jp $_xK
+6539  06FF      00551 $nfK    ld b,255        ; not found code
+653B  DDE1      00552 $_xK    pop ix
+653D  D1        00553                 pop de
+653E  F1        00554                 pop af
+653F  C9        00555                 ret
+                00556 
+                00557 
+                00558 ;get_verb_id
+                00559 ;the verb is assumed to be in word1
+                00560 ;returns the id # of the verb in a
+                00561 *MOD
+                00562 get_verbs_id
+6540  C5        00563                 push bc
+6541  D5        00564                 push de
+6542  E5        00565                 push hl
+6543  DDE5      00566                 push ix
+6545  FDE5      00567                 push iy
+6547  FD210000  00568                 ld iy,word1
+tables.asm(172): undefined symbol
+654B  DD210000  00569                 ld ix,verb_table
+tables.asm(173): undefined symbol
+654F  DD7E00    00570 $lpL    ld a,(ix)       ;save the id byte
+6552  47        00571                 ld b,a
+6553  FEFF      00572                 cp 0ffh 
+6555  CA7465    00573                 jp z, $xL               ; hit end of table
+6558  1600      00574                 ld d,0                  ; set up de with len
+655A  DD23      00575                 inc ix
+655C  DD5E00    00576                 ld e,(ix)               ; get length byte
+655F  DD23      00577                 inc ix                  ;ix now at text
+6561  CD0000    00578                 call streq
+tables.asm(182): undefined symbol
+6564  FE01      00579                 cp 1   
+6566  CA7465    00580                 jp z,$xL
+6569  DDE5      00581                 push ix         ;move ix to hl
+656B  E1        00582                 pop hl
+656C  19        00583                 add hl,de       ; skip text (add length)
+656D  23        00584                 inc hl          ; skip null
+656E  E5        00585                 push hl         ;transfer back to 2
+656F  DDE1      00586                 pop ix  ; ix is always 2 bytes past hl
+6571  C34F65    00587                 jp $lpL
+6574  78        00588 $xL             ld a,b
+6575  FDE1      00589                 pop iy
+6577  DDE1      00590                 pop ix
+6579  E1        00591                 pop hl
+657A  D1        00592                 pop de
+657B  C1        00593                 pop bc
+657C  C9        00594                 ret
+                00595                 
+                00596 *INCLUDE strings.asm
+main.asm(82): unable to include file
+                00597 *INCLUDE checksZ80.asm
+main.asm(83): unable to include file
+                00598 *INCLUDE sentencesZ80.asm
+main.asm(84): unable to include file
+                00599 *INCLUDE movementZ80.asm
+main.asm(85): unable to include file
+                00600 *INCLUDE containersZ80.asm
+main.asm(86): unable to include file
+                00601 *INCLUDE routinesZ80.asm
+main.asm(87): unable to include file
+                00602 *INCLUDE inventoryZ80.asm
+main.asm(88): unable to include file
+                00603 *INCLUDE open_close.asm
+main.asm(89): unable to include file
+                00604 *INCLUDE wear_sub.asm
+main.asm(90): unable to include file
+                00605 *INCLUDE put.asm
+main.asm(91): unable to include file
+                00606 *INCLUDE miscZ80.asm
+main.asm(92): unable to include file
+                00607 *INCLUDE print_rets.asm
+main.asm(93): unable to include file
+                00608 *INCLUDE EventsZ80.asm
+main.asm(94): unable to include file
+                00609 *INCLUDE articlesZ80.asm
+main.asm(95): unable to include file
+                00610 *INCLUDE PrepTableZ80.asm
+main.asm(96): unable to include file
+                00611 *INCLUDE StringTableZ80.asm
+main.asm(97): unable to include file
+                00612 *INCLUDE DictionaryZ80.asm
+main.asm(98): unable to include file
+                00613 *INCLUDE VerbTableZ80.asm
+main.asm(99): unable to include file
+                00614 *INCLUDE ObjectTableZ80.asm
+main.asm(100): unable to include file
+                00615 *INCLUDE ObjectWordTableZ80.asm
+main.asm(101): unable to include file
+                00616 *INCLUDE NogoTableZ80.asm
+                00617 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00618 ; NogoTableZ80.asm
+                00619 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00620 
+                00621 nogo_table
+657D  05        00622         DB 5
+657E  424C414E  00623         DB "BLANK" ; 0
+      4B                     
+6583  00        00624         DB 0 ; null terminator
+6584  16        00625         DB 22
+6585  594F5520  00626         DB "YOU CAN'T GO THAT WAY." ; 1
+      43 41 4E 27 54 20 47 4F
+      20 54 48 41 54 20 57 41
+      59 2E                  
+659B  00        00627         DB 0 ; null terminator
+659C  18        00628         DB 24
+659D  54484520  00629         DB "THE FOREST IS TOO THICK." ; 2
+      46 4F 52 45 53 54 20 49
+      53 20 54 4F 4F 20 54 48
+      49 43 4B 2E            
+65B5  00        00630         DB 0 ; null terminator
+65B6  1D        00631         DB 29
+65B7  54484520  00632         DB "THE ONLY EXIT IS TO THE WEST." ; 3
+      4F 4E 4C 59 20 45 58 49
+      54 20 49 53 20 54 4F 20
+      54 48 45 20 57 45 53 54
+      2E                     
+65D4  00        00633         DB 0 ; null terminator
+65D5  1A        00634         DB 26
+65D6  54484520  00635         DB "THE HILLSIDE IS TOO STEEP." ; 4
+      48 49 4C 4C 53 49 44 45
+      20 49 53 20 54 4F 4F 20
+      53 54 45 45 50 2E      
+65F0  00        00636         DB 0 ; null terminator
+65F1  21        00637         DB 33
+65F2  44454E53  00638         DB "DENSE UNDERBRUSH BLOCKS YOUR WAY." ; 5
+      45 20 55 4E 44 45 52 42
+      52 55 53 48 20 42 4C 4F
+      43 4B 53 20 59 4F 55 52
+      20 57 41 59 2E         
+6613  00        00639         DB 0 ; null terminator
+6614  23        00640         DB 35
+6615  54484520  00641         DB "THE COLLAPSED TUNNEL IS IMPASSIBLE." ; 6
+      43 4F 4C 4C 41 50 53 45
+      44 20 54 55 4E 4E 45 4C
+      20 49 53 20 49 4D 50 41
+      53 53 49 42 4C 45 2E   
+6638  00        00642         DB 0 ; null terminator
+6639  33        00643         DB 51
+663A  54484520  00644         DB "THE TANGLED WOODS ARE IMPASSIBLE IN THAT DIRECTION." ; 7
+      54 41 4E 47 4C 45 44 20
+      57 4F 4F 44 53 20 41 52
+      45 20 49 4D 50 41 53 53
+      49 42 4C 45 20 49 4E 20
+      54 48 41 54 20 44 49 52
+      45 43 54 49 4F 4E 2E   
+666D  00        00645         DB 0 ; null terminator
+666E  27        00646         DB 39
+666F  54484520  00647         DB "THE PATH DEADENDS HERE AT THE HILLSIDE." ; 8
+      50 41 54 48 20 44 45 41
+      44 45 4E 44 53 20 48 45
+      52 45 20 41 54 20 54 48
+      45 20 48 49 4C 4C 53 49
+      44 45 2E               
+6696  00        00648         DB 0 ; null terminator
+6697  29        00649         DB 41
+6698  594F5520  00650         DB "YOU HIT YOUR HEAD THE ROOF OF THE TUNNEL." ; 9
+      48 49 54 20 59 4F 55 52
+      20 48 45 41 44 20 54 48
+      45 20 52 4F 4F 46 20 4F
+      46 20 54 48 45 20 54 55
+      4E 4E 45 4C 2E         
+66C1  00        00651         DB 0 ; null terminator
+66C2  26        00652         DB 38
+66C3  54484520  00653         DB "THE GIANT DEBRIS PILE BLOCKS THE EXIT." ; 10
+      47 49 41 4E 54 20 44 45
+      42 52 49 53 20 50 49 4C
+      45 20 42 4C 4F 43 4B 53
+      20 54 48 45 20 45 58 49
+      54 2E                  
+66E9  00        00654         DB 0 ; null terminator
+66EA  1D        00655         DB 29
+66EB  54484520  00656         DB "THE DEBRIS PILE IS TOO STEEP." ; 11
+      44 45 42 52 49 53 20 50
+      49 4C 45 20 49 53 20 54
+      4F 4F 20 53 54 45 45 50
+      2E                     
+6708  00        00657         DB 0 ; null terminator
+6709  1E        00658         DB 30
+670A  54484520  00659         DB "THE ONLY EXIT IS TO THE NOTRH." ; 12
+      4F 4E 4C 59 20 45 58 49
+      54 20 49 53 20 54 4F 20
+      54 48 45 20 4E 4F 54 52
+      48 2E                  
+6728  00        00660         DB 0 ; null terminator
+6729  3F        00661         DB 63
+672A  54484520  00662         DB "THE TUNNEL STOPS ABRUPTLY WHERE IT WAS INTENTIONALLY DYNAMITED." ; 13
+      54 55 4E 4E 45 4C 20 53
+      54 4F 50 53 20 41 42 52
+      55 50 54 4C 59 20 57 48
+      45 52 45 20 49 54 20 57
+      41 53 20 49 4E 54 45 4E
+      54 49 4F 4E 41 4C 4C 59
+      20 44 59 4E 41 4D 49 54
+      45 44 2E               
+6769  00        00663         DB 0 ; null terminator
+676A  22        00664         DB 34
+676B  54484520  00665         DB "THE RISING WATER BLOCKS YOUR PATH." ; 14
+      52 49 53 49 4E 47 20 57
+      41 54 45 52 20 42 4C 4F
+      43 4B 53 20 59 4F 55 52
+      20 50 41 54 48 2E      
+678D  00        00666         DB 0 ; null terminator
+678E  24        00667         DB 36
+678F  54484520  00668         DB "THE ONLY EXITS ARE UP AND SOUTHEAST." ; 15
+      4F 4E 4C 59 20 45 58 49
+      54 53 20 41 52 45 20 55
+      50 20 41 4E 44 20 53 4F
+      55 54 48 45 41 53 54 2E
+67B3  00        00669         DB 0 ; null terminator
+67B4  5B        00670         DB 91
+67B5  41532059  00671         DB "AS YOU ATTEMPT TO CLIMB THE LADDER, WASPS BEGIN TO SWARM AROUND YOU, FORCING YOU BACK DOWN." ; 16
+      4F 55 20 41 54 54 45 4D
+      50 54 20 54 4F 20 43 4C
+      49 4D 42 20 54 48 45 20
+      4C 41 44 44 45 52 2C 20
+      57 41 53 50 53 20 42 45
+      47 49 4E 20 54 4F 20 53
+      57 41 52 4D 20 41 52 4F
+      55 4E 44 20 59 4F 55 2C
+      20 46 4F 52 43 49 4E 47
+      20 59 4F 55 20 42 41 43
+      4B 20 44 4F 57 4E 2E   
+6810  00        00672         DB 0 ; null terminator
+6811  20        00673         DB 32
+6812  54484520  00674         DB "THE METAL CUPOLA IS IN YOUR WAY." ; 17
+      4D 45 54 41 4C 20 43 55
+      50 4F 4C 41 20 49 53 20
+      49 4E 20 59 4F 55 52 20
+      57 41 59 2E            
+6832  00        00675         DB 0 ; null terminator
+6833  2E        00676         DB 46
+6834  54484520  00677         DB "THE RUSTED BARBED WIRE FENCE BLOCKS YOUR PATH." ; 18
+      52 55 53 54 45 44 20 42
+      41 52 42 45 44 20 57 49
+      52 45 20 46 45 4E 43 45
+      20 42 4C 4F 43 4B 53 20
+      59 4F 55 52 20 50 41 54
+      48 2E                  
+6862  00        00678         DB 0 ; null terminator
+6863  29        00679         DB 41
+6864  54484552  00680         DB "THERE ARE NO TREES SUITABLE FOR CLIMBING." ; 19
+      45 20 41 52 45 20 4E 4F
+      20 54 52 45 45 53 20 53
+      55 49 54 41 42 4C 45 20
+      46 4F 52 20 43 4C 49 4D
+      42 49 4E 47 2E         
+688D  00        00681         DB 0 ; null terminator
+688E  FF        00682         DB 255 ; end of table
+                00683 
+                00684 *INCLUDE BackDropTableZ80.asm
+main.asm(103): unable to include file
+                00685 *INCLUDE before_table_Z80.asm
+                00686 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00687 ; before_table_Z80.asm
+                00688 ; Machine Generated Sentence Table
+                00689 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00690 
+                00691 preactions_table
+688F  251FFFFF  00692         DB 37,31,255,255        ;pick lock  
+6893  0000      00693         DW pick_lock_sub
+before_table_Z80.asm(8): undefined symbol
+6895  251F0A1E  00694         DB 37,31,10,30  ;pick lock with paperclip
+6899  0000      00695         DW pick_lock_sub
+before_table_Z80.asm(10): undefined symbol
+689B  252BFFFF  00696         DB 37,43,255,255        ;pick nose  
+689F  0000      00697         DW pick_nose_sub
+before_table_Z80.asm(12): undefined symbol
+68A1  25FEFFFF  00698         DB 37,254,255,255       ;pick *  
+68A5  0000      00699         DW pick_unpickable_sub
+before_table_Z80.asm(14): undefined symbol
+68A7  2720FFFF  00700         DB 39,32,255,255        ;turn on flashlight  
+68AB  0000      00701         DW flashlight_on_sub
+before_table_Z80.asm(16): undefined symbol
+68AD  2820FFFF  00702         DB 40,32,255,255        ;turn off flashlight  
+68B1  0000      00703         DW flashlight_off_sub
+before_table_Z80.asm(18): undefined symbol
+68B3  03FFFFFF  00704         DB 3,255,255,255        ;west   
+68B7  0000      00705         DW before_west_sub
+before_table_Z80.asm(20): undefined symbol
+68B9  12FEFFFF  00706         DB 18,254,255,255       ;examine *  
+68BD  0000      00707         DW before_examine_sub
+before_table_Z80.asm(22): undefined symbol
+68BF  2E26FFFF  00708         DB 46,38,255,255        ;read MAP  
+68C3  0000      00709         DW before_examine_sub
+before_table_Z80.asm(24): undefined symbol
+68C5  FF        00710         DB 255
+                00711 
+                00712 
+                00713 *INCLUDE instead_table_Z80.asm
+                00714 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00715 ; instead_table_Z80.asm
+                00716 ; Machine Generated Sentence Table
+                00717 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00718 
+                00719 actions_table
+68C6  261BFFFF  00720         DB 38,27,255,255        ;burn pile of leaves  
+68CA  0000      00721         DW burn_leaves_sub
+instead_table_Z80.asm(8): undefined symbol
+68CC  2601FFFF  00722         DB 38,1,255,255 ;burn player  
+68D0  0000      00723         DW burn_self_sub
+instead_table_Z80.asm(10): undefined symbol
+68D2  26FEFFFF  00724         DB 38,254,255,255       ;burn *  
+68D6  0000      00725         DW burn_unburnable_sub
+instead_table_Z80.asm(12): undefined symbol
+68D8  1FFEFFFF  00726         DB 31,254,255,255       ;climb *  
+68DC  0000      00727         DW climb_sub
+instead_table_Z80.asm(14): undefined symbol
+68DE  0F2BFFFF  00728         DB 15,43,255,255        ;drop nose  
+68E2  0000      00729         DW drop_undropable_sub
+instead_table_Z80.asm(16): undefined symbol
+68E4  18FEFFFF  00730         DB 24,254,255,255       ;eat *  
+68E8  0000      00731         DW eat_inedible_sub
+instead_table_Z80.asm(18): undefined symbol
+68EA  0CFFFFFF  00732         DB 12,-1,255,255        ;get charred papers  
+68EE  0000      00733         DW get_gunk_sub
+instead_table_Z80.asm(20): undefined symbol
+68F0  0C22FFFF  00734         DB 12,34,255,255        ;get filthy toilet  
+68F4  0000      00735         DW get_toilet_sub
+instead_table_Z80.asm(22): undefined symbol
+68F6  0E01FFFF  00736         DB 14,1,255,255 ;kill player  
+68FA  0000      00737         DW kill_self_sub
+instead_table_Z80.asm(24): undefined symbol
+68FC  0EFEFFFF  00738         DB 14,254,255,255       ;kill *  
+6900  0000      00739         DW strange_humor_sub
+instead_table_Z80.asm(26): undefined symbol
+6902  141F0A1E  00740         DB 20,31,10,30  ;open lock with paperclip
+6906  0000      00741         DW unlock_door_sub
+instead_table_Z80.asm(28): undefined symbol
+6908  14290A2A  00742         DB 20,41,10,42  ;open cupola with wrench
+690C  0000      00743         DW unbolt_cupola_sub
+instead_table_Z80.asm(30): undefined symbol
+690E  1020FFFF  00744         DB 16,32,255,255        ;light flashlight  
+6912  0000      00745         DW flashlight_on_sub
+instead_table_Z80.asm(32): undefined symbol
+6914  113200FF  00746         DB 17,50,0,255  ;look crevice in 
+6918  0000      00747         DW look_in_crevice_sub
+instead_table_Z80.asm(34): undefined symbol
+691A  22FEFFFF  00748         DB 34,254,255,255       ;pour *  
+691E  0000      00749         DW confused_msg_sub
+instead_table_Z80.asm(36): undefined symbol
+6920  1A2F00FF  00750         DB 26,47,0,-1   ;put wooden crate in steel helmet
+6924  0000      00751         DW wont_fit_sub
+instead_table_Z80.asm(38): undefined symbol
+6926  24FFFFFF  00752         DB 36,255,255,255       ;jump   
+692A  0000      00753         DW jump_sub
+instead_table_Z80.asm(40): undefined symbol
+692C  2B29FFFF  00754         DB 43,41,255,255        ;unbolt cupola  
+6930  0000      00755         DW unbolt_cupola_sub
+instead_table_Z80.asm(42): undefined symbol
+6932  2BFEFFFF  00756         DB 43,254,255,255       ;unbolt *  
+6936  0000      00757         DW unbolt_unboltable_sub
+instead_table_Z80.asm(44): undefined symbol
+6938  160EFF1E  00758         DB 22,14,255,30 ;unlock door using paperclip
+693C  0000      00759         DW pick_lock_sub
+instead_table_Z80.asm(46): undefined symbol
+693E  160E0A1E  00760         DB 22,14,10,30  ;unlock door with paperclip
+6942  0000      00761         DW pick_lock_sub
+instead_table_Z80.asm(48): undefined symbol
+6944  160EFFFF  00762         DB 22,14,255,255        ;unlock door  
+6948  0000      00763         DW unlock_door_sub
+instead_table_Z80.asm(50): undefined symbol
+694A  2C1E061F  00764         DB 44,30,6,31   ;use paperclip on lock
+694E  0000      00765         DW unlock_door_sub
+instead_table_Z80.asm(52): undefined symbol
+6950  2C1E060E  00766         DB 44,30,6,14   ;use paperclip on door
+6954  0000      00767         DW unlock_door_sub
+instead_table_Z80.asm(54): undefined symbol
+6956  2C22FFFF  00768         DB 44,34,255,255        ;use filthy toilet  
+695A  0000      00769         DW use_toilet_sub
+instead_table_Z80.asm(56): undefined symbol
+695C  2C2A0633  00770         DB 44,42,6,51   ;use wrench on bolts
+6960  0000      00771         DW unbolt_cupola_sub
+instead_table_Z80.asm(58): undefined symbol
+6962  2CFEFFFF  00772         DB 44,254,255,255       ;use *  
+6966  0000      00773         DW use_unusable_sub
+instead_table_Z80.asm(60): undefined symbol
+6968  08FFFFFF  00774         DB 8,255,255,255        ;up   
+696C  0000      00775         DW instead_up_sub
+instead_table_Z80.asm(62): undefined symbol
+696E  1EFFFFFF  00776         DB 30,255,255,255       ;wait   
+6972  0000      00777         DW wait_sub
+instead_table_Z80.asm(64): undefined symbol
+6974  1AFE0036  00778         DB 26,254,0,54  ;put * in SMALL ROUND RECESS
+6978  0000      00779         DW wont_fit_sub
+instead_table_Z80.asm(66): undefined symbol
+697A  1A2E0036  00780         DB 26,46,0,54   ;put COIN in SMALL ROUND RECESS
+697E  0000      00781         DW insert_coin_sub
+instead_table_Z80.asm(68): undefined symbol
+6980  1024FFFF  00782         DB 16,36,255,255        ;light CIGARETTE LIGHTER  
+6984  0000      00783         DW light_lighter_sub
+instead_table_Z80.asm(70): undefined symbol
+6986  0C23FFFF  00784         DB 12,35,255,255        ;get PILE OF GUNK  
+698A  0000      00785         DW get_gunk_sub
+instead_table_Z80.asm(72): undefined symbol
+698C  2D3AFFFF  00786         DB 45,58,255,255        ;push ROTTING TREE  
+6990  0000      00787         DW push_tree_sub
+instead_table_Z80.asm(74): undefined symbol
+6992  1F3AFFFF  00788         DB 31,58,255,255        ;climb ROTTING TREE  
+6996  0000      00789         DW climb_tree_sub
+instead_table_Z80.asm(76): undefined symbol
+6998  1F3EFFFF  00790         DB 31,62,255,255        ;climb BARBED WIRE FENCE  
+699C  0000      00791         DW climb_fence_sub
+instead_table_Z80.asm(78): undefined symbol
+699E  2EFEFFFF  00792         DB 46,254,255,255       ;read *  
+69A2  0000      00793         DW default_read_sub
+instead_table_Z80.asm(80): undefined symbol
+69A4  2E26FFFF  00794         DB 46,38,255,255        ;read MAP  
+69A8  0000      00795         DW read_map_sub
+instead_table_Z80.asm(82): undefined symbol
+69AA  FF        00796         DB 255
+                00797 
+                00798 
+                00799 *INCLUDE after_table_Z80.asm
+                00800 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00801 ; after_table_Z80.asm
+                00802 ; Machine Generated Sentence Table
+                00803 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00804 
+                00805 postactions_table
+69AB  0F2FFFFF  00806         DB 15,47,255,255        ;drop wooden crate  
+69AF  0000      00807         DW after_drop_crate_sub
+after_table_Z80.asm(8): undefined symbol
+69B1  2922FFFF  00808         DB 41,34,255,255        ;flush filthy toilet  
+69B5  0000      00809         DW flush_toilet_sub
+after_table_Z80.asm(10): undefined symbol
+69B7  29FEFFFF  00810         DB 41,254,255,255       ;flush *  
+69BB  0000      00811         DW flush_unflushable_sub
+after_table_Z80.asm(12): undefined symbol
+69BD  0C31FFFF  00812         DB 12,49,255,255        ;get GOLD BARS  
+69C1  0000      00813         DW after_get_gold_sub
+after_table_Z80.asm(14): undefined symbol
+69C3  FF        00814         DB 255
+                00815 
+                00816 
+                00817 *INCLUDE CheckRulesZ80.asm
+                00818 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00819 ; check rules table
+                00820 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00821 
+                00822 check_table
+69C4  26        00823         DB 38 ; burn
+69C5  0000      00824         DW check_dobj_supplied
+CheckRulesZ80.asm(7): undefined symbol
+69C7  26        00825         DB 38 ; burn
+69C8  0000      00826         DW check_see_dobj
+CheckRulesZ80.asm(9): undefined symbol
+69CA  17        00827         DB 23 ; close
+69CB  0000      00828         DW check_dobj_supplied
+CheckRulesZ80.asm(11): undefined symbol
+69CD  17        00829         DB 23 ; close
+69CE  0000      00830         DW check_dobj_open
+CheckRulesZ80.asm(13): undefined symbol
+69D0  17        00831         DB 23 ; close
+69D1  0000      00832         DW check_see_dobj
+CheckRulesZ80.asm(15): undefined symbol
+69D3  19        00833         DB 25 ; drink
+69D4  0000      00834         DW check_dobj_supplied
+CheckRulesZ80.asm(17): undefined symbol
+69D6  19        00835         DB 25 ; drink
+69D7  0000      00836         DW check_see_dobj
+CheckRulesZ80.asm(19): undefined symbol
+69D9  19        00837         DB 25 ; drink
+69DA  0000      00838         DW check_have_dobj
+CheckRulesZ80.asm(21): undefined symbol
+69DC  0F        00839         DB 15 ; drop
+69DD  0000      00840         DW check_dobj_supplied
+CheckRulesZ80.asm(23): undefined symbol
+69DF  0F        00841         DB 15 ; drop
+69E0  0000      00842         DW check_see_dobj
+CheckRulesZ80.asm(25): undefined symbol
+69E2  0F        00843         DB 15 ; drop
+69E3  0000      00844         DW check_have_dobj
+CheckRulesZ80.asm(27): undefined symbol
+69E5  18        00845         DB 24 ; eat
+69E6  0000      00846         DW check_dobj_supplied
+CheckRulesZ80.asm(29): undefined symbol
+69E8  18        00847         DB 24 ; eat
+69E9  0000      00848         DW check_see_dobj
+CheckRulesZ80.asm(31): undefined symbol
+69EB  0A        00849         DB 10 ; enter
+69EC  0000      00850         DW check_dobj_supplied
+CheckRulesZ80.asm(33): undefined symbol
+69EE  0A        00851         DB 10 ; enter
+69EF  0000      00852         DW check_see_dobj
+CheckRulesZ80.asm(35): undefined symbol
+69F1  12        00853         DB 18 ; examine
+69F2  0000      00854         DW check_dobj_supplied
+CheckRulesZ80.asm(37): undefined symbol
+69F4  12        00855         DB 18 ; examine
+69F5  0000      00856         DW check_see_dobj
+CheckRulesZ80.asm(39): undefined symbol
+69F7  21        00857         DB 33 ; fill
+69F8  0000      00858         DW check_see_dobj
+CheckRulesZ80.asm(41): undefined symbol
+69FA  29        00859         DB 41 ; flush
+69FB  0000      00860         DW check_see_dobj
+CheckRulesZ80.asm(43): undefined symbol
+69FD  0C        00861         DB 12 ; get
+69FE  0000      00862         DW check_dobj_supplied
+CheckRulesZ80.asm(45): undefined symbol
+6A00  0C        00863         DB 12 ; get
+6A01  0000      00864         DW check_see_dobj
+CheckRulesZ80.asm(47): undefined symbol
+6A03  0C        00865         DB 12 ; get
+6A04  0000      00866         DW check_dont_have_dobj
+CheckRulesZ80.asm(49): undefined symbol
+6A06  0C        00867         DB 12 ; get
+6A07  0000      00868         DW check_dobj_portable
+CheckRulesZ80.asm(51): undefined symbol
+6A09  0E        00869         DB 14 ; kill
+6A0A  0000      00870         DW check_dobj_supplied
+CheckRulesZ80.asm(53): undefined symbol
+6A0C  0E        00871         DB 14 ; kill
+6A0D  0000      00872         DW check_see_dobj
+CheckRulesZ80.asm(55): undefined symbol
+6A0F  10        00873         DB 16 ; light
+6A10  0000      00874         DW check_dobj_supplied
+CheckRulesZ80.asm(57): undefined symbol
+6A12  10        00875         DB 16 ; light
+6A13  0000      00876         DW check_see_dobj
+CheckRulesZ80.asm(59): undefined symbol
+6A15  10        00877         DB 16 ; light
+6A16  0000      00878         DW check_have_dobj
+CheckRulesZ80.asm(61): undefined symbol
+6A18  14        00879         DB 20 ; open
+6A19  0000      00880         DW check_dobj_supplied
+CheckRulesZ80.asm(63): undefined symbol
+6A1B  14        00881         DB 20 ; open
+6A1C  0000      00882         DW check_see_dobj
+CheckRulesZ80.asm(65): undefined symbol
+6A1E  25        00883         DB 37 ; pick
+6A1F  0000      00884         DW check_dobj_supplied
+CheckRulesZ80.asm(67): undefined symbol
+6A21  25        00885         DB 37 ; pick
+6A22  0000      00886         DW check_see_dobj
+CheckRulesZ80.asm(69): undefined symbol
+6A24  1A        00887         DB 26 ; put
+6A25  0000      00888         DW check_dobj_supplied
+CheckRulesZ80.asm(71): undefined symbol
+6A27  1A        00889         DB 26 ; put
+6A28  0000      00890         DW check_see_dobj
+CheckRulesZ80.asm(73): undefined symbol
+6A2A  1A        00891         DB 26 ; put
+6A2B  0000      00892         DW check_prep_supplied
+CheckRulesZ80.asm(75): undefined symbol
+6A2D  1A        00893         DB 26 ; put
+6A2E  0000      00894         DW check_iobj_supplied
+CheckRulesZ80.asm(77): undefined symbol
+6A30  1A        00895         DB 26 ; put
+6A31  0000      00896         DW check_not_self_or_child
+CheckRulesZ80.asm(79): undefined symbol
+6A33  27        00897         DB 39 ; turn on
+6A34  0000      00898         DW check_dobj_supplied
+CheckRulesZ80.asm(81): undefined symbol
+6A36  27        00899         DB 39 ; turn on
+6A37  0000      00900         DW check_see_dobj
+CheckRulesZ80.asm(83): undefined symbol
+6A39  27        00901         DB 39 ; turn on
+6A3A  0000      00902         DW check_have_dobj
+CheckRulesZ80.asm(85): undefined symbol
+6A3C  2B        00903         DB 43 ; unbolt
+6A3D  0000      00904         DW check_dobj_supplied
+CheckRulesZ80.asm(87): undefined symbol
+6A3F  2B        00905         DB 43 ; unbolt
+6A40  0000      00906         DW check_see_dobj
+CheckRulesZ80.asm(89): undefined symbol
+6A42  16        00907         DB 22 ; unlock
+6A43  0000      00908         DW check_dobj_supplied
+CheckRulesZ80.asm(91): undefined symbol
+6A45  16        00909         DB 22 ; unlock
+6A46  0000      00910         DW check_see_dobj
+CheckRulesZ80.asm(93): undefined symbol
+6A48  20        00911         DB 32 ; wear
+6A49  0000      00912         DW check_see_dobj
+CheckRulesZ80.asm(95): undefined symbol
+6A4B  20        00913         DB 32 ; wear
+6A4C  0000      00914         DW check_have_dobj
+CheckRulesZ80.asm(97): undefined symbol
+6A4E  20        00915         DB 32 ; wear
+6A4F  0000      00916         DW check_dobj_wearable
+CheckRulesZ80.asm(99): undefined symbol
+6A51  11        00917         DB 17 ; look
+6A52  0000      00918         DW check_light
+CheckRulesZ80.asm(101): undefined symbol
+6A54  14        00919         DB 20 ; open
+6A55  0000      00920         DW check_dobj_closed
+CheckRulesZ80.asm(103): undefined symbol
+6A57  FF        00921         DB 255
+                00922 
+                00923 *INCLUDE sentence_tableZ80.asm
+                00924 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00925 ;sentence jump table
+                00926 ;this is NOT machine generated
+                00927 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                00928 sentence_table 
+6A58  00        00929         DB look_verb_id
+sentence_tableZ80.asm(6): undefined symbol
+6A59  0000      00930         DW look_sub
+sentence_tableZ80.asm(7): undefined symbol
+6A5B  00        00931         DB inventory_verb_id
+sentence_tableZ80.asm(8): undefined symbol
+6A5C  0000      00932         DW inventory_sub
+sentence_tableZ80.asm(9): undefined symbol
+6A5E  00        00933         DB n_verb_id
+sentence_tableZ80.asm(10): undefined symbol
+6A5F  0000      00934         DW move_player
+sentence_tableZ80.asm(11): undefined symbol
+6A61  00        00935         DB ne_verb_id
+sentence_tableZ80.asm(12): undefined symbol
+6A62  0000      00936         DW move_player
+sentence_tableZ80.asm(13): undefined symbol
+6A64  00        00937         DB nw_verb_id
+sentence_tableZ80.asm(14): undefined symbol
+6A65  0000      00938         DW move_player  
+sentence_tableZ80.asm(15): undefined symbol
+6A67  00        00939         DB s_verb_id
+sentence_tableZ80.asm(16): undefined symbol
+6A68  0000      00940         DW move_player
+sentence_tableZ80.asm(17): undefined symbol
+6A6A  00        00941         DB e_verb_id
+sentence_tableZ80.asm(18): undefined symbol
+6A6B  0000      00942         DW move_player
+sentence_tableZ80.asm(19): undefined symbol
+6A6D  00        00943         DB w_verb_id
+sentence_tableZ80.asm(20): undefined symbol
+6A6E  0000      00944         DW move_player
+sentence_tableZ80.asm(21): undefined symbol
+6A70  00        00945         DB se_verb_id
+sentence_tableZ80.asm(22): undefined symbol
+6A71  0000      00946         DW move_player  
+sentence_tableZ80.asm(23): undefined symbol
+6A73  00        00947         DB sw_verb_id
+sentence_tableZ80.asm(24): undefined symbol
+6A74  0000      00948         DW move_player  
+sentence_tableZ80.asm(25): undefined symbol
+6A76  00        00949         DB up_verb_id
+sentence_tableZ80.asm(26): undefined symbol
+6A77  0000      00950         DW move_player  
+sentence_tableZ80.asm(27): undefined symbol
+6A79  00        00951         DB down_verb_id
+sentence_tableZ80.asm(28): undefined symbol
+6A7A  0000      00952         DW move_player  
+sentence_tableZ80.asm(29): undefined symbol
+6A7C  00        00953         DB get_verb_id
+sentence_tableZ80.asm(30): undefined symbol
+6A7D  0000      00954         DW get_sub
+sentence_tableZ80.asm(31): undefined symbol
+6A7F  00        00955         DB out_verb_id
+sentence_tableZ80.asm(32): undefined symbol
+6A80  0000      00956         DW move_player  
+sentence_tableZ80.asm(33): undefined symbol
+6A82  00        00957         DB enter_verb_id
+sentence_tableZ80.asm(34): undefined symbol
+6A83  0000      00958         DW enter_sub
+sentence_tableZ80.asm(35): undefined symbol
+6A85  00        00959         DB drop_verb_id
+sentence_tableZ80.asm(36): undefined symbol
+6A86  0000      00960         DW drop_sub
+sentence_tableZ80.asm(37): undefined symbol
+6A88  00        00961         DB examine_verb_id
+sentence_tableZ80.asm(38): undefined symbol
+6A89  0000      00962         DW look_at_sub
+sentence_tableZ80.asm(39): undefined symbol
+6A8B  00        00963         DB put_verb_id
+sentence_tableZ80.asm(40): undefined symbol
+6A8C  0000      00964         DW put_sub
+sentence_tableZ80.asm(41): undefined symbol
+6A8E  00        00965         DB open_verb_id
+sentence_tableZ80.asm(42): undefined symbol
+6A8F  0000      00966         DW open_sub
+sentence_tableZ80.asm(43): undefined symbol
+6A91  00        00967         DB close_verb_id
+sentence_tableZ80.asm(44): undefined symbol
+6A92  0000      00968         DW close_sub    
+sentence_tableZ80.asm(45): undefined symbol
+6A94  00        00969         DB smell_verb_id
+sentence_tableZ80.asm(46): undefined symbol
+6A95  0000      00970         DW smell_sub
+sentence_tableZ80.asm(47): undefined symbol
+6A97  00        00971         DB listen_verb_id
+sentence_tableZ80.asm(48): undefined symbol
+6A98  0000      00972         DW listen_sub
+sentence_tableZ80.asm(49): undefined symbol
+6A9A  00        00973         DB quit_verb_id
+sentence_tableZ80.asm(50): undefined symbol
+6A9B  0000      00974         DW quit_sub
+sentence_tableZ80.asm(51): undefined symbol
+6A9D  00        00975         DB lock_verb_id
+sentence_tableZ80.asm(52): undefined symbol
+6A9E  0000      00976         DW lock_sub
+sentence_tableZ80.asm(53): undefined symbol
+6AA0  00        00977         DB unlock_verb_id
+sentence_tableZ80.asm(54): undefined symbol
+6AA1  0000      00978         DW unlock_sub
+sentence_tableZ80.asm(55): undefined symbol
+6AA3  00        00979         DB look_in_verb_id
+sentence_tableZ80.asm(56): undefined symbol
+6AA4  0000      00980         DW look_in_sub
+sentence_tableZ80.asm(57): undefined symbol
+6AA6  00        00981         DB wear_verb_id
+sentence_tableZ80.asm(58): undefined symbol
+6AA7  0000      00982         DW wear_sub
+sentence_tableZ80.asm(59): undefined symbol
+6AA9  FF        00983         DB 255
+                00984         
+                00985 
+                00986 *INCLUDE WelcomeZ80.asm
+main.asm(109): unable to include file
+                00987 *INCLUDE sinclair.asm
+                00988 ;sinclair
+                00989 
+                00990 ;BASE equ  3C00H ; address of charset
+    = 5800      00991 ATTRS equ 22528  ; address of attr
+    = 4000      00992 REGION1 equ 16384
+    = 4100      00993 ROW2 equ 16384+256
+    = 4800      00994 REGION2 equ 18432
+    = 5000      00995 REGION3 equ 20480
+                00996 
+    = 3C00      00997 ROMCHARS equ 3C00H
+    = 5C88      00998 S_POS equ 23688
+                00999 
+                01000 ;ENTRY :        B=LINE,C=COLUMN 
+                01001 ;PRESERVED : BC,DE 
+                01002 ;EXIT: HL=ADDRESS IN DISPLAY FILE, A=L 
+                01003 
+6AAA  78        01004 df_loc  ld      a,b 
+6AAB  E6F8      01005                 and     0f8h 
+6AAD  C640      01006                 add     a,40h 
+6AAF  67        01007                 ld      h,a 
+6AB0  78        01008                 ld      a,b 
+6AB1  E607      01009                 and     7 
+6AB3  0F        01010                 rrca 
+6AB4  0F        01011                 rrca 
+6AB5  0F        01012                 rrca 
+6AB6  81        01013                 add a,c
+6AB7  6F        01014                 ld l,a
+6AB8  C9        01015                 ret
+                01016                 
+                01017 ;FINDS ATTR FOR A BYTE IN THE DISP FILE
+                01018 ;ENTRY: HL=D.F. ADDRESS 
+                01019 ;PRESERVED: HL,BC 
+                01020 ;EXIT: DE =ATTR. ADDRESS, A=D 
+                01021 df_att 
+6AB9  7C        01022                 ld      a,h     
+6ABA  0F        01023                 rrca
+6ABB  0F        01024                 rrca
+6ABC  0F        01025                 rrca
+6ABD  E603      01026                 and 3
+6ABF  F658      01027                 or 58h
+6AC1  57        01028                 ld      d,a 
+6AC2  5D        01029                 ld      e,l
+6AC3  C9        01030                 ret                     
+                01031                 
+                01032 ;ENTRY: B=LINE, C=COLUMN 
+                01033 ;PRESERVED: BC 
+                01034 ;EXIT: HL=D.F. ADDRESS
+                01035 ; DE=ATTR. ADDRESS
+                01036 ; A=ATTR(B,C) 
+                01037 ;DFCC IS ALTERED stores address to print at in d_file
+                01038 locate
+6AC4  78        01039                 ld a,b
+6AC5  E618      01040                 and 18h
+6AC7  67        01041                 ld h,a
+6AC8  CBF4      01042                 set 6,h
+6ACA  0F        01043                 rrca
+6ACB  0F        01044                 rrca
+6ACC  0F        01045                 rrca
+6ACD  F658      01046                 or 58h
+6ACF  57        01047                 ld d,a
+6AD0  78        01048                 ld a,b
+6AD1  E607      01049                 and 7
+6AD3  0F        01050                 rrca
+6AD4  0F        01051                 rrca
+6AD5  0F        01052                 rrca
+6AD6  81        01053                 add a,c
+6AD7  6F        01054                 ld l,a
+6AD8  5F        01055                 ld e,a
+6AD9  1A        01056                 ld a,(de)
+6ADA  22DA6C    01057                 ld (DFCC),hl
+6ADD  C9        01058                 ret
+                01059                 
+                01060 ;clears screen and attrs
+                01061 ;PRESERVED: A ;EXIT: BC-0, DE =5B0H, HL=5AFFH
+                01062 cls1 
+6ADE  210040    01063                 ld hl,4000h
+6AE1  010018    01064                 ld bc,1800h
+6AE4  75        01065                 ld (hl),l
+6AE5  54        01066                 ld d,h
+6AE6  1E01      01067                 ld e,1
+6AE8  EDB0      01068                 ldir 
+6AEA  77        01069                 ld (hl),a
+6AEB  01FF02    01070                 ld bc,02ffh
+6AEE  EDB0      01071                 ldir 
+6AF0  C9        01072                 ret             
+                01073 
+                01074 ;A - CHAR               
+                01075 ;prints char in 'a' to          
+                01076 *MOD
+                01077 print1_zx
+6AF1  F5        01078                         push af
+6AF2  C5        01079                         push bc
+6AF3  D5        01080                         push de
+6AF4  E5        01081                         push hl
+                01082         
+6AF5  F5        01083                         push af
+6AF6  CD156C    01084                         call upd_crs
+6AF9  F1        01085                         pop af
+                01086                         
+6AFA  6F        01087                         ld l,a
+6AFB  2600      01088                         ld h,0
+6AFD  29        01089                         add hl,hl
+6AFE  29        01090                         add hl,hl
+6AFF  29        01091                         add hl,hl
+6B00  ED5BDC6C  01092                         ld de,(BASE)
+6B04  19        01093                         add hl,de
+                01094                         
+                01095                         ;take D_FILE address
+6B05  ED5BDA6C  01096                         ld de,(DFCC)
+6B09  0608      01097                         ld b,8
+                01098                         
+                01099                         ;print char row by row
+6B0B  7E        01100 $nxtRowM        ld a,(hl)
+6B0C  12        01101                         ld (de),a
+6B0D  23        01102                         inc hl
+6B0E  14        01103                         inc d
+6B0F  10FA      01104                         djnz $nxtRowM
+                01105 
+                01106                         ;construct attr address
+6B11  7A        01107                         ld a,d
+6B12  0F        01108                         rrca
+6B13  0F        01109                         rrca
+6B14  0F        01110                         rrca
+6B15  3D        01111                         dec a
+6B16  E603      01112                         and 3
+6B18  F658      01113                         or 58h
+6B1A  57        01114                         ld d,a
+6B1B  2AD86C    01115                         ld hl,(ATT)
+                01116                         ;take old attr
+6B1E  1A        01117                         ld a,(de)
+                01118                         
+                01119                         ;construct new one
+6B1F  AD        01120                         xor l
+6B20  A4        01121                         and h
+6B21  AD        01122                         xor l
+                01123                         
+                01124                         ;replace attr
+6B22  12        01125                         ld (de),a
+                01126                         
+                01127                         ;finally set DFCC to next print pos
+6B23  21DA6C    01128                         ld hl,DFCC
+6B26  34        01129                         inc (hl)
+6B27  C22F6B    01130                         jp nz,$xM
+6B2A  23        01131                         inc hl
+6B2B  7E        01132                         ld a,(hl)
+6B2C  C608      01133                         add a,8
+6B2E  77        01134                         ld (hl),a
+                01135                         
+                01136                         ;update the cursor pos
+                01137 $xM             ;       call upd_crs
+6B2F  E1        01138                         pop hl
+6B30  D1        01139                         pop de
+6B31  C1        01140                         pop bc
+6B32  F1        01141                         pop af
+6B33  C9        01142                         ret
+                01143 
+                01144 ;prints str in HL                       
+                01145 ;calls print1
+                01146 *MOD
+                01147 zx_printstr
+6B34  F5        01148                 push af
+6B35  C5        01149                 push bc
+6B36  D5        01150                 push de
+6B37  E5        01151                 push hl
+                01152 
+                01153                 ;set the print location based
+                01154                 ;on cursor position
+6B38  CD2D6C    01155                 call repos_cursor
+                01156 
+                01157                 ;set src for char data
+6B3B  21003C    01158                 ld hl,3C00h
+6B3E  22DC6C    01159                 ld (BASE),hl
+                01160                 
+6B41  E1        01161                 pop hl
+                01162 
+                01163                 
+6B42  7E        01164 $lpN    ld a,(hl)
+6B43  FE00      01165                 cp 0
+6B45  CA6B6B    01166                 jp z,$xN
+                01167                 
+                01168                 ;will the word fit on the line?
+6B48  FE20      01169                 cp 32 ; space?
+6B4A  C2626B    01170                 jp nz, $goN
+                01171                 
+6B4D  CDC06C    01172                 call word_len ; word_len -> b
+6B50  3ADF6C    01173                 ld a,(CRSRX)
+6B53  80        01174                 add a,b
+6B54  FE1F      01175                 cp 31
+6B56  FA606B    01176                 jp m,$spN
+                01177                 
+                01178                 ;replace the space with a newline
+6B59  CD6F6B    01179                 call zx_newline
+6B5C  23        01180                 inc hl  ; skip space
+6B5D  C3426B    01181                 jp $lpN
+                01182                 
+                01183                 
+6B60  3E20      01184 $spN    ld a,32 ; reload space
+                01185 
+6B62  E5        01186 $goN    push hl
+6B63  CDF16A    01187                 call print1_zx ; 
+6B66  E1        01188                 pop hl
+6B67  23        01189                 inc hl
+6B68  C3426B    01190                 jp $lpN
+                01191                 
+                01192 $xN              
+6B6B  D1        01193                 pop de
+6B6C  C1        01194                 pop bc
+6B6D  F1        01195                 pop af
+6B6E  C9        01196                 ret
+                01197 
+                01198 
+                01199 *MOD
+                01200 zx_newline
+6B6F  E5        01201                 push hl
+6B70  3E00      01202                 ld a,0                  ;back to left
+6B72  32DF6C    01203                 ld (CRSRX),a
+6B75  3ADE6C    01204                 ld a,(CRSRY)    ;down (if room)
+6B78  FE17      01205                 cp 23
+6B7A  CA846B    01206                 jp z,$sclO
+6B7D  3C        01207                 inc a
+6B7E  32DE6C    01208                 ld (CRSRY),a                            
+6B81  C3876B    01209                 jp $xO
+6B84  CD8C6B    01210 $sclO   call zx_scroll
+6B87  CD2D6C    01211 $xO     call repos_cursor
+6B8A  E1        01212                 pop hl
+6B8B  C9        01213                 ret
+                01214 
+                01215 ;scrolls lines up, but leaves the top line
+                01216 ;with the room and the score intact
+                01217 ;notes, screen is in three chunks
+                01218 ;
+                01219 *MOD
+                01220 zx_scroll
+                01221                 
+6B8C  CDA26C    01222                 call scroll_rgn1
+                01223 
+6B8F  3E07      01224                 ld a,7
+6B91  32E36C    01225                 ld (SCROLL_LPS),a
+6B94  110048    01226                 ld de,REGION2
+6B97  CDB46B    01227                 call scroll_rgn
+                01228                 
+6B9A  3E07      01229                 ld a,7
+6B9C  32E36C    01230                 ld (SCROLL_LPS),a
+6B9F  110050    01231                 ld de,REGION3
+6BA2  CDB46B    01232                 call scroll_rgn
+                01233  
+6BA5  01C002    01234                 ld bc,704 ; scroll attrs
+6BA8  214058    01235                 ld hl,ATTRS+64
+6BAB  112058    01236                 ld de,ATTRS+32
+6BAE  EDB0      01237                 ldir ; hl->de repeating         
+                01238                 
+6BB0  CD386C    01239                 call clr_btm_line
+                01240 
+6BB3  C9        01241                 ret 
+                01242 
+                01243 *MOD
+                01244 ;de =start addr of bank
+                01245 ;scrolls a region of the screen, up one 
+                01246 ;line of chars
+                01247 scroll_rgn
+                01248 
+6BB4  ED53E06C  01249                 ld (SCROLLTEMP),de
+                01250                                 
+6BB8  3AE06C    01251                 ld a,(SCROLLTEMP) ;don't copy 1st 
+6BBB  FE40      01252                 cp 40h                    ;bank down - 1st
+6BBD  CAE66B    01253                 jp z,$cpyQ      ;starts at 4000h
+                01254                   
+                01255                 ;copy eight lines (for 1st row) into
+                01256                 ;the last lines in the previous bank
+                01257                 ;the byte difference will be
+                01258                 ; 2k -(7x32) = 1824 bytes
+                01259 
+6BC0  2AE06C    01260                 ld hl,(SCROLLTEMP)
+6BC3  3E08      01261                 ld a,8 ; rows to copy
+                01262                 
+6BC5  112007    01263                 ld de,1824
+6BC8  A7        01264                 and a ; clr carry
+6BC9  ED52      01265                 sbc hl,de
+6BCB  E5        01266                 push hl ; hl->de
+6BCC  D1        01267                 pop de 
+                01268                 
+6BCD  2AE06C    01269                 ld hl,(SCROLLTEMP) ; src
+6BD0  012000    01270 $lpQ    ld bc,32 ; bytes per row
+6BD3  EDB0      01271                 ldir ; hl->de
+                01272                 
+                01273                 ;add 224 to de and hl
+                01274                 ;to get to the next line 
+                01275                 ;of pixels to copy
+6BD5  E5        01276                 push hl  ; save hl
+                01277                 
+6BD6  01E000    01278                 ld bc,224
+6BD9  D5        01279                 push de ; de->hl
+6BDA  E1        01280                 pop hl
+6BDB  09        01281                 add hl,bc       
+6BDC  E5        01282                 push hl ; hl->de
+6BDD  D1        01283                 pop de
+                01284                 
+6BDE  E1        01285                 pop hl ; restore hl
+                01286                 
+6BDF  09        01287                 add hl,bc
+                01288                 
+                01289                 ;loop
+6BE0  3D        01290                 dec a
+6BE1  FE00      01291                 cp 0
+6BE3  C2D06B    01292                 jp nz,$lpQ
+                01293                                 
+                01294                 ;copy 7 rows of 32 chars
+6BE6  3AE36C    01295 $cpyQ   ld a,(SCROLL_LPS)
+                01296 $lp2Q   
+6BE9  2AE06C    01297                 ld hl,(SCROLLTEMP)
+6BEC  ED5BE06C  01298                 ld de,(SCROLLTEMP)
+6BF0  012000    01299                 ld bc,32
+6BF3  09        01300             add hl,bc ; copy from 3rd row
+                01301                 
+6BF4  E5        01302                 push hl ; hl is set up, save it
+                01303                 
+6BF5  2AE06C    01304                 ld hl,(SCROLLTEMP)
+6BF8  010000    01305                 ld bc,0
+6BFB  09        01306                 add hl,bc ; ...to 2nd row
+                01307                 
+6BFC  E5        01308                 push hl ; hl->de
+6BFD  D1        01309                 pop de
+                01310                 
+6BFE  E1        01311                 pop hl ; restore hl
+                01312                 
+6BFF  01E000    01313                 ld bc,224 ; times to loop
+6C02  EDB0      01314                 ldir ; hl->de
+                01315                 
+                01316                 ;advance scroll temp to next 
+                01317                 ;block of bytes
+6C04  2AE06C    01318                 ld hl,(SCROLLTEMP)
+6C07  010001    01319                 ld bc,256
+6C0A  09        01320                 add hl,bc
+6C0B  22E06C    01321                 ld (SCROLLTEMP),hl
+                01322                 
+                01323                 ;loop
+6C0E  3D        01324                 dec a
+6C0F  FE00      01325                 cp 0
+6C11  C2E96B    01326                 jp nz,$lp2Q
+                01327                 
+6C14  C9        01328                 ret
+                01329                 
+                01330 ;moves the cursor position       
+                01331 ;this should be called by print1
+                01332 
+                01333 *MOD
+                01334 upd_crs
+6C15  3ADF6C    01335         ld a,(CRSRX)
+6C18  3C        01336         inc a
+6C19  32DF6C    01337         ld (CRSRX),a
+6C1C  FE20      01338         cp 32d
+6C1E  C22C6C    01339         jp nz,$xR
+                01340         
+6C21  3AE26C    01341         ld a,(NOSCROLL)
+6C24  FE01      01342         cp 1
+6C26  CA2C6C    01343         jp z,$xR
+6C29  CD6F6B    01344         call zx_newline
+                01345          
+6C2C  C9        01346 $xR ret         
+                01347                         
+                01348 
+                01349 ;reset the 'print at' position          
+                01350 repos_cursor
+6C2D  ED4BDE6C  01351         ld bc,(CRSRY) ; grabs x,y
+6C31  78        01352         ld a,b
+6C32  41        01353         ld b,c
+6C33  4F        01354         ld c,a
+6C34  CDC46A    01355         call locate             
+6C37  C9        01356         ret
+                01357 
+                01358 *MOD    
+                01359 clr_btm_line
+                01360 
+6C38  3E01      01361                 ld a,1
+6C3A  32E26C    01362                 ld (NOSCROLL),a
+                01363                 
+6C3D  3E00      01364                 ld a,0
+6C3F  32DF6C    01365                 ld (CRSRX),a
+6C42  3E17      01366                 ld a,23
+6C44  32DE6C    01367                 ld (CRSRY),a
+6C47  CD2D6C    01368                 call repos_cursor
+                01369                 
+6C4A  3E20      01370                 ld a,32  ; 32 spaces
+                01371                 
+6C4C  F5        01372 $lpS    push af
+6C4D  3E20      01373                 ld a,32  ; ascii space
+6C4F  CDF16A    01374                 call print1_zx
+6C52  F1        01375                 pop af
+6C53  3D        01376                 dec a
+6C54  FE00      01377                 cp 0
+6C56  C24C6C    01378                 jp nz,$lpS
+                01379                 
+6C59  3E00      01380                 ld a,0
+6C5B  32DF6C    01381                 ld (CRSRX),a
+6C5E  3E17      01382                 ld a,23
+6C60  32DE6C    01383                 ld (CRSRY),a
+6C63  CD2D6C    01384                 call repos_cursor
+                01385 
+6C66  3E00      01386                 ld a,0
+6C68  32E26C    01387                 ld (NOSCROLL),a
+                01388                 
+6C6B  C9        01389                 ret
+                01390 
+                01391 ;This is the 'delete' key function
+                01392 *MOD            
+                01393 back_up
+                01394         ;are we all the way left?
+6C6C  3ADF6C    01395         ld a,(CRSRX)
+6C6F  FE01      01396         cp 1
+6C71  CAA16C    01397         jp z,$xT
+                01398         
+                01399         ;back up
+6C74  3ADF6C    01400         ld a,(CRSRX)
+6C77  3D        01401         dec a
+6C78  32DF6C    01402         ld (CRSRX),a
+6C7B  CD2D6C    01403         call repos_cursor
+                01404 
+                01405         ;back up buffer index
+6C7E  3A7A62    01406         ld a,(BUFIX)
+6C81  3D        01407         dec a
+6C82  327A62    01408         ld (BUFIX),a
+                01409         
+                01410         ;overwrite character
+6C85  1600      01411         ld d,0
+6C87  3A7A62    01412         ld a,(BufIx)
+6C8A  5F        01413         ld e,a
+6C8B  217B62    01414         ld hl,InBuf
+6C8E  19        01415         add hl,de
+6C8F  3E00      01416         ld a,0
+6C91  77        01417         ld (hl),a
+                01418         
+                01419         
+                01420                 
+                01421         ;print a space
+6C92  3E20      01422         ld a,32 
+6C94  CDF16A    01423         call print1_zx
+                01424         
+                01425         ;back up again
+6C97  3ADF6C    01426         ld a,(CRSRX)
+6C9A  3D        01427         dec a
+6C9B  32DF6C    01428         ld (CRSRX),a
+6C9E  CD2D6C    01429         call repos_cursor
+                01430         
+6CA1  C9        01431 $xT     ret
+                01432 *MOD
+                01433 scroll_rgn1
+                01434 
+6CA2  3E08      01435                 ld a,8
+                01436 
+6CA4  112040    01437                 ld de,REGION1 + 32
+6CA7  214040    01438                 ld hl,REGION1 + 64
+                01439 $lpU    
+6CAA  01C000    01440                 ld bc,192
+6CAD  EDB0      01441                 ldir ; hl->de repeating
+                01442                 
+                01443                 ;add 64 to hl and de
+6CAF  014000    01444                 ld bc,64
+6CB2  09        01445                 add hl,bc
+6CB3  E5        01446                 push hl ; save it
+                01447                 
+                01448                 ;add 64 to de 
+6CB4  D5        01449                 push de
+6CB5  E1        01450                 pop hl
+6CB6  09        01451                 add hl,bc
+6CB7  EB        01452                 ex de,hl
+                01453                 
+6CB8  E1        01454                 pop hl  ; restore it
+                01455                 
+6CB9  3D        01456                 dec a
+6CBA  FE00      01457                 cp 0
+6CBC  C2AA6C    01458                 jp nz,$lpU
+6CBF  C9        01459                 ret
+                01460                 
+                01461 
+                01462 *MOD
+                01463 ;returns the length of the word indexed 
+                01464 ;by hl in register b
+                01465 ;other registers are preserved.
+                01466 ;assumes (hl) points to a space
+                01467 *MOD
+                01468 word_len
+6CC0  F5        01469         push af
+6CC1  E5        01470         push hl
+                01471         
+6CC2  23        01472         inc hl  
+6CC3  0601      01473         ld b,1
+                01474 $lpW
+6CC5  7E        01475         ld a,(hl)
+                01476         
+6CC6  FE00      01477     cp 0  ; null
+6CC8  CAD56C    01478         jp z,$xW
+                01479 
+6CCB  FE20      01480     cp 32  ; space
+6CCD  CAD56C    01481         jp z,$xW         
+                01482 
+6CD0  04        01483         inc b
+6CD1  23        01484         inc hl
+6CD2  C3C56C    01485         jp $lpW
+                01486 
+6CD5  E1        01487 $xW     pop hl
+6CD6  F1        01488         pop af
+6CD7  C9        01489         ret
+                01490 
+                01491                 
+6CD8  38        01492 ATT DB 38h ; 
+6CD9  00        01493 MASK DB 0 ; Attribute mask for printing 
+6CDA  A00F      01494 DFCC DW 4000 ; DF Address of cell x,y (set by locate sub)
+6CDC  003C      01495 BASE DW 3C00h
+6CDE  00        01496 CRSRY DB 0
+6CDF  00        01497 CRSRX DB 0
+6CE0  0000      01498 SCROLLTEMP DW 0
+6CE2  00        01499 NOSCROLL DB 0
+6CE3  07        01500 SCROLL_LPS DB 7 ; how many rows to move
+6CE4  3E        01501 curstr DB ">"
+6CE5  00        01502         DB 0
+                01503 
+                01504 *INCLUDE math.asm
+main.asm(111): unable to include file
+                01505 *INCLUDE UserVarsZ80.asm
+main.asm(112): unable to include file
+                01506 
+6CE6  64        01507 score DB 100
+6CE7  00        01508 gameOver DB 0
+6CE8  00        01509 moves DB 0
+6CE9  00        01510 turnsWithoutLight DB 0
+6CEA  64        01511 health DB 100
+6CEB  0000      01512 stacksav DW 0
+                01513         
+                01514         end start
+
+
+$CK             6528  $CPYQ           6BE6  $GO?            61EB  
+$GON            6B62  $INP?           61D0  $LP2A           6207  
+$LP2Q           6BE9  $LPC            625E  $LPF            63B4  
+$LPG            6403  $LPK            6502  $LPL            654F  
+$LPN            6B42  $LPQ            6BD0  $LPS            6C4C  
+$LPU            6CAA  $LPW            6CC5  $NFK            6539  
+$NXTROWM        6B0B  $OUTA           6239  $SA             6218  
+$SCD            6276  $SCLO           6B84  $SPN            6B60  
+$XA             623C  $XD             6278  $XG             6422  
+$XL             6574  $XM             6B2F  $XN             6B6B  
+$XO             6B87  $XR             6C2C  $XT             6CA1  
+$XW             6CD5  $_LPJ           64CB  $_NFJ           64F1  
+$_XJ            64F3  $_XK            653B  $_YK            6533  
+ACTIONS_TABLE   68C6  AFTER_DROP_CRAT 0000  AFTER_GET_GOLD_ 0000  
+ATT             6CD8  ATTRS           5800  AUTHOR          0000  
+BACKUP_2        642F  BACK_UP         6C6C  BASE            6CDC  
+BEFORE_EXAMINE_ 0000  BEFORE_WEST_SUB 0000  BUFIX           627A  
+BUFSIZE         0030  BURN_LEAVES_SUB 0000  BURN_SELF_SUB   0000  
+BURN_UNBURNABLE 0000  B_ANCESTOR_OF_C 0000  CHECK_DOBJ_CLOS 0000  
+CHECK_DOBJ_OPEN 0000  CHECK_DOBJ_PORT 0000  CHECK_DOBJ_SUPP 0000  
+CHECK_DOBJ_WEAR 0000  CHECK_DONT_HAVE 0000  CHECK_HAVE_DOBJ 0000  
+CHECK_IOBJ_SUPP 0000  CHECK_LIGHT     0000  CHECK_NOT_SELF_ 0000  
+CHECK_PREP_SUPP 0000  CHECK_SEE_DOBJ  0000  CHECK_TABLE     69C4  
+CLIMB_FENCE_SUB 0000  CLIMB_SUB       0000  CLIMB_TREE_SUB  0000  
+CLOSE_SUB       0000  CLOSE_VERB_ID   0000  CLRBUF          6254  
+CLR_BTM_LINE    6C38  CLS1            6ADE  CONFUSED_MSG_SU 0000  
+CRSRX           6CDF  CRSRY           6CDE  CRTBYTE         6386  
+CURMODE         5CD1  CURSTR          6CE4  DEFAULT_READ_SU 0000  
+DELETE          000C  DFCC            6CDA  DF_ATT          6AB9  
+DF_LOC          6AAA  DICTIONARY      0000  DIV             0000  
+DOWN_VERB_ID    0000  DO_EVENTS       0000  DRAW_TOP_BAR    63A1  
+DROP_SUB        0000  DROP_UNDROPABLE 0000  DROP_VERB_ID    0000  
+EAT_INEDIBLE_SU 0000  ENCODE          0000  ENTER_SUB       0000  
+ENTER_VERB_ID   0000  EXAMINE_VERB_ID 0000  E_VERB_ID       0000  
+FLASHLIGHT_OFF_ 0000  FLASHLIGHT_ON_S 0000  FLUSH_TOILET_SU 0000  
+FLUSH_UNFLUSHAB 0000  GAMEOVER        6CE7  GETCOMMAND      61E3  
+GETLIN          61FE  GET_GUNK_SUB    0000  GET_OBJ_ID      64F5  
+GET_PLAYER_ROOM 0000  GET_SUB         0000  GET_TABLE_INDEX 64C8  
+GET_TOILET_SUB  0000  GET_VERBS_ID    6540  GET_VERB_ID     0000  
+HEALTH          6CEA  HUNDRED         6442  INBUF           627B  
+INSERT_COIN_SUB 0000  INSTEAD_UP_SUB  0000  INVENTORY_SUB   0000  
+INVENTORY_VERB_ 0000  JUMP_SUB        0000  KILL_SELF_SUB   0000  
+LIGHT_LIGHTER_S 0000  LISTEN_SUB      0000  LISTEN_VERB_ID  0000  
+LOCATE          6AC4  LOCK_SUB        0000  LOCK_VERB_ID    0000  
+LOOK_AT_SUB     0000  LOOK_IN_CREVICE 0000  LOOK_IN_SUB     0000  
+LOOK_IN_VERB_ID 0000  LOOK_SUB        0000  LOOK_VERB_ID    0000  
+LOOP            6380  MAIN            61A8  MASK            6CD9  
+MOD             0000  MOVES           6CE8  MOVE_PLAYER     0000  
+NE_VERB_ID      0000  NOGO_TABLE      657D  NOSCROLL        6CE2  
+NW_VERB_ID      0000  N_VERB_ID       0000  OBJ_WORD_TABLE  0000  
+OPEN_SUB        0000  OPEN_VERB_ID    0000  OUTLIN          638A  
+OUTLINCR        623D  OUT_VERB_ID     0000  PARSE           0000  
+PICK_LOCK_SUB   0000  PICK_NOSE_SUB   0000  PICK_UNPICKABLE 0000  
+POSTACTIONS_TAB 69AB  PREACTIONS_TABL 688F  PRINT1_ZX       6AF1  
+PRINTCR         6390  PRINT_OBJ_NAME  6474  PRINT_SCORE     63F1  
+PRINT_SPACE     64BA  PRINT_TABLE_ENT 6447  PROMPT          003E  
+PUSH_TREE_SUB   0000  PUT_SUB         0000  PUT_VERB_ID     0000  
+QUIT            61FD  QUIT_SUB        0000  QUIT_VERB_ID    0000  
+READKB          637B  READ_MAP_SUB    0000  REGION1         4000  
+REGION2         4800  REGION3         5000  REPOS_CURSOR    6C2D  
+ROMCHARS        3C00  ROW2            4100  RUN_SENTENCE    0000  
+SCORE           6CE6  SCRCOLOR        5C8D  SCREEN          4000  
+SCROLLTEMP      6CE0  SCROLL_LPS      6CE3  SCROLL_RGN      6BB4  
+SCROLL_RGN1     6CA2  SCRSIZE         02BE  SENTENCE_TABLE  6A58  
+SE_VERB_ID      0000  SMELL_SUB       0000  SMELL_VERB_ID   0000  
+STACKSAV        6CEB  START           61A8  STRANGE_HUMOR_S 0000  
+STREQ           0000  SW_VERB_ID      0000  S_POS           5C88  
+S_VERB_ID       0000  TURNSWITHOUTLIG 6CE9  UNBOLT_CUPOLA_S 0000  
+UNBOLT_UNBOLTAB 0000  UNLOCK_DOOR_SUB 0000  UNLOCK_SUB      0000  
+UNLOCK_VERB_ID  0000  UPD_CRS         6C15  UP_VERB_ID      0000  
+USE_TOILET_SUB  0000  USE_UNUSABLE_SU 0000  VALIDATE_ENCODE 0000  
+VALIDATE_WORDS  0000  VERB_TABLE      0000  VERSION         0000  
+WAIT_SUB        0000  WEAR_SUB        0000  WEAR_VERB_ID    0000  
+WELCOME         0000  WONT_FIT_SUB    0000  WORD1           0000  
+WORD_LEN        6CC0  W_VERB_ID       0000  ZX_NEWLINE      6B6F  
+ZX_PRINTSTR     6B34  ZX_SCROLL       6B8C  ZX_TO_ASCII     6267  
+_L2$            648F  _LP             644F  _LP$            6480  
+_OUT$           648B  _SK             645E  _X              646D  
+_XI             64B4  
