@@ -23,7 +23,10 @@ _kblp	lda $c000 	; kb strobe
 		pha
 		jsr cout1 
 		pla
-		sta $200,y; ;store key 
+		cmp #225  ; 'a' 
+		bcc _s  ; <
+		sbc #160 ; convert it to upper
+_s		sta $200,y; ;store key 
 		jsr undrscr
 		iny
 		jmp _kblp
