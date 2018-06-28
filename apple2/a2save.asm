@@ -16,9 +16,13 @@
 #define NORMAL_ACCESS $C3
 #define STANDARD_FILE $01
 
+	.module save_sub
 save_sub
 	lda #0
 	sta ioErrFlg
+	jsr get_slot_num
+	lda ioErrFlg
+	bne _x
 	lda #saving%256 ; print the prompt
 	sta strAddr
 	lda #saving/256
@@ -34,22 +38,54 @@ save_sub
 	lda #done/256
 	sta strAddr+1
 	jsr printstrcr
-	rts
+_x	rts
 
 	.module restore_sub
 restore_sub
+	lda #0
+	sta ioErrFlg
+	jsr get_slot_num
+	lda ioErrFlg
+	cmp #0
+	bne _x
 	lda #restoring%256 ; print the prompt
 	sta strAddr
 	lda #restoring/256
 	sta strAddr+1
 	jsr printstrcr
 	jsr open_file
+	lda ioErrFlg
+	bne _x
 	jsr read_file
 	jsr close_file
 	jsr look_sub
-	rts	
+_x	rts	
 
-	
+	.module get_slot_num
+get_slot_num
+	lda #selSlotMsg%256 ; pick slot
+	sta strAddr
+	lda #selSlotMsg/256
+	sta strAddr+1
+	jsr printstrcr
+	jsr readkb
+	lda $200
+	cmp #176 ; a >= 30  
+	bcc _err ; kb  < 30 
+	cmp #186  ; <= '9'? 
+	bcs _err ;  ? < 9  carry set means < 9
+	jmp _x
+_err	
+	sta ioErrFlg  ; put non zero in flag
+	lda #badSlotMsg%256
+	sta $strAddr
+	lda #badSlotMsg/256
+	sta $strAddr+1		
+	jsr printstrcr
+	rts
+_x
+	sta nameBuf+12
+	rts
 	
 ;destroys the file name whose
 ;name is in the buffer.
@@ -260,7 +296,7 @@ writeParams
   	
 fnf	.text "FILE NOT FOUND."
 	.byte 0		
-selslot	.text "SELECT A SLOT[1-5]."
+selSlotMsg	.text "SELECT A SLOT NUMBER [0-9]."
 	.byte 0		
 saving	.text "SAVING..."
 	.byte 0		
@@ -277,6 +313,8 @@ opnErrMsg .text "OPEN ERR."
 			.byte 0	
 closeErrMsg .text "CLOSE ERR."
 			.byte 0				
+badSlotMsg .text "BAD SLOT."
+			.byte 0	
 ioErrFlg .byte 0 
 			
 nameLen .db 13
