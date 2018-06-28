@@ -31,7 +31,7 @@
 #define kbBufHi $02
 
 #define cls $FC58
-.org $800
+.org $800   ; was $800 (moved it to make room for I/O buffer)
 	.module main
 start
 	tsx			 ;save stack
@@ -120,6 +120,7 @@ _x 	jsr printcr
 .include "StringTable6502.asm"
 .include "VerbTable6502.asm"
 .include "CheckRules6502.asm"
+.include "a2fileio.asm"
 beginData
 .include "ObjectTable6502.asm"	
 .include "builtInVars6502.asm"
