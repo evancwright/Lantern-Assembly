@@ -64,7 +64,7 @@ _x		sta ancestorFlag
 ;used by the loop which tries to map objects to the 
 ;environment
 ; the parent needs to be set by the caller
-; table addr needs to be set by the caller to 
+; the child to check needs to by stored in the global child by the caller
 ; point to the check_ancestor
 	.module visible_ancestor
 visible_ancestor
@@ -74,9 +74,9 @@ visible_ancestor
 		lda $tableAddr+1
 		pha
  
-		ldy #0		; get current object (child)
-		lda ($tableAddr),y
-		sta child
+;		ldy #0		; get current object (child)
+;		lda ($tableAddr),y
+;		sta child
 		
 		ldx #0  ; loop counter
 		lda #0	;clear search flag
@@ -85,14 +85,14 @@ _lp
 		lda child
 		ldy #HOLDER_ID
 		jsr get_obj_attr
-		nop  ; is the parent closed ?
-		tax ;save parent
+		nop  ; 
+		tax ;save child's parent
 		cmp parent
 		beq _y
-		cmp #0
+		cmp #0  ; hit offscreen
 		beq _n		
-		sta child
-		txa ; restore parent
+		txa ; restore child's parent
+		sta child  ; child's parent is the new child
 		
 		cmp #PLAYER_ID ; skip over player
 		beq _s
@@ -100,7 +100,7 @@ _lp
 		nop ; is parent closed?
 		
 		ldy #0
-		jsr get_obj_attr  ; position table pointer
+		jsr get_obj_attr  ; positions table pointer so we can get 
 		
 		ldy #PROPERTY_BYTE_1		
 		lda ($tableAddr),y ; table
@@ -130,12 +130,18 @@ _x		sta visibleAncestorFlag
 ;is pointing
 ;parent is set to the player room
 in_player_room
- 
+		pha
+		tay
+		pha
+		ldy #0
+		lda ($tableAddr),y
+		sta child
 		jsr get_player_room
 		sta parent
- 
 		jsr visible_ancestor
-
+		pla
+		tay
+		pla
 		rts
 		
 in_player_inventory

@@ -5,7 +5,20 @@
 ;this is just a legacy thing.  visibility is now
 ;checked by the in the sentence handling
 check_see_dobj
-	rts
+	jsr get_player_room
+	sta parent
+	lda $sentence+1
+	sta child
+	ldy #0
+	jsr get_obj_attr
+	jsr visible_ancestor
+	lda visibleAncestorFlag
+	cmp #0
+	bne _x
+	jsr dont_see
+	lda #1
+	sta checkFailed
+_x	rts
 
 	
 
@@ -96,7 +109,6 @@ check_have_dobj
 		sta parent
 		lda $sentence+1
 		sta child
-		jsr get_obj_attr ; position table
 		jsr visible_ancestor
 		lda visibleAncestorFlag
 		cmp #0

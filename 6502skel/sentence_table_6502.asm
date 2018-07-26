@@ -57,8 +57,8 @@ sentence_table
 	.word unlock_sub
 	.byte wear_verb_id
 	.word wear_sub
-	.byte 255
 	.byte save_verb_id
 	.word save_sub
 	.byte restore_verb_id
 	.word restore_sub	
+	.byte 255

@@ -63,6 +63,8 @@ get_word_index
 _lp		lda ($tableAddr),y	;
 		cmp #255
 		beq _x
+		cmp #0
+		beq _x		
  		jsr tab_addr_to_str_src  ; put table addr into strSrc
 		jsr streq6 ; do they match? (compares strSrc to StrDest)
 		cmp #1

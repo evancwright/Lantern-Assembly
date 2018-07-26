@@ -48,10 +48,10 @@ streq6
  		ldy #0
 _lp		lda (strSrc),y
 		jsr to_upper
+		sta $temp
 		lda (strDest),y
 		jsr to_upper
-		sta $temp
-		cmp (strSrc),y
+		cmp $temp
 		bne _n
 		cmp #0 ; if equal and null, string are equal
 		beq _y

@@ -37,13 +37,19 @@ has_visible_child
 		tya
 		pha
 		
+		
 		lda $tableAddr ;save table
 		pha
 		lda $tableAddr+1
 		pha
 		
+		
 		lda #0		; clear flag
 		sta visibleChild		
+
+		lda parentId
+		cmp #PLAYER_ID
+		beq _srch
 		
 		;if the parent is closed, we can stop now
 		lda parentId
@@ -55,9 +61,9 @@ has_visible_child
 		lda parentId
 		ldx #CONTAINER
 		jsr get_obj_prop
-		cmp #1
-		bne _srch
-		
+		cmp #0
+		bne _x
+		;object is a container
 		lda parentId
 		ldx #OPEN
 		jsr get_obj_prop
@@ -232,9 +238,9 @@ drop_sub
 		ldx $playerRoom
 		ldy #HOLDER_ID
 		jsr set_obj_attr
-		lda #dropped%256
 		
 		;print done
+		lda #dropped%256
 		sta strAddr
 		lda #dropped/256
 		sta strAddr+1
