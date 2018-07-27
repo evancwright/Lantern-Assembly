@@ -16,6 +16,7 @@ extern const int NumObjects;
 
 extern char ObjectData[];
 extern unsigned char ObjectWordTableData[];
+char Scores[128]; /* object scores for word matching*/
 
 typedef  unsigned char BOOL;
 
@@ -153,6 +154,7 @@ void draw_status_bar();
 char toupper(char c);
 void scroll();
 void print_word(char* w);
+void collapse_verb();
 void __cdecl print_cr();
 void __cdecl print_string(unsigned short entryId);
 void list_any_contents(unsigned char objectId);
@@ -162,6 +164,9 @@ void print_obj_contents(unsigned char objectId);
 void __cdecl set_obj_prop(unsigned short objNum, unsigned short propNum, unsigned short val);
 void __cdecl set_obj_attr(unsigned short objNum, unsigned short propNum, unsigned short val);
 void enter_object(unsigned char tgtRoom, int dir);
+void score_objects(unsigned char wordId);
+
+BOOL parse_and_map();
 BOOL can_see();
 BOOL parse();
 BOOL map();
@@ -197,16 +202,19 @@ BOOL is_ancestor(unsigned char parent, unsigned char child);
 BOOL is_visible_to(unsigned char roomId, unsigned char objectId);
 BOOL try_sentence(Sentence *table, int tableSize, BOOL wildcards) ;
 BOOL has_visible_children(unsigned char objectId);
+BOOL score_object(int startIndex, int endIndex, unsigned char *objId);
 unsigned char get_verb_id(char *verb);
 unsigned char get_word_id(char *wordPtr, const char **table, int tableSize);
 //unsigned char get_string_id(unsigned short entryNum, char *table[]);
 unsigned char verb_to_dir(unsigned char);
 unsigned char word_to_object_id(char *word);
+unsigned char max_score_object(int score);
 unsigned short __cdecl get_obj_prop(unsigned short object, unsigned short prop);
 unsigned short __cdecl get_obj_attr(unsigned short object, unsigned short prop);
 unsigned char noun_to_object_id(unsigned char wordId);
 void try_default_sentence();
 void __cdecl print_table_entry(unsigned short entryNum, const char **table);
+int max_score_matches(int score);
 
 #include "CheckTable8086.h"
 unsigned char done=FALSE;
@@ -269,10 +277,10 @@ int main(int argv, char **argc)
 		}
 		
 		/* parse a line */
-		if (parse()==TRUE)
+	//	if (parse()==TRUE)
 		{
 			printf("\n");
-			if (map()==TRUE)
+			if (parse_and_map()==TRUE)
 			{
 				Col=0;
 				if (check_rules()==TRUE)
@@ -288,7 +296,7 @@ int main(int argv, char **argc)
 
 	return 0;
 }
-
+/*
 BOOL parse()
 {
 	int i=0;
@@ -300,13 +308,13 @@ BOOL parse()
 	PrepPtr = 0;
 	NumWords=0;
 	token = strtok(Buffer, delim);
-   /*clear word pointers*/
+   //clear word pointers
    for (i=0; i < NumWords; i++)
    {
 	   WordPtrs[i]=0;
    }
    
-   /* walk through other tokens */
+   // walk through other tokens
    while( token != NULL ) {
 //      printf("token: %s\n", token);
 	  if (!is_article(token))
@@ -316,14 +324,7 @@ BOOL parse()
 	  }		  
       token = strtok(NULL, delim);
    }	
-/*   
-   printf("dumping identified words:\n");
-   for (i=0; i < NumWords; i++)
-   {
-	   printf("Word: %s\n", WordPtrs[i]);
-   }
- */  
-   if (NumWords == 0)
+    if (NumWords == 0)
    {
 	   printf("Beg pardon?\n");
 	   return FALSE;
@@ -331,7 +332,7 @@ BOOL parse()
    
    memset(VerbBuffer,0,80);
    strcpy(VerbBuffer,WordPtrs[0]);
-   /*collapse the verb*/
+   //collapse the verb
    if (NumWords > 1)
    {
 	   if (is_prep(WordPtrs[1]))
@@ -340,12 +341,12 @@ BOOL parse()
 		   strcat(VerbBuffer," ");
 		   strcat(VerbBuffer,WordPtrs[1]);
 		//   printf("Verb is now %s\n", VerbBuffer);
-		   /*move all pointers down one*/
+		   //move all pointers down one
 		   for (i=1; i < NumWords-1;i++)
 		   {
 			   WordPtrs[i] =WordPtrs[i+1];
 		   }
-		   WordPtrs[NumWords-1]=0; /*erase last entry*/
+		   WordPtrs[NumWords-1]=0; //erase last entry
 		   NumWords--;
 	   } 
 	   else
@@ -357,7 +358,7 @@ BOOL parse()
    if (NumWords==1)
 	   return TRUE;
    
-   /*is there a prep*/ 
+   //is there a prep
    
    DobjPtr = WordPtrs[1];
    //printf("dobj=%s\n",DobjPtr);
@@ -375,7 +376,7 @@ BOOL parse()
    }
    return TRUE;
 }
-
+*/
 void get_obj_name(unsigned char objectId, char *buffer)
 {
    strcpy(buffer, Dictionary[(int)(ObjectWordTable[(int)objectId].word1)]);
@@ -412,6 +413,7 @@ void get_room_name(unsigned char objectId, char *buffer)
 }
 
 /*map the parsed words to object ids*/ 
+/*
 BOOL map()
 {
 	int v = get_verb_id(VerbBuffer);
@@ -455,7 +457,7 @@ BOOL map()
 //	printf("\n");
 	return TRUE;
 } 
-
+*/
 
 BOOL check_rules()
 {
@@ -765,6 +767,11 @@ void drop_sub()
 
 void put_sub()
 {
+	if (is_supporter(IobjId)==FALSE && is_open_container(IobjId) == FALSE)
+	{
+		printf("You can't do that.\n");
+		return;
+	}
 	printf("Done.\n");
 	ObjectTable[DobjId].attrs[HOLDER_ID] = IobjId;
 }
@@ -1089,6 +1096,26 @@ unsigned char noun_to_object_id(unsigned char wordId)
 		}
 		return INVALID;
 }
+
+/*returns true of wordId applies to object objectId*/
+BOOL word_matches_object(int wordId, int objectId)
+{
+	/*need the loop to check for synonyms*/
+	int i=0;
+	for (; i < ObjectWordTableSize; i++)
+	{
+		if (ObjectWordTable[i].id == objectId)
+		{
+			if (ObjectWordTable[i].word1 == wordId)
+				return TRUE;
+			if (ObjectWordTable[i].word2 == wordId)
+				return TRUE;
+			if (ObjectWordTable[i].word3 == wordId)
+				return TRUE;
+		}
+	}
+	return FALSE;
+}
 /*
 unsigned char get_string_id(unsigned short entryNum, char *table[])
 {
@@ -1365,7 +1392,7 @@ BOOL is_ancestor(unsigned char parent, unsigned char child)
 unsigned char word_to_object_id(char *word)
 {		
 		int i=0;
-		unsigned int wordId = get_word_id(word, Dictionary, DictionarySize);
+		unsigned char wordId = get_word_id(word, Dictionary, DictionarySize);
 		
 		if (wordId == INVALID)
 			return INVALID; 
@@ -1606,5 +1633,219 @@ void init()
 }
 
 
+void tokenize_input()
+{
+	int i=0;
+	char *token=0;
+	char *delim = " ";	
+	
+	NumWords=0;
+	/*clear word pointers*/
+   for (i=0; i < 10; i++)
+   {
+	   WordPtrs[i]=0;
+   }
+
+	token = strtok(Buffer, delim);
+   
+   /* walk through other tokens */
+   while( token != NULL ) 
+   {
+      printf("token: %s\n", token);
+	  if (!is_article(token))
+	  {
+		  WordPtrs[NumWords] = token;
+		  NumWords++;
+	  }		  
+      token = strtok(NULL, delim);
+   }
+   printf("WordCount=%d\n",NumWords);
+}
+
+/*if needed, turn verbs like 'look at' into one word*/
+void collapse_verb()
+{
+	int i=1;
+	printf("Num words=%d\n", NumWords);
+	if (NumWords > 1)
+    {
+	   if (is_prep(WordPtrs[1]))
+	   {
+	 	   printf("%s is a prep\n", WordPtrs[1]);
+		   strcat(VerbBuffer," ");
+		   strcat(VerbBuffer,WordPtrs[1]);
+		   
+		   for (i=1; i < NumWords-1;i++)
+			{
+				WordPtrs[i] =WordPtrs[i+1];
+			}
+			WordPtrs[NumWords-1]=0; /*erase last entry*/
+			NumWords--;
+ 	   }
+	}
+	 
+	strcpy(VerbBuffer,WordPtrs[0]);
+	
+	printf("verb=%s\n",VerbBuffer);
+}
+
+/*scores each object if wordId applies to it*/
+void score_objects(unsigned char wordId)
+{
+	int i=0;
+	int playerRoom=0;
+	playerRoom = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
+
+	for (i=0; i < NumObjects; i++)
+	{
+		if (word_matches_object(wordId,i))
+		{
+			if (Scores[i] != INVALID)
+			{
+	//	 			printf("Word %d matches object %d\n", wordId,i);
+					Scores[i]+=1;
+					
+					if (is_visible_to(playerRoom,PLAYER_ID))
+						Scores[i]+=1;
+			}
+ 		}
+		else
+		{
+			Scores[i] = INVALID; /*can't be this object*/
+		}
+	}
+}
+
+int get_max_score()
+{
+	int i=0;
+	int max=0;
+	for (i=0; i < NumObjects; i++)
+	{
+		/*clear invalid flags*/
+		if (Scores[i] == INVALID)
+			Scores[i]=0;
+		
+		if (Scores[i] > max)
+		{
+			max = Scores[i];
+		}
+	}
+	return max;
+}
+
+/*returns number of objects matching the max score*/
+int max_score_matches(int max)
+{
+	int i=0;
+	int count=0;
+	for (i=0; i < NumObjects; i++)
+	{
+		if (Scores[i] == max)
+			count++;
+	}
+//	printf("After parsing, there are %d matches.\n", count);
+	return count;
+}
+
+/*returns the object with the supplied score*/
+unsigned char max_score_object(int max)
+{
+	int i=0;
+	for (i=0; i < NumObjects; i++)
+	{
+		if (Scores[i] == max)
+			return i;
+	}
+	return INVALID;
+}
+
+/*parses input and determines verb, noun, and prep id numbers*/
+BOOL parse_and_map()
+{
+	int i=0;
+	int wordId=0;
+	int maxScore=0;
+	DobjId=INVALID;
+	PrepId=INVALID;
+	IobjId=INVALID;
+
+	tokenize_input();
+	
+	if (NumWords==0)
+	{
+		printf("Pardon?\n");
+		return FALSE;
+	}
+	
+	collapse_verb();
+	
+	VerbId = get_verb_id(VerbBuffer);
+	
+	if (VerbId == INVALID)
+	{
+		printf("I don't know the verb '%s'\n", VerbBuffer);
+		return FALSE;
+	}
+	
+	if (NumWords==1)
+		return TRUE; //nothing left to do
+	
+	//map noun1 and noun2
+	memset(Scores,0,NumObjects); //clear scores
+
+	for (i=1; i < NumWords; i++)
+	{	
+		if (is_prep(WordPtrs[i]))
+		{ 
+		//	printf("prep found:%s\n",WordPtrs[i]);
+
+			PrepId = get_word_id(WordPtrs[i],PrepTable,PrepTableSize);
+			if (score_object(1,i,&DobjId) == TRUE)
+			{
+				if (score_object(i+1,NumWords,&IobjId) == TRUE)
+				{
+					return TRUE;	
+				}	
+			}					
+			return FALSE;
+		}
+	}
+	
+	/*no prep found - whole thing is noun1*/
+	//printf("no prep found.\n");
+	return score_object(1,NumWords,&DobjId);	
+}
+
+/*loops over a range of words and tries to map the result to objId*/
+BOOL score_object(int startIndex, int endIndex, unsigned char *objId)
+{
+	int maxScore=0;
+	int wordId=INVALID;
+	int i=startIndex;
+
+	memset(Scores,0,NumObjects); //clear scores
+
+	for (; i < endIndex ;i++)
+	{
+//		printf("scoring word %s\n", WordPtrs[i]);
+		wordId = get_word_id(WordPtrs[i],Dictionary,DictionarySize);
+		if (wordId == INVALID){
+			printf("I don't know the word '%s'\n",WordPtrs[i]);
+			return FALSE;
+		}
+		score_objects(wordId);
+	}
+	
+	maxScore = get_max_score();
+	if (max_score_matches(maxScore) > 1)
+	{
+		printf("I don't know which one you mean.\n");
+		return FALSE;
+	}
+	
+	*objId = max_score_object(maxScore);
+	return TRUE;
+}
 
 
