@@ -41,7 +41,9 @@ _lp	lda ($strAddr),y
 	jsr OSWRCH
 	iny
 	jmp _lp 
-_x	rts	
+_x	lda #' '
+	jsr OSWRCH
+	rts	
 
 
 cls

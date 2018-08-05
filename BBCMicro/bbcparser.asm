@@ -565,7 +565,7 @@ get_preposition
 		pha
 		tya 
 		pha
-_lp		lda $buffer
+_lp		lda buffer
 		cmp #0
 		beq _x
 		jsr mov_to_end_of_first_word

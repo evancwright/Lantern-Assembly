@@ -17,14 +17,14 @@
 #define PAGE_19 $1900
 #define PAGE_20 $2000
 #define PAGE_107 $6B00
- 
+#define OSFILESAV #0 
 
-.org $PAGE_19 
+.org $PAGE_20
 	.module main
 start
 	tsx			 ;save stack
 	stx stack
-	
+	l	
 	jsr cls
 	jsr show_intro
  	jsr look_sub

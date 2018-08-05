@@ -3,7 +3,7 @@
 
 .include "defs6502.asm"	
 
-
+#define INVALID 255
 #define strAddr $CE
 #define fmtByte $32
 #define altChar1 $C00E
@@ -19,7 +19,7 @@
 #define scrWdth $21
 #define hcur $24
 #define vcur $25
-
+#define kbdbuf $200
 ;zero page vars
 #define strAddr $CE
 #define fmtByte $32
@@ -27,6 +27,7 @@
 #define strSrc 	$EB ; some zero page addr
 #define strDest	$FA ; some zero page addr
 
+ 
 #define kbBufLo $0
 #define kbBufHi $02
 
@@ -41,11 +42,13 @@ start
 	jsr show_intro
  	jsr look_sub
 _lp
- 	jsr clr_buffr
-	jsr clr_words
+	jsr clr_buffr
     jsr printcr
 	jsr print_title_bar
-			
+	;clear the fail flag
+	lda #0
+	sta encodeFail
+	
 	jsr readkb
 	lda $200
 	cmp #$8D ; cr
@@ -66,25 +69,13 @@ _c 	jsr toascii
 ;	cmp #1
 ;	beq _x
 
-	jsr remove_articles
-	jsr get_verb
-	jsr get_nouns ; 
+ 	jsr parse
 	
-	jsr encode_sentence
-	lda #1
-	cmp encodeFailed
+	lda encodeFail
+	cmp #1
 	beq _lp
 	
-	jsr map_nouns
-	
-	jsr check_mapping ; make sure objects were visible
-	lda #1
-	cmp encodeFailed
-	beq _lp
-	
-	jsr process_sentence	
-	
-;	jsr do_events
+	jsr process_sentence		
 	jsr player_can_see	
 	jsr do_events
 	jsr inv_weight
@@ -100,7 +91,8 @@ _x 	jsr printcr
 .include "printing6502.asm"
 .include "a2printing.asm"
 .include "look6502.asm"
-.include "a2parser.asm"
+.include "newparser.asm"
+.include "scoring6502.asm"
 .include "tables6502.asm"
 .include "routines6502.asm"
 .include "attributes6502.asm"
@@ -145,5 +137,6 @@ prompt 	.text ">"
 confused .text "I DON'T FOLLOW YOU."
 	.byte 0
 ;quit .byte "QUIT",0h
+;NumWords .db 
 stack .byte 0
 .end

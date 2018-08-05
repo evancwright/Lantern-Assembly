@@ -24,8 +24,8 @@ _x	rts
 
 	.module check_dobj_supplied
 check_dobj_supplied
-		lda $word2
-		cmp #0
+		lda dobjId	
+		cmp #255
 		bne _x
 		lda #missingDobj%256
 		sta $strAddr
@@ -38,8 +38,8 @@ _x		rts
 
 	.module check_iobj_supplied
 check_iobj_supplied
-		lda $word3
-		cmp #0
+		lda iobjId
+		cmp #255
 		bne _x
 		lda #missingDobj%256
 		sta $strAddr
@@ -257,6 +257,7 @@ missing_dobj
 		rts
 		
 
+;prints the verb
 thats_not_something
 		lda #1
 		sta checkFailed
@@ -267,9 +268,9 @@ thats_not_something
 		sta $strAddr+1
 		jsr printstr  ; print that's not ...
 		
-		lda #word1%256
+		lda #verbBuffer%256
 		sta $strAddr
-		lda #word1/256
+		lda #verbBuffer/256
 		sta $strAddr+1
 		jsr printstr
  
@@ -395,7 +396,7 @@ dobj_already_closed
 		
 		
 checkFailed .byte 0		
-missingDobj .text "IT LOOKS LIKE YOU ARE MISSING A NOUN."
+missingDobj .text "MISSING NOUN."
 .byte 0		
 thatsNotSomething .text "THAT'S NOT SOMETHING YOU CAN "
 .byte 0		

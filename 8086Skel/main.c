@@ -16,7 +16,7 @@ extern const int NumObjects;
 
 extern char ObjectData[];
 extern unsigned char ObjectWordTableData[];
-char Scores[128]; /* object scores for word matching*/
+char Scores[NumObjects]; /* object scores for word matching*/
 
 typedef  unsigned char BOOL;
 
