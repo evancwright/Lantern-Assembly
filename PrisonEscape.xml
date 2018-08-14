@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <project>
+    <projname>Prison_Escape</projname>
+    <welcome>WELCOME TO PRISON ESCAPE.  HAVING BEEN WRONGFULLY CONVICTED OF J-WALKING, YOU ARE NOW AN INMATE AT ONE OF AMERICA'S MOST NOTORIOUS PRISONS.  ONE DAY YOU AWAKE AND FIND THAT YOUR CELL-MATE, BUBBA, HAS ESCAPED.  SEE IF YOU CAN ESCAPE, TOO.</welcome>
+    <author>EVAN WRIGHT</author>
+    <version>VERSION 1.0</version>
+    <preps>
+      <prep>in</prep>
+      <prep>on</prep>
+      <prep>at</prep>
+      <prep>under</prep>
+      <prep>into</prep>
+      <prep>inside</prep>
+      <prep>through</prep>
+      <prep>out</prep>
+      <prep>behind</prep>
+      <prep>off</prep>
+      <prep>up</prep>
+      <prep>with</prep>
+      <prep>to</prep>
+    </preps>
+    <verbs>
+      <builtinverbs>
+        <verb>n,go north,north</verb>
+        <verb>s,go south,south</verb>
+        <verb>e,go east,east</verb>
+        <verb>w,go west,west</verb>
+        <verb>ne,go northeast,northeast</verb>
+        <verb>se,go southeast,southeast</verb>
+        <verb>sw,go southwest,southwest</verb>
+        <verb>nw,go northwest,northwest</verb>
+        <verb>up,go up,u</verb>
+        <verb>down,go down,d</verb>
+        <verb>enter,go in,go into,go inside</verb>
+        <verb>out</verb>
+        <verb>get,take,grab,pick up</verb>
+        <verb>inventory,i</verb>
+        <verb>kill</verb>
+        <verb>drop</verb>
+        <verb>light</verb>
+        <verb>look,l</verb>
+        <verb>examine,x,look at,inspect</verb>
+        <verb>look in,search</verb>
+        <verb>open</verb>
+        <verb>lock</verb>
+        <verb>unlock</verb>
+        <verb>close,shut</verb>
+        <verb>eat</verb>
+        <verb>drink</verb>
+        <verb>put,place</verb>
+        <verb>quit</verb>
+        <verb>smell,sniff</verb>
+        <verb>listen</verb>
+        <verb>wait</verb>
+        <verb>climb</verb>
+        <verb>yell,scream,shout</verb>
+        <verb>jump</verb>
+        <verb>talk to</verb>
+        <verb>turn on</verb>
+        <verb>wear</verb>
+        <verb>save</verb>
+        <verb>restore</verb>
+      </builtinverbs>
+      <userverbs>
+        <verb>feed</verb>
+        <verb>give</verb>
+        <verb>pet</verb>
+        <verb>read</verb>
+        <verb>kick</verb>
+        <verb>look behind</verb>
+        <verb>punch,hit</verb>
+        <verb>hide in</verb>
+        <verb>hide</verb>
+      </userverbs>
+    </verbs>
+    <objects>
+      <object id="0" holder="0" name="OFFSCREEN" printedname="OFFSCREEN">
+        <description>OFFSTAGE.  MOVE OBJECTS HERE TO REMOVE THEM FROM THE WORLD.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms names="" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="1" holder="2" name="PLAYER" printedname="PLAYER">
+        <description>YOU'RE A WONDERFUL PERSON. YOU SHOULDN'T CARE WHAT YOU LOOK LIKE.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms names="ME,SELF" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="2" holder="0" name="CELL_24" printedname="CELL 24">
+        <description>THIS IS A FILTHY JAIL CELL. THERE IS A DOOR TO THE EAST WHICH LEADS TO A HALLWAY.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo>
+          <s />
+          <w />
+          <ne />
+          <nw />
+          <e>YOUR CELL IS LOCKED FROM THE OTHER SIDE.</e>
+          <se />
+          <sw />
+          <n />
+          <up />
+          <down />
+        </nogo>
+        <backdrop />
+      </object>
+      <object id="3" holder="0" name="ESCAPE_TUNNEL" printedname="ESCAPE TUNNEL">
+        <description>YOU ARE IN A NARROW ESCAPE TUNNEL WHICH WAS APPARENTLY CARVED OUT BY BUBBA OVER MANY YEARS USING A PLASTIC SPORK. IT LEADS UP INTO AN AIRSHAFT, AND EAST INTO CELL 24.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="2" w="255" ne="255" se="255" sw="255" nw="255" up="6" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="4" holder="0" name="FAN_BLADES" printedname="FAN BLADES">
+        <description>AS THE GIANT FAN BLADES CHOP YOU INTO LITTLE BITS, YOUR LAST MOVE SEEMS, IN RETROSPECT, A BAD IDEA</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="5" holder="0" name="JUNCTION" printedname="JUNCTION">
+        <description>YOU ARE IN A 'T' SHAPED JUNCTION IN THE VENTILATION SHAFT. THE AIR DUCTS LEAD EAST, WEST, AND SOUTH</description>
+        <initialdescription />
+        <directions n="255" s="6" e="7" w="22" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="6" holder="0" name="AIRSHAFT" printedname="AIRSHAFT">
+        <description>YOU ARE IN AN ALUMINUM NORTH-SOUTH RUNNING AIR SHAFT. TO THE SOUTH YOU CAN HEAR THE SWOOSHING SOUND OF FAN BLADES FORCING AIR THROUGH THE PRISON VENTILATION SYSTEM. THE SHAFT LEADS DOWN INTO THE ESCAPE TUNNEL DUG BY BUBBA.</description>
+        <initialdescription />
+        <directions n="5" s="4" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="3" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="7" holder="0" name="EAST_SHAFT" printedname="EAST SHAFT">
+        <description>YOU ARE AT THE EASTERN END OF AN AIR SHAFT. YOU CAN GO WEST, OR DROP DOWN INTO WHAT APPEARS TO BE A GUARD'S BREAK ROOM.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="5" ne="255" se="255" sw="255" nw="255" up="255" down="10" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="8" holder="0" name="STORAGE_CLOSET" printedname="STORAGE CLOSET">
+        <description>THIS IS A STORAGE CLOSET.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="11" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="9" holder="0" name="HALLWAY" printedname="HALLWAY">
+        <description>TO THE WEST IS THE BREAK ROOM. TO THE SOUTH IS THE LAUNDRY ROOM.</description>
+        <initialdescription />
+        <directions n="255" s="16" e="255" w="10" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="10" holder="0" name="BREAK_ROOM" printedname="BREAK ROOM">
+        <description>THIS IS THE GUARD'S BREAK ROOM. HALLWAYS LEAD EAST. TO THE WEST IS A STORAGE CLOSET. ABOVE YOU, A MISSING PANEL LEADS TO AN AIR SHAFT.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="9" w="11" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms names="" />
+        <nogo>
+          <s />
+          <w />
+          <ne />
+          <nw />
+          <e />
+          <se />
+          <sw />
+          <n />
+          <up>YOU CAN'T JUMP THAT HIGH.</up>
+          <down />
+        </nogo>
+        <backdrop />
+      </object>
+      <object id="11" holder="10" name="DOOR" printedname="DOOR">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="10" w="8" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="1" open="0" backdrop="0" wearable="0" emittinglight="0" locked="1" lockable="1" beingworn="0" lightable="0" door="1" unused="0" />
+        <synonyms names="" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="12" holder="8" name="BOX_OF_SNAUSAGES" printedname="BOX OF SNAUSAGES">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription>A BOX OF SNAUSAGES SITS ON A SHELF.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms names="SNAUSAGE" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="13" holder="10" name="SLEEPING_GUARD" printedname="SLEEPING GUARD">
+        <description>THE PRISON GUARD WEARS A BLUE UNIFORM DRESS SHIRT WITH BLACK PANTS.</description>
+        <initialdescription>A GUARD, WHO IS SUPPOSED TO BE ON DUTY, IS SLEEPING IN A CHAIR.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="14" holder="16" name="LAUNDRY_CART" printedname="LAUNDRY CART">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="18" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="1" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms names="" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="15" holder="9" name="DOG" printedname="DOG">
+        <description>UPON CLOSER EXAMINATION THE VICIOUS GUARD DOG TURNS OUT TO BE A CHIHUAHUA.</description>
+        <initialdescription>A VICIOUS POLICE DOG EYES YOU WITH HOSTILITY.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms names="CHIHUAHUA" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="16" holder="0" name="LAUNDRY_ROOM" printedname="LAUNDRY ROOM">
+        <description>THIS IS THE LAUNDRY ROOM. A HALL LEADS NORTH. TO THE SOUTH IS A ROLLING STEEL DOOR.</description>
+        <initialdescription />
+        <directions n="9" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="17" holder="2" name="TRAVEL_POSTER" printedname="TRAVEL POSTER">
+        <description>THIS IS AN OLD TRAVEL POSTER SHOWING EXOTIC DESTINATIONS. IT APPEARS TO RUSTLE AS THOUGH THERE IS AIR MOVING BEHIND IT</description>
+        <initialdescription>A POSTER IS TAPED TO THE WEST WALL.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="18" holder="0" name="INSIDE_CART" printedname="INSIDE CART">
+        <description>YOU ARE NOW HIDDEN IN THE CART USED TO HAUL THE PRISONERS' LAUNDRY</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="16" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="19" holder="0" name="KEY" printedname="KEY">
+        <description>You notice nothing unexpected.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="20" holder="0" name="PARADISE" printedname="PARADISE">
+        <description>CONGRATULATIONS. YOU HAVE REACHED THE END OF THE GAME.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="21" holder="16" name="SCHEDULE" printedname="SCHEDULE">
+        <description>A SCHEDULE INDICATES A LAUNDRY VAN WILL BE ARRIVING SOON.</description>
+        <initialdescription>A SCHEDULE IS TAPED TO THE WALL.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms names="PAPER" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="22" holder="0" name="AIR_SHAFT" printedname="AIR SHAFT">
+        <description>THIS IS A DEAD END IN  AN AIRSHAFT.  TO THE EAST IS A JUNCTION.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="5" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+    </objects>
+    <checks>
+      <check verb="close" check="check_dobj_supplied" />
+      <check verb="drink" check="check_dobj_supplied" />
+      <check verb="drink" check="check_have_dobj" />
+      <check verb="drop" check="check_dobj_supplied" />
+      <check verb="drop" check="check_have_dobj" />
+      <check verb="eat" check="check_dobj_supplied" />
+      <check verb="enter" check="check_dobj_supplied" />
+      <check verb="examine" check="check_dobj_supplied" />
+      <check verb="get" check="check_dobj_supplied" />
+      <check verb="get" check="check_dont_have_dobj" />
+      <check verb="kill" check="check_dobj_supplied" />
+      <check verb="light" check="check_dobj_supplied" />
+      <check verb="light" check="check_have_dobj" />
+      <check verb="open" check="check_dobj_supplied" />
+      <check verb="open" check="check_dobj_opnable" />
+      <check verb="put" check="check_dobj_supplied" />
+      <check verb="put" check="check_prep_supplied" />
+      <check verb="put" check="check_iobj_supplied" />
+      <check verb="put" check="check_not_self_or_child" />
+      <check verb="talk to" check="check_dobj_supplied" />
+      <check verb="turn on" check="check_dobj_supplied" />
+      <check verb="turn on" check="check_have_dobj" />
+      <check verb="unlock" check="check_dobj_supplied" />
+      <check verb="look in" check="check_dobj_supplied" />
+      <check verb="open" check="check_dobj_unlocked" />
+      <check verb="hide in" check="check_dobj_supplied" />
+    </checks>
+    <sentences>
+      <sentence verb="kill" do="PLAYER" prep="" io="" type="instead" sub="kill_self" />
+      <sentence verb="talk to" do="PLAYER" prep="" io="" type="instead" sub="talk_to_self" />
+      <sentence verb="listen" do="" prep="" io="" type="instead" sub="listen" />
+      <sentence verb="smell" do="" prep="" io="" type="instead" sub="smell" />
+      <sentence verb="wait" do="" prep="" io="" type="instead" sub="wait" />
+      <sentence verb="yell" do="" prep="" io="" type="instead" sub="yell" />
+      <sentence verb="jump" do="" prep="" io="" type="instead" sub="jump" />
+      <sentence verb="get" do="TRAVEL_POSTER" prep="" io="" type="after" sub="get_poster" />
+      <sentence verb="s" do="" prep="" io="" type="instead" sub="go_south" />
+      <sentence verb="kill" do="STORAGE_CLOSET" prep="" io="" type="instead" sub="kick_dog" />
+      <sentence verb="eat" do="BOX_OF_SNAUSAGES" prep="" io="" type="instead" sub="eat_snausages" />
+      <sentence verb="kill" do="DOG" prep="" io="" type="instead" sub="kick_dog" />
+      <sentence verb="feed" do="DOG" prep="" io="" type="instead" sub="feed_dog" />
+      <sentence verb="kill" do="SLEEPING_GUARD" prep="" io="" type="instead" sub="kill_guard" />
+      <sentence verb="unlock" do="DOOR" prep="with" io="KEY" type="instead" sub="unlock_door" />
+      <sentence verb="open" do="DOOR" prep="with" io="KEY" type="instead" sub="unlock_door" />
+      <sentence verb="unlock" do="DOOR" prep="" io="" type="instead" sub="unlock_door" />
+      <sentence verb="kick" do="DOG" prep="" io="" type="instead" sub="kick_dog" />
+      <sentence verb="pet" do="DOG" prep="" io="" type="instead" sub="pet_dog" />
+      <sentence verb="look behind" do="TRAVEL_POSTER" prep="" io="" type="instead" sub="look_behind" />
+      <sentence verb="punch" do="SLEEPING_GUARD" prep="" io="" type="instead" sub="punch_guard" />
+      <sentence verb="kick" do="SLEEPING_GUARD" prep="" io="" type="instead" sub="kick_guard" />
+      <sentence verb="read" do="SCHEDULE" prep="" io="" type="instead" sub="read_schedule" />
+      <sentence verb="hide in" do="LAUNDRY_CART" prep="" io="" type="instead" sub="hide_in_cart" />
+      <sentence verb="hide" do="" prep="" io="" type="instead" sub="hide" />
+      <sentence verb="look in" do="SLEEPING_GUARD" prep="" io="" type="instead" sub="search_guard" />
+    </sentences>
+    <routines>
+      <routine name="kill_self">println("IF YOU ARE EXPERIENCING SUICIDAL THOUGHTS, YOU SHOULD SEEK PSYCHIATRIC HELP.");
+</routine>
+      <routine name="kill_player">println("***YOU HAVE DIED***");
+player.holder=1;
+look();
+</routine>
+      <routine name="talk_to_self">println("TALKING TO YOURSELF IS A SIGN OF IMPENDING MENTAL COLLAPSE.");
+</routine>
+      <routine name="listen">println("YOU HEAR NOTHING UNEXPECTED.");
+</routine>
+      <routine name="smell">println("YOU SMELL NOTHING UNEXPECTED.");
+</routine>
+      <routine name="wait">if (player.holder == inside_cart)
+{
+     println("AFTER A SHORT WAIT, YOU HEAR THE STEEL DOOR ROLL OPEN.");
+     println("A LAUNDRY CREW DUMPS THE CART (AND YOU) INTO A TRUCK.  YOU MANAGE TO ESCAPE AT THE FIRST RED LIGHT AND HEAD FOR A NICE CARRIBEAN ISLAND.");
+     player.holder = paradise;
+     dog.holder = paradise;
+     dog.initialdescription = "BY YOUR FEET, A FORMER POLICE DOG IS NAPPING PEACEFULLY.";
+     look();
+}
+else
+{
+     println("TIME PASSES...");
+}
+</routine>
+      <routine name="yell">println("AAAAAAAAAAAAARRRRGGGGGG!");
+if (player.holder == break_room)
+{
+     if (sleeping_guard.holder == break_room)
+     {
+          println("SEEING THAT YOU ARE OUT OF YOUR CELL, THE GUARD FLEES IN TERROR.");
+          println("AS HE FLEES, A KEY FALLS OUT OF HIS POCKET.");
+          sleeping_guard.holder = offscreen;
+          key.holder=break_room;
+     }
+}
+</routine>
+      <routine name="jump">println("WHEEEEEE!");
+</routine>
+      <routine name="get_poster">if (posterMoved == 0)
+{
+     posterMoved=1;
+     println("TAKING THE POSTER REVEALS AN ESCAPE TUNNEL LEADING WEST.");
+     travel_poster.description = "THIS IS AN OLD TRAVEL POSTER.";
+     cell_24.w = escape_tunnel;
+}
+</routine>
+      <routine name="eat_anything">println("THAT'S NOT PART OF A HEALTHY DIET.");
+</routine>
+      <routine name="eat_snausages">println("THAT'S JUST GROSS.");
+</routine>
+      <routine name="kick_dog">println("THIS PROGRAM DOES NOT TOLERATE CRUELTY TO ANIMALS.");
+</routine>
+      <routine name="kill_guard">println("THAT'S SO MEAN. MAYBE YOU SHOULD BE IN JAIL AFTER ALL.");
+</routine>
+      <routine name="go_south">if (player.holder  == hallway)
+{
+     if (dog.holder == hallway)
+     {
+          if (happyDog == 0)
+          {
+               println("THE DOG SNARLS AND TRIES TO SHRED YOUR SOCKS. YOU WISELY BACK OFF.");
+          }
+          else
+          {
+               move();
+          }
+     }
+     else
+     {
+          move();
+     }
+}
+else
+{
+     move();
+}
+</routine>
+      <routine name="feed_dog">if (box_of_snausages.holder == player)
+{
+     if (happyDog == 0)
+     {
+          println("THE DOG GLEEFULLY DEVOURS THE SNAUSAGE AND STARTS WAGGING HIS TAIL.");
+          happyDog =1 ;
+     }
+     else
+     {
+          println("DON'T OVER DO IT.  DO YOU KNOW HOW HARD IT IS TO GET A DOG TO LOSE WEIGHT?");
+     }
+}
+else
+{
+     println("YOU HAVE NOTHING THE DOG WANTS TO EAT.");
+}
+</routine>
+      <routine name="wake_guard">println("SEEING THAT YOU ARE OUT OF YOUR CELL, THE GUARD FLEES IN TERROR.");
+if (key.holder == OFFSCREEN)
+{
+     println("AS HE FLEES, A KEY FALLS OUT OF HIS POCKET.");
+     sleeping_guard.holder = offscreen;
+     key.holder=break_room;
+}
+</routine>
+      <routine name="unlock_door">if (key.holder == player)
+{
+     if (door.locked == 1)
+     {
+          println("DONE.");
+          door.open = 1;
+          door.locked = 0;
+     }
+     else
+     {
+          println("IT'S ALREADY UNLOCKED.");
+     }
+}
+else
+{
+     println("YOU DON'T HAVE THE KEY.");
+}
+</routine>
+      <routine name="pet_dog">if (happyDog == 1)
+{
+     println("THE DOG WAGS HIS TAIL.");
+}
+else
+{
+     println("THE DOG SNAPS AT YOUR HAND.");
+}
+</routine>
+      <routine name="read_schedule">println("A SCHEDULE INDICATES A LAUNDRY VAN WILL BE ARRIVING SOON.");
+</routine>
+      <routine name="look_behind">if (posterMoved == 0)
+{
+     println("THERE SEEMS TO BE A HOLE BEHIND THE POSTER.");
+}
+else
+{
+     println("THERE IS A HOLE WHERE THE POSTER USED TO BE.");
+}
+</routine>
+      <routine name="kick_guard">println("YOU KICK THE GUARD'S CHAIR.");
+println("SEEING THAT YOU ARE OUT OF YOUR CELL, HE FLEES IN TERROR.");
+println("AS HE FLEES, A KEY FALLS OUT OF HIS POCKET.");
+sleeping_guard.holder = offscreen;
+key.holder=break_room;
+</routine>
+      <routine name="punch_guard">println("AS YOU DEBATE WHETHER THAT IS A NICE THING TO DO, THE GUARD SNORTS AND WAKES UP.");
+println("SEEING THAT YOU ARE OUT OF YOUR CELL, HE FLEES IN TERROR.");
+println("AS HE FLEES, A KEY FALLS OUT OF HIS POCKET.");
+sleeping_guard.holder = offscreen;
+key.holder=break_room;
+</routine>
+      <routine name="hide">println("I DON'T KNOW WHERE YOU WANT TO HIDE.");
+</routine>
+      <routine name="hide_in_cart">if (player.holder == laundry_room)
+{
+     println("AFTER A SHORT WAIT, YOU HEAR THE STEEL DOOR ROLL OPEN.");
+     println("A LAUNDRY CREW DUMPS THE CART (AND YOU) INTO A TRUCK.  YOU MANAGE TO ESCAPE AT THE FIRST RED LIGHT AND HEAD FOR A NICE CARRIBEAN ISLAND.");
+     player.holder = paradise;
+     dog.holder = paradise;
+     dog.initialdescription = "BY YOUR FEET, A FORMER POLICE DOG IS NAPPING PEACEFULLY.";
+     look();
+}
+</routine>
+      <routine name="search_guard">if (key.holder == offscreen)
+{
+     println("WITHOUT WAKING HIM, YOU DEFTLY PULL A KEY OUT OF HIS SHIRT POCKET.");
+     key.holder = PLAYER;
+}
+else
+{
+     println("YOU FIND SOME POCKET LINT.");
+}
+</routine>
+    </routines>
+    <events>
+      <event name="fan_death">if (player.holder == fan_blades)
+{
+     player.holder = cell_24;
+     println("***YOU HAVE DIED***");
+     println("LET'S TRY THIS AGAIN...");
+}
+</event>
+    </events>
+    <variables>
+      <builtin>
+        <var name="dobj" addr="sentence+1" value="0" />
+        <var name="iobj" addr="sentence+3" value="0" />
+        <var name="score" addr="score" value="0" />
+        <var name="moves" addr="moves" value="0" />
+        <var name="health" addr="health" value="100" />
+        <var name="turnsWithoutLight" addr="turnsWithoutLight" value="0" />
+        <var name="gameOver" addr="gameOver" value="0" />
+      </builtin>
+      <user>
+        <var name="posterMoved" addr="Lantern" value="0" />
+        <var name="happyDog" addr="Lantern" value="0" />
+      </user>
+    </variables>
+  </project>
+</xml>
