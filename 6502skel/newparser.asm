@@ -197,9 +197,9 @@ _lp	lda $verbBuffer,y
 	beq _x
 	iny
 	jmp _lp
-	lda #' '
+_x	lda #' '
 	sta $verbBuffer,y
-_x	rts
+	rts
 
 	
 	.module compact_verb
@@ -228,7 +228,26 @@ compact_verb
 	lda wordIndexes,y	; get wordIndex,y
 	tay
 	jsr set_str_dest
+	lda strDest
+	sta strSrc
+	lda strDest+1
+	sta strSrc+1
+	lda #$verbBuffer%256 ; set destination
+	sta $strDest
+	lda #$verbBuffer/256
+	sta $strDest+1
 	jsr strcat  ; copy prep onto verb 
+	;shift all the pointer (indexes) down
+	ldy #2
+_s	cpy numWords
+	beq _d
+	lda wordIndexes,y
+	dey 
+	sta wordIndexes,y
+	iny
+	iny
+	jmp _s
+	
 _d  rts
 
 	
