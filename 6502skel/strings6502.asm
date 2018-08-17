@@ -4,9 +4,25 @@
 ;strSrc and strDest must be set
 	.module strcat
 strcat	
+		lda #0
 		ldy #0
-_lp		lda (strSrc),y
+		sta srcIx
+_mv		lda (strDest),y
+		cmp #0
+		beq _cp
+		iny
+		jmp _mv
+_cp
+		sty dstIx
+_lp		
+		ldy srcIx
+		lda (strSrc),y
+		iny
+		sty srcIx
+		ldy dstIx
 		sta (strDest),y
+		iny
+		sty dstIx
 		cmp #0
 		beq _x
 		iny
@@ -92,5 +108,7 @@ to_upper
 	sbc #160 ; to upper 
 _x	rts
 		
+srcIx .byte 0
+dstIx .byte 0
 streqRes .byte 0
 cmpLen .byte 6  ; how many bytes to compare comparing strings
