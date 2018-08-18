@@ -16,7 +16,7 @@ extern const int NumObjects;
 
 extern char ObjectData[];
 extern unsigned char ObjectWordTableData[];
-char Scores[NumObjects]; /* object scores for word matching*/
+char Scores[128]; /* object scores for word matching*/
 
 typedef  unsigned char BOOL;
 
@@ -78,6 +78,8 @@ unsigned char VerbId=255;
 unsigned char DobjId=255;
 unsigned char PrepId=255;
 unsigned char IobjId=255;
+unsigned char DobjSupplied=0;
+unsigned char IobjSupplied=0;
 char *WordPtrs[10];
 char VerbBuffer[80];
 
@@ -551,7 +553,7 @@ void try_default_sentence()
 	}
 	else
 	{
-		printf("couldn't find a default handler.\n");
+//		printf("couldn't find a default handler.\n");
 		Handled = FALSE;
 	}
 //	if (VerbId == UNWEAR_VERB_ID)
@@ -1260,7 +1262,7 @@ BOOL check_dobj_visible()
 
 BOOL check_dobj_supplied()
 {
-	if (DobjId == INVALID)
+	if (DobjSupplied == 0)
 	{
 		printf("Missing noun.\n");
 		return FALSE;
@@ -1270,7 +1272,7 @@ BOOL check_dobj_supplied()
 
 BOOL check_iobj_supplied()
 {
-	if (IobjId == INVALID)
+	if (IobjSupplied	== 0)
 	{
 		printf("Missing noun.\n");
 		return FALSE;
@@ -1651,7 +1653,7 @@ void tokenize_input()
    /* walk through other tokens */
    while( token != NULL ) 
    {
-      printf("token: %s\n", token);
+  //    printf("token: %s\n", token);
 	  if (!is_article(token))
 	  {
 		  WordPtrs[NumWords] = token;
@@ -1659,14 +1661,14 @@ void tokenize_input()
 	  }		  
       token = strtok(NULL, delim);
    }
-   printf("WordCount=%d\n",NumWords);
+//   printf("WordCount=%d\n",NumWords);
 }
 
 /*if needed, turn verbs like 'look at' into one word*/
 void collapse_verb()
 {
 	int i=1;
-	printf("Num words=%d\n", NumWords);
+//	printf("Num words=%d\n", NumWords);
 	if (NumWords > 1)
     {
 	   if (is_prep(WordPtrs[1]))
@@ -1686,7 +1688,7 @@ void collapse_verb()
 	 
 	strcpy(VerbBuffer,WordPtrs[0]);
 	
-	printf("verb=%s\n",VerbBuffer);
+//	printf("verb=%s\n",VerbBuffer);
 }
 
 /*scores each object if wordId applies to it*/
@@ -1705,7 +1707,7 @@ void score_objects(unsigned char wordId)
 	//	 			printf("Word %d matches object %d\n", wordId,i);
 					Scores[i]+=1;
 					
-					if (is_visible_to(playerRoom,PLAYER_ID))
+					if (is_visible_to(playerRoom,i))
 						Scores[i]+=1;
 			}
  		}
@@ -1769,7 +1771,9 @@ BOOL parse_and_map()
 	DobjId=INVALID;
 	PrepId=INVALID;
 	IobjId=INVALID;
-
+	DobjSupplied=FALSE;
+	IobjSupplied=FALSE;
+	
 	tokenize_input();
 	
 	if (NumWords==0)
@@ -1801,6 +1805,8 @@ BOOL parse_and_map()
 		//	printf("prep found:%s\n",WordPtrs[i]);
 
 			PrepId = get_word_id(WordPtrs[i],PrepTable,PrepTableSize);
+			IobjSupplied=TRUE;
+			DobjSupplied=TRUE;
 			if (score_object(1,i,&DobjId) == TRUE)
 			{
 				if (score_object(i+1,NumWords,&IobjId) == TRUE)
@@ -1814,6 +1820,7 @@ BOOL parse_and_map()
 	
 	/*no prep found - whole thing is noun1*/
 	//printf("no prep found.\n");
+	DobjSupplied = TRUE;
 	return score_object(1,NumWords,&DobjId);	
 }
 
