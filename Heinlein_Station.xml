@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <project>
+    <projname>NEW_PROJECT</projname>
+    <welcome>Short welcome message.</welcome>
+    <author>Your name</author>
+    <version>Version 1.0</version>
+    <preps>
+      <prep>in</prep>
+      <prep>on</prep>
+      <prep>at</prep>
+      <prep>under</prep>
+      <prep>into</prep>
+      <prep>inside</prep>
+      <prep>through</prep>
+      <prep>out</prep>
+      <prep>behind</prep>
+      <prep>off</prep>
+      <prep>up</prep>
+      <prep>with</prep>
+      <prep>to</prep>
+      <prep>off</prep>
+      <prep>north</prep>
+      <prep>south</prep>
+      <prep>east</prep>
+      <prep>west</prep>
+      <prep>up</prep>
+      <prep>down</prep>
+    </preps>
+    <verbs>
+      <builtinverbs>
+        <verb>go</verb>
+        <verb>n,go north,north</verb>
+        <verb>s,go south,south</verb>
+        <verb>e,go east,east</verb>
+        <verb>w,go west,west</verb>
+        <verb>ne,go northeast,northeast</verb>
+        <verb>se,go southeast,southeast</verb>
+        <verb>sw,go southwest,southwest</verb>
+        <verb>nw,go northwest,northwest</verb>
+        <verb>up,go up,u</verb>
+        <verb>down,go down,d</verb>
+        <verb>enter,go in,go into,go inside</verb>
+        <verb>out</verb>
+        <verb>get,take,grab,pick up</verb>
+        <verb>give</verb>
+        <verb>inventory,i</verb>
+        <verb>kill,attack</verb>
+        <verb>drop</verb>
+        <verb>light</verb>
+        <verb>look,l</verb>
+        <verb>examine,x,look at,inspect</verb>
+        <verb>look in,search</verb>
+        <verb>open</verb>
+        <verb>lock</verb>
+        <verb>unlock</verb>
+        <verb>close,shut</verb>
+        <verb>eat</verb>
+        <verb>drink</verb>
+        <verb>put,place</verb>
+        <verb>quit</verb>
+        <verb>smell,sniff</verb>
+        <verb>listen</verb>
+        <verb>wait</verb>
+        <verb>climb</verb>
+        <verb>yell,scream,shout</verb>
+        <verb>jump</verb>
+        <verb>talk to</verb>
+        <verb>turn on</verb>
+        <verb>turn off</verb>
+        <verb>wear</verb>
+        <verb>save</verb>
+        <verb>restore</verb>
+      </builtinverbs>
+      <userverbs>
+        <verb>push,press</verb>
+      </userverbs>
+    </verbs>
+    <objects>
+      <object id="0" holder="0" name="Offscreen" printedname="Offscreen">
+        <description>Offscreen.  Move objects here to remove them from the world.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="1" holder="3" name="PLAYER" printedname="PLAYER">
+        <description>You're a wonderful person. You shouldn't care what you look like.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
+        <synonyms names="ME,SELF" />
+        <nogo />
+        <backdrop />
+      </object>
+      <object id="2" holder="0" name="Corridor" printedname="Corridor">
+        <description>This a spartan corridor. To west is an airlock. A hallways leads east. Crew quarters are to the south.</description>
+        <initialdescription />
+        <directions n="255" s="3" e="4" w="7" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="3" holder="0" name="Quarters" printedname="Quarters">
+        <description>These are the quarters where the crew sleeps.  To the north is a hallway.</description>
+        <initialdescription />
+        <directions n="2" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="4" holder="0" name="Junction" printedname="Junction">
+        <description>Hallways lead west and south. To the east is a turbo lift.</description>
+        <initialdescription />
+        <directions n="255" s="14" e="5" w="2" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="5" holder="0" name="Turbo_Lift_1" printedname="Turbo Lift 1">
+        <description>This is a small elevalor.  A door to the west leads out to a corridor.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="4" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="6" holder="0" name="Turbo_Lift_2" printedname="Turbo Lift 2">
+        <description>DESCRIPTION NOT SET</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="10" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="7" holder="0" name="Airlock_1" printedname="Airlock 1">
+        <description>This is an airlock for leaving and entering the command center.  Automatic doors to the east and west maintain pressurization of the facility.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="2" w="9" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="8" holder="0" name="Airlock_2" printedname="Airlock 2">
+        <description>This is an airlock for leaving and entering the science center.  Automatic doors to the east and west maintain pressurization of the facility.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="9" w="11" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="9" holder="0" name="Lunar_Surface" printedname="Lunar Surface">
+        <description>You are standing on a flat lunar plain between the two space stations.  To the east is the command center.  To the west is the science center.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="7" w="8" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="10" holder="0" name="Command_Center" printedname="Command Center">
+        <description>This is the command center atop the installation.  From here you have a view of the surrounding terrain.  To the west, across a flat plain, you can see the science station. To the east is a turbo lift.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="6" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="11" holder="0" name="Corridor" printedname="Corridor">
+        <description>There are exits to the north and south.  To the east is an airlock.</description>
+        <initialdescription />
+        <directions n="12" s="13" e="8" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="12" holder="0" name="Chemisty_Lab" printedname="Chemisty Lab">
+        <description>A doorway leads south to a hallway.</description>
+        <initialdescription />
+        <directions n="255" s="11" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="13" holder="0" name="Electronics_lab" printedname="Electronics lab">
+        <description>This is room is where the technicians repair and enhance the station's electronics. To the north is a corridor.</description>
+        <initialdescription />
+        <directions n="11" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="14" holder="0" name="Corridor" printedname="Corridor">
+        <description>This is the south end of a corrididor. To the north is a junction.</description>
+        <initialdescription />
+        <directions n="4" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="15" holder="2" name="giant_space_slug" printedname="giant space slug">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="16" holder="3" name="bunk" printedname="bunk">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="0" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="17" holder="5" name="button" printedname="button">
+        <description>You noticed nothing unexpected.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="18" holder="6" name="button" printedname="button">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="19" holder="7" name="button" printedname="button">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags emittinglight="0" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="20" holder="7" name="placard" printedname="placard">
+        <description>The placard reads 'PRESS BUTTON TO ACTIVATE AIRLOCK'.</description>
+        <initialdescription>There is a placard on the wall.</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="21" holder="8" name="button" printedname="button">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="22" holder="8" name="placard" printedname="placard">
+        <description>The placard reads 'PRESS BUTTON TO ACTIVATE AIRLOCK'.</description>
+        <initialdescription>There is placard on the wall</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags openable="0" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="23" holder="10" name="panel" printedname="panel">
+        <description>The panel is labeled 'COMM PANEL'</description>
+        <initialdescription>On the north wall is a panel labeled 'COMM'</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags container="0" openable="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="24" holder="10" name="S-100_slot" printedname="S-100 slot">
+        <description>The slot is design to accept a communication card designed with S-100 bus technology.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags container="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="25" holder="10" name="subspace_radio" printedname="subspace radio">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags portable="0" openable="0" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="26" holder="12" name="jar" printedname="jar">
+        <description>The jar has the letters NaCL written on it.</description>
+        <initialdescription>A small jar sits on a table</initialdescription>
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags portable="1" openable="1" wearable="0" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="27" holder="26" name="small_white_cube" printedname="small white cube">
+        <description>The cube is about 1 cm square.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags portable="1" openable="0" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="28" holder="13" name="workbench" printedname="workbench">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="29" holder="13" name="comm_board" printedname="comm board">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="30" holder="14" name="storage_locker" printedname="storage locker">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags openable="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+      <object id="31" holder="30" name="space_suit" printedname="space suit">
+        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+        <initialdescription />
+        <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
+        <flags portable="1" openable="0" wearable="1" />
+        <synonyms names="" />
+        <nogo />
+      </object>
+    </objects>
+    <checks>
+      <check verb="close" check="check_dobj_supplied" />
+      <check verb="drink" check="check_dobj_supplied" />
+      <check verb="drink" check="check_have_dobj" />
+      <check verb="drop" check="check_dobj_supplied" />
+      <check verb="drop" check="check_have_dobj" />
+      <check verb="eat" check="check_dobj_supplied" />
+      <check verb="enter" check="check_dobj_supplied" />
+      <check verb="examine" check="check_dobj_supplied" />
+      <check verb="examine" check="check_see_dobj   " />
+      <check verb="get" check="check_dobj_supplied" />
+      <check verb="get" check="check_see_dobj" />
+      <check verb="get" check="check_dont_have_dobj" />
+      <check verb="get" check="check_dobj_portable" />
+      <check verb="kill" check="check_dobj_supplied" />
+      <check verb="kill" check="check_see_dobj" />
+      <check verb="light" check="check_dobj_supplied" />
+      <check verb="light" check="check_have_dobj" />
+      <check verb="light" check="check_see_dobj" />
+      <check verb="open" check="check_dobj_supplied" />
+      <check verb="open" check="check_dobj_opnable" />
+      <check verb="open" check="check_dobj_unlocked" />
+      <check verb="put" check="check_dobj_supplied" />
+      <check verb="put" check="check_prep_supplied" />
+      <check verb="put" check="check_iobj_supplied" />
+      <check verb="put" check="check_not_self_or_child" />
+      <check verb="talk to" check="check_dobj_supplied" />
+      <check verb="talk to" check="check_see_dobj" />
+      <check verb="turn on" check="check_dobj_supplied" />
+      <check verb="turn on" check="check_see_dobj" />
+      <check verb="unlock" check="check_dobj_supplied" />
+      <check verb="look in" check="check_dobj_supplied" />
+      <check verb="look in" check="check_see_dobj" />
+      <check verb="quit" check="quit" />
+    </checks>
+    <sentences>
+      <sentence verb="examine" do="*" prep="" io="" type="before" sub="get_portable" />
+      <sentence verb="take" do="PLAYER" prep="" io="" type="instead" sub="not_possible" />
+      <sentence verb="kill" do="PLAYER" prep="" io="" type="instead" sub="kill_self" />
+      <sentence verb="kill" do="*" prep="" io="" type="instead" sub="default_kill" />
+      <sentence verb="kill" do="*" prep="with" io="*" type="instead" sub="default_kill" />
+      <sentence verb="talk to" do="PLAYER" prep="" io="" type="instead" sub="talk_to_self" />
+      <sentence verb="talk to" do="*" prep="" io="" type="instead" sub="default_talk" />
+      <sentence verb="listen" do="" prep="" io="" type="instead" sub="listen" />
+      <sentence verb="smell" do="" prep="" io="" type="instead" sub="smell" />
+      <sentence verb="wait" do="" prep="" io="" type="instead" sub="wait" />
+      <sentence verb="yell" do="" prep="" io="" type="instead" sub="yell" />
+      <sentence verb="jump" do="" prep="" io="" type="instead" sub="jump" />
+      <sentence verb="eat" do="*" prep="" io="" type="instead" sub="default_eat" />
+      <sentence verb="drink" do="*" prep="" io="" type="instead" sub="default_drink" />
+      <sentence verb="wear" do="*" prep="" io="" type="before" sub="get_portable" />
+      <sentence verb="push" do="button" prep="" io="" type="instead" sub="go_up" />
+      <sentence verb="push" do="button" prep="" io="" type="instead" sub="go_down" />
+      <sentence verb="push" do="button" prep="" io="" type="instead" sub="use_airlock1" />
+    </sentences>
+    <routines>
+      <routine name="not_possible">if (dobj == player)
+{
+     println("Not physically possible.");
+} </routine>
+      <routine name="get_portable">if (dobj.portable == 1) { if (dobj.holder != player) { println("(Taken)"); dobj.holder = player;}  } </routine>
+      <routine name="kill_self">println("If you are experiencing suicidal thoughts you should seek psychiatric help.");</routine>
+      <routine name="default_kill">println("Perhaps you should count to 3 and calm down.");</routine>
+      <routine name="kill_player">println("***YOU HAVE DIED***.");player.holder=2;
+</routine>
+      <routine name="talk_to_self">println("Talking to yourself is a sign of impending mental collapse.");</routine>
+      <routine name="default_talk">println("That fails to produce an exciting conversation.");</routine>
+      <routine name="listen">println("You hear nothing unexpected.");</routine>
+      <routine name="smell">println("You smell nothing unexpected.");</routine>
+      <routine name="wait">println("Time passes...");</routine>
+      <routine name="yell">println("AAAAAAAAAAAAARRRRGGGGGG!");</routine>
+      <routine name="jump">println("WHEEEEEE!");
+</routine>
+      <routine name="default_eat">println("That's not part of a healthy diet.");
+</routine>
+      <routine name="default_drink">println("That's not something you can drink.");
+</routine>
+      <routine name="go_up">println("The turbo lift rises to the top level of the station.");
+println("The door to the west opens, revealing a command center.");
+player.holder = turbo_lift_2;
+</routine>
+      <routine name="go_down">println("The turbo lift rises to the ground level of the station.");
+println("The door to the west opens, revealing a corridor.");
+player.holder = turbo_lift_1;
+</routine>
+      <routine name="use_airlock1">if (airlock1Open == 0)
+{
+     println("A computerized voice says, 'WARNING: DEPRESSSURIZING AIRLOCK'");
+     airlock1Open = 1;
+     airlock_1.w = lunar_surface;
+     airlock_1.e = 255;
+}
+else
+{
+     println("A computerized voice says, 'RESTORING ATMOSPHERIC PRESSURE'");
+     airlock1Open = 0;
+     airlock_1.w = 255;
+     airlock_1.e = 2;
+}
+</routine>
+    </routines>
+    <events />
+    <variables>
+      <builtin>
+        <var name="dobj" addr="sentence+1" value="0" />
+        <var name="iobj" addr="sentence+3" value="0" />
+        <var name="score" addr="score" value="0" />
+        <var name="moves" addr="moves" value="0" />
+        <var name="health" addr="health" value="100" />
+        <var name="turnsWithoutLight" addr="turnsWithoutLight" value="0" />
+        <var name="gameOver" addr="gameOver" value="0" />
+      </builtin>
+      <user>
+        <var name="pressure" addr="Lantern" value="1" />
+        <var name="airlock1Open" addr="Lantern" value="0" />
+        <var name="airlock2Open" addr="Lantern" value="1" />
+      </user>
+    </variables>
+  </project>
+</xml>
