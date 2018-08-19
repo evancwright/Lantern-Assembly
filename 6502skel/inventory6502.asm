@@ -30,13 +30,14 @@ _x		rts
 ;registers are preserved
 	.module has_visible_child
 has_visible_child
-	    sta $parentId
+	    pha
+		sta $parentId
+		
 		pha
-		txa
+		txa ; save regs
 		pha
 		tya
 		pha
-		
 		
 		lda $tableAddr ;save table
 		pha
@@ -62,7 +63,7 @@ has_visible_child
 		ldx #CONTAINER
 		jsr get_obj_prop
 		cmp #0
-		bne _x
+		beq _x
 		;object is a container
 		lda parentId
 		ldx #OPEN
@@ -104,6 +105,8 @@ _x		pla ; restore table
 		pla
 		tax
 		pla
+		pla 
+		sta parentId
 		rts
 
 ;lists item names
@@ -111,16 +114,24 @@ _x		pla ; restore table
 ;the parent is on the top of the stack
 	.module list_items
 list_items
-		sta $parentId
+		pha 
+		sta $parentId  ; save parent
+		lda $tableAddr
+		pha
+		lda $tableAddr+1
+		pha		
 		lda #$obj_table%256	; setup object table
 		sta $tableAddr
 		lda #$obj_table/256
 		sta $tableAddr+1
-_lp		ldy #0
+_lp		lda parentId
+		pha
+		ldy #0
 		lda ($tableAddr),y
 		cmp #255
-		beq _x
-		ldy #HOLDER_ID
+		bne _g
+		jmp _x ;done
+_g		ldy #HOLDER_ID
 		lda ($tableAddr),y
 		cmp $parentId
 		bne _c
@@ -137,6 +148,7 @@ _lp		ldy #0
 		pha
 		ldy #0				;reload id
 		lda ($tableAddr),y
+	 
 		jsr indent
 		pha
 		lda #leadingA%256
@@ -152,21 +164,19 @@ _lp		ldy #0
 		sta $tableAddr	;restory table (lo)		
 		jsr print_adj
 		jsr printcr
-
+		
 		jsr supporter_or_open_container
 		lda showContents
 		cmp #0
 		beq _c
+		lda ($tableAddr),y ; reload id 
 		jsr has_visible_child
 		lda visibleChild
 		cmp #0
 		beq _c
 		jsr print_list_header
-		lda $tableAddr	;save table (lo)
-		pha
-		lda $tableAddr+1 	;save table (hi)
-		pha		
-		lda parentId 	; save parent id
+		
+		lda parentId
 		pha
 		ldy #0				;set the new parent id
 		lda ($tableAddr),y
@@ -174,17 +184,23 @@ _lp		ldy #0
 		inc indentLvl
 		jsr list_items ; recurse
 		dec indentLvl
-		pla		   ; restore parent id
+		pla
 		sta parentId
-		pla 
-		sta $tableAddr+1	;restore table (hi)
-		pla 
-		sta $tableAddr	;restore table (lo)		
-
+		
+		
 _s		nop	;
 _c		jsr next_entry
+		pla
+		sta parentId
 		jmp _lp
-_x		rts
+_x		pla ; pull parent temp
+		pla				;restor table
+		sta $tableAddr+1
+		pla
+		sta $tableAddr
+		pla 
+		sta parentId	;restore parent
+		rts
 
 	.module get_sub		
 get_sub

@@ -13,6 +13,10 @@ process_sentence
 		cmp #1
 		beq _x
 
+		lda sentence+1
+		sta oldDobj
+		lda sentence+3
+		sta oldIobj
 		jsr run_preactions ; run preactions
 		jsr run_actions ;
 		jsr run_postactions ;
@@ -279,6 +283,10 @@ _run	lda #1
 		lda #_nxt%256
 		pha
 		
+		lda oldDobj
+		sta sentence+1
+		lda oldIobj
+		sta sentence+3
 		jmp ($jumpVector)	; run the sentence
 		
 _nxt	nop ; padding - don not remove!
@@ -314,4 +322,4 @@ defaultHandled .byte 0
 sentenceRun .byte 0  ;flag used for wildcards
 handled .byte 0 ; action taken or not
 oldDobj .byte 0
-oldIObj .byte 0
+oldIobj .byte 0

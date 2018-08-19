@@ -90,6 +90,7 @@ list_objects
 		sta $tableAddr+1		
 _lp		ldy #0	; need to index with 0
 		lda ($tableAddr),y
+		sta parentId
 		cmp #0	; skip 'offscreen'
 		beq _c
 		cmp #1	; skip player
@@ -112,22 +113,23 @@ _lp		ldy #0	; need to index with 0
 		beq _s
 		jsr print_frm_str_tbl ; print initial desc
 		jmp _l
-_s		ldy #0	; reload id
-		lda ($tableAddr),y
-		jsr list_object
+_s		 
+		lda parentId ; reload
+		jsr list_object ; there is a __ here
 _l		nop ; list contents
-		ldy #0	 ; reload parent
-		lda ($tableAddr),y
+ 		lda parentId
 		jsr has_visible_child
 		lda visibleChild
 		cmp #0
 		beq _c  ; no objects? continue
-		lda ($tableAddr),y ;reload id
-		
-		sta parentId
+ 		lda parentId
 		jsr supporter_or_open_container
+		lda showContents
+		cmp #0
+		beq _c
 		jsr print_list_header
 		inc indentLvl
+		lda parentId
 		jsr list_items ; recurse
 		dec indentLvl
 _c		jsr next_entry
