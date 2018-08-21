@@ -5,6 +5,10 @@
 ;this is just a legacy thing.  visibility is now
 ;checked by the in the sentence handling
 check_see_dobj
+	lda $tableAddr
+	pha
+	lda $tableAddr+1
+	pha
 	jsr get_player_room
 	sta parent
 	lda $sentence+1
@@ -18,7 +22,11 @@ check_see_dobj
 	jsr dont_see
 	lda #1
 	sta checkFailed
-_x	rts
+_x	pla	
+	sta $tableAddr+1
+	pla 
+	sta $tableAddr
+	rts
 
 	
 
