@@ -136,10 +136,20 @@ _x			pla
 	.module save_cursor
 	
 save_cursor
+	pha
+	txa
+	pha
+	tya
+	pha
 	sec
 	jsr PLOT
 	stx saveVCur
 	sty saveHCur
+	pla 
+	tay
+	pla
+	tax
+	pla
 	rts
 		
 	.module restore_cursor
