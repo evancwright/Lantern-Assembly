@@ -6,9 +6,9 @@
 #define SPACE 32
 #define GT 62
 #define BS 14
-#define CR 12 
+#define CR $0D
 #define UNDRSCR 164
-
+#define INVALID 255
 ;#define rdkey $FD0C
 
 #define cout1 $FFD2
@@ -46,11 +46,13 @@ start
 	jsr show_intro
  	jsr look_sub
 _lp
-; 	jsr clr_buffr ; CAUSE OF CPU JAM
-	jsr clr_words
     jsr printcr
 	jsr print_title_bar
-			
+	
+	;clear the encode fail flag
+	lda #0
+	sta encodeFail
+		
 	jsr readkb
  	cmp #CR ; cr
 	bne _c
@@ -59,28 +61,16 @@ _lp
 _c  lda #0
 	sta strSrc
 	
-	jsr remove_articles
-	jsr get_verb
-	jsr get_nouns ; 
+	jsr parse
 	
-	jsr encode_sentence
-	lda #1
-	cmp encodeFailed
+	lda encodeFail
+	cmp #1
 	beq _lp
 	
-	jsr map_nouns
-	
-	jsr check_mapping ; make sure objects were visible
-	lda #1
-	cmp encodeFailed
-	beq _lp
-	
-	jsr process_sentence	
-	
+	jsr process_sentence		
 	jsr player_can_see	
 	jsr do_events
-	jsr inv_weight
- 		
+	jsr inv_weight	
 	jmp _lp
 
 _x 	jsr printcr
@@ -92,7 +82,9 @@ _x 	jsr printcr
 .include "printing6502.asm"
 .include "c64printing.asm"
 .include "look6502.asm"
-.include "c64parser.asm"
+;.include "c64parser.asm"
+.include "newparser.asm"
+.include "scoring6502.asm"
 .include "tables6502.asm"
 .include "routines6502.asm"
 .include "attributes6502.asm"
@@ -138,8 +130,6 @@ confused .text "I DON'T FOLLOW YOU."
 ;quit .byte "QUIT",0h
 stack .byte 0
 
-score .byte 0
-gameOver .byte 0
 temp .byte 0
 .end
 
