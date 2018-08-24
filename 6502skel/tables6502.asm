@@ -19,8 +19,8 @@ get_entry_id
 		ldx #255	;set index to 'not found'	
 		stx wrdId
 		ldx #0  ; loop counter
-		ldy #0
-_lp		lda ($tableAddr),y	;
+_lp		ldy #0
+		lda ($tableAddr),y	;
 		cmp #255 	; hit end?
 		beq _x
 		jsr inc_tabl_addr ; skip id byte
@@ -59,8 +59,8 @@ get_word_index
 		ldx #255	;set index to 'not found'	
 		stx strIndex
 		ldx #0  ; loop counter
-		ldy #0
-_lp		lda ($tableAddr),y	;
+_lp		ldy #0
+		lda ($tableAddr),y	;
 		cmp #255
 		beq _x
 		cmp #0
