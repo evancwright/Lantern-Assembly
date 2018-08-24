@@ -4,8 +4,21 @@
 	
 	.module parse
 parse
+	lda #255
+	sta sentence
+	sta sentence+1
+	sta sentence+2
+	sta sentence+3
+	jsr clr_ixs
 	jsr strtok
-	jsr compact_verb
+	lda $numWords
+	cmp #0
+	bne _e
+	jsr no_input
+	lda #1
+	sta encodeFail
+	rts
+_e	jsr compact_verb
 	jsr validate_verb
 	lda encodeFail
 	cmp #1
@@ -218,6 +231,9 @@ compact_verb
 	lda #$verbBuffer/256
 	sta $strDest+1
 	jsr strcpy  	;copy word[0] to buffer
+	lda #1
+	cmp numWords
+	beq _d
 	ldy wordIndexes+1
  	jsr is_prep2
 	lda strIndex
@@ -292,6 +308,11 @@ strtok
 	sty startIx
 	sty endIx
 	jsr seek_start ; position at 1st word
+	ldy $startIx
+	lda kbdbuf,y
+	cmp #0
+	bne _lp
+	rts
 _lp	
 	jsr seek_end
 	ldy endIx   
@@ -494,6 +515,15 @@ no_input
 		sta strAddr+1
 		jsr printstrcr
 		rts 
+
+	.module clr_ixs
+clr_ixs
+	lda #0
+_lp	sta wordIndexes,y
+	iny
+	cpy #12
+	bne _lp
+	rts
 		
 ambig	.db "I DON'T KNOW WHICH ONE YOU MEAN.", 0	 	
 ;kbdbuf	.text "PUT THE SWORD IN THE BOX",0	
