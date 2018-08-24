@@ -23,6 +23,8 @@ _kblp	jsr getchar
 		beq _kblp
 		cmp #BS  ; backspace?
 		beq _bs
+		cmp #$14  ; backspace?
+		beq _bs
 		cmp #0Dh
 		beq _kbout
 		sta $kbdbuf,y; ;store key 
@@ -30,28 +32,23 @@ _kblp	jsr getchar
 ;		jsr undrscr
 		iny
 		jmp _kblp
-_bs		lda #SPACE	; space
-		jsr cout1 
-		nop ;back the cursor up
-		nop ;		dec $24		; back up
-		nop ;		dec $24		; back up
-		jsr backup
-		jsr backup
-		dey
+_bs	
+		jsr save_cursor
+		ldx saveHCur  ; if already in col 1, don't back up any more
+		cpx #1
+		beq _kblp
+		jsr cout1 ; back up on screen
 		lda #0
-		sta $kbdbuf,y
-		nop ; back up cursor on screen
-	;	dec $24 ; back up (CHANGE ME)
-	;	jsr undrscr
-		jmp _kblp
+		sta $kbdbuf,y; 
+ 		dey		
+ 		sta $kbdbuf,y; 
+ 		jmp _kblp
 _kbout	
-		;dec $24	; back up and rub out the cursor
-		jsr printcr	; new line
-		jsr printcr	; new line
-		
 		lda #0	; null terminate buffer
 		sta $kbdbuf,y;
-
+		jsr printcr	; new line
+		jsr printcr	; new line
+ 
 		pla	;restore registers
 		tay ;restore y
 		pla
@@ -68,7 +65,13 @@ undrscr
  	pla
 	rts
 
+;backs the cursor up	
 backup
+	pha
+	tax
+	pha
+	tay
+	pha
 	; get current pos
 	sec ; carry flag 1 = get 
 	ldx #0
@@ -78,6 +81,11 @@ backup
 	clc ; carry flag 0 = set 
 	dey ; back up
 	jsr PLOT ; save cur pos
+	pla
+	tay
+	pla
+	tax
+	pla
 	rts
 
 
