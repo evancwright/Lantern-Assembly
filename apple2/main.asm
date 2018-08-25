@@ -16,7 +16,7 @@
 #define keyin  $FD0C
 #define getlin $FD6A 
 #define cout1 $FDF0
-#define scrWdth $21
+#define scrWdth $24  ; 39
 #define hcur $24
 #define vcur $25
 #define kbdbuf $200
@@ -37,7 +37,8 @@
 start
 	tsx			 ;save stack
 	stx stack
-	
+	lda #32
+	sta charsLeft
 	jsr cls
 	jsr show_intro
  	jsr look_sub
@@ -50,6 +51,10 @@ _lp
 	sta encodeFail
 	
 	jsr readkb
+	
+	lda #scrWdth
+	sta charsLeft
+	
 	lda $200
 	cmp #$8D ; cr
 	bne _c
@@ -113,6 +118,7 @@ _x 	jsr printcr
 .include "VerbTable6502.asm"
 .include "CheckRules6502.asm"
 .include "a2fileio.asm"
+.include "formatting6502.asm"
 beginData
 .include "ObjectTable6502.asm"	
 .include "builtInVars6502.asm"
@@ -139,4 +145,5 @@ confused .text "I DON'T FOLLOW YOU."
 ;quit .byte "QUIT",0h
 ;NumWords .db 
 stack .byte 0
+spcChar .byte $A0
 .end
