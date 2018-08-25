@@ -9,10 +9,11 @@
 #define CR $0D
 #define UNDRSCR 164
 #define INVALID 255
+
 ;#define rdkey $FD0C
 
 #define cout1 $FFD2
-;#define scrWdth $21
+#define scrWdth $24
 
 ;zero page vars
 #define strAddr $03 ; 3-4
@@ -42,10 +43,14 @@ start
 	tsx			 ;save stack
 	stx stack
 	
+	lda #scrWdth
+	sta charsLeft
+	
 	jsr cls
 	jsr show_intro
  	jsr look_sub
 _lp
+	jsr clr_buffr
     jsr printcr
 	jsr print_title_bar
 	
@@ -54,6 +59,10 @@ _lp
 	sta encodeFail
 		
 	jsr readkb
+	
+	lda #scrWdth
+	sta charsLeft
+	
  	cmp #CR ; cr
 	bne _c
 	jsr no_input
@@ -81,8 +90,8 @@ _x 	jsr printcr
 .include "strings6502.asm"
 .include "printing6502.asm"
 .include "c64printing.asm"
+.include "formatting6502.asm"
 .include "look6502.asm"
-;.include "c64parser.asm"
 .include "newparser.asm"
 .include "scoring6502.asm"
 .include "tables6502.asm"
@@ -129,8 +138,9 @@ confused .text "I DON'T FOLLOW YOU."
 	.byte 0
 ;quit .byte "QUIT",0h
 stack .byte 0
-
+spcChar .byte $20
 temp .byte 0
+charMask .byte $0  ; used on apple
 .end
 
 
