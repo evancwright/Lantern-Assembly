@@ -16,6 +16,8 @@ printcr:
 	pha
 	lda #$CR ; non-flashing cr
 	jsr $cout1
+	lda  #scrWdth
+	sta charsLeft
 	pla
 	rts
 	
@@ -101,37 +103,6 @@ backup_2
 	jsr backup
 	jsr backup
 	rts			
-	
-	;prints the string whose addr is stored in strAddr
-	.module printstr
-printstr
-			pha
-			tya
-			pha
-			ldy #0
-_lp1		lda ($strAddr),y
-			cmp #0
-			beq _x
-			cmp #32 ; space;
-			bne _s
-			jsr get_wrd_len  ; get and store length of next word
-			tax
- 			sec
-			lda #SCREEN_WIDTH ; line len
-			sbc $CCOL
-			cmp wrdLen
-			bcs _s1	; room left on line
-			lda #CR		; output a cr instead
-			jmp _c
-_s1			txa			; restore char and output		
-_c			nop
-_s			jsr $cout1
-			iny
-			jmp _lp1
-_x			pla
-			tay
-			pla	
-			rts
 
 	.module save_cursor
 	
@@ -169,7 +140,11 @@ cls
 	ldy #0
 	jsr PLOT
 	rts
-		
+
+charout1
+	jsr cout1
+	rts
+	
 saveHCur .byte 0
 saveVCur .byte 0
 
