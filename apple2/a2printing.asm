@@ -4,6 +4,8 @@ printcr:
 	pha
 	lda #$8D ; non-flashing cr
 	jsr $cout1
+	lda #scrWdth
+	sta charsLeft
 	pla
 	rts
 		
@@ -31,7 +33,7 @@ print_title_bar
 _lp 
 		sta $400,y
 	 	iny 
-		cpy scrWdth ; screen width
+		cpy #40 ; screen width
 		beq _out
 		jmp _lp
 _out	lda #0
@@ -129,8 +131,8 @@ backup_2
 	
 ;printstr
 ;prints the string whose addr is stored in strAddr
-	.module printstr
-printstr
+	.module printstr1
+printstr1
 			pha
 			tya
 			pha
