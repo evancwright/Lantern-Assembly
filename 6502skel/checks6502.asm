@@ -117,6 +117,7 @@ check_have_dobj
 		sta parent
 		lda $sentence+1
 		sta child
+		jsr get_obj_attr ; set table addr
 		jsr visible_ancestor
 		lda visibleAncestorFlag
 		cmp #0
@@ -176,10 +177,10 @@ _x		pla
 	.module check_dobj_lockable
 check_dobj_lockable
 		lda $sentence+1
-		ldx #OPENABLE
+		ldx #LOCKABLE
 		jsr get_obj_prop
 		cmp #1
-		bne _x
+		beq _x
 		jsr thats_not_something
 _x		rts
 
@@ -265,7 +266,7 @@ missing_dobj
 		rts
 		
 
-;prints the verb
+;prints the verb and sets the fail flag
 thats_not_something
 		lda #1
 		sta checkFailed
@@ -409,7 +410,7 @@ missingDobj .text "MISSING NOUN."
 thatsNotSomething .text "THAT'S NOT SOMETHING YOU CAN "
 .byte 0		
 notContainer .text "THAT'S NOT SOMETHING YOU CAN "
-.byte 0	
+.byte 0
 alreadyLocked	.text "IS ALREADY LOCKED."
 .byte 0
 alreadyUnlocked	.text "IS ALREADY UNLOCKED."
