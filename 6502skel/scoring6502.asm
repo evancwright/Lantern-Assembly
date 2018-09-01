@@ -103,7 +103,7 @@ _c
 	.module get_max_count
 get_max_count
 	ldy #0
-	sta maxScoreCount
+	sty maxScoreCount
 _lp
 	lda scores,y
 	cmp maxScore
