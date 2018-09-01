@@ -74,9 +74,9 @@ visible_ancestor
 		lda $tableAddr+1
 		pha
  
-;		ldy #0		; get current object (child)
-;		lda ($tableAddr),y
-;		sta child
+		ldy #0		; get current object (child)
+		lda ($tableAddr),y
+		sta child
 		
 		ldx #0  ; loop counter
 		lda #0	;clear search flag
