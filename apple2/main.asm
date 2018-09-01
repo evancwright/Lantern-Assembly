@@ -37,7 +37,7 @@
 start
 	tsx			 ;save stack
 	stx stack
-	lda #32
+	lda #scrWdth
 	sta charsLeft
 	jsr cls
 	jsr show_intro
@@ -146,4 +146,5 @@ confused .text "I DON'T FOLLOW YOU."
 ;NumWords .db 
 stack .byte 0
 spcChar .byte $A0
+charMask .byte $80
 .end
