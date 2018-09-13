@@ -13,8 +13,11 @@ readkb
 		jsr cout1
 		jsr undrscr
 		ldy #0
-_kblp	lda $c000 	; kb strobe
+_kblp	
+		inc lastRand ; reseed rand from kb
+		lda $c000 	; kb strobe
 		bpl _kblp   
+		
 		sta $c010; ;clear strobe 
 		cmp #88h  ; backspace?
 		beq _bs
