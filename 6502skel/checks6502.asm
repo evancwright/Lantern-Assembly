@@ -113,6 +113,12 @@ _x		rts
 
 	.module check_have_dobj
 check_have_dobj 
+		;save table
+		lda $tableAddr
+		pha
+		lda $tableAddr+1
+		pha
+
 		lda #PLAYER_ID
 		sta parent
 		lda $sentence+1
@@ -129,7 +135,11 @@ check_have_dobj
 		lda #dontHave/256
 		sta $strAddr+1
 		jsr printstrcr
-_x		rts
+_x		pla	
+		sta $tableAddr+1
+		pla 
+		sta $tableAddr
+		rts
 
 check_dont_have_dobj 
 		lda #0
@@ -401,6 +411,10 @@ dobj_already_closed
 		
 		rts		
 
+	
+	
+	
+	
 		
 		
 		
