@@ -12,11 +12,17 @@ score_objects
 	sta $tableAddr
 	lda #$obj_word_table/256
 	sta $tableAddr+1
+	lda #0
+	pha ; push loop counter
 _lp	
+	pla ; restore loop counter
+	cmp $NumObjects
+	beq _x
+	clc
+	adc #1
+	pha ; save loop counter
 	ldy #0
 	lda ($tableAddr),y
-	cmp #255
-	beq _x
  	sta objToScore
 	;does the word apply to the object
 	jsr does_wrd_match_obj ; 
@@ -57,7 +63,7 @@ score_object
 		cmp #0
 		beq _x
 		ldx objToScore ; reload object id
-		inc scores,x  ; add one more to the score
+		inc scores,x  ; add one more to the score for visible things
 _x		rts
 
 
