@@ -22,35 +22,44 @@ void printstr(const char *str)
 /*prints the next word including any leading white space*/ 
 char* printwrd(char *str)
 {
-	int pastWord = FALSE;
+	BOOL pastWord = FALSE;
 	
 	while (*str != 0)
 	{
-		if (*str == NEWLINE)
+		
+		unsigned char c = *str;
+		
+		if (c == 0x20) //convert inverted spaces to spaces
+			c = 0x60;
+		
+		if (c == RETURN || c == LF)
 		{
 			carriage_return();	
+			str++;	//skip the char
 		}
-		else if (  (*str == ' ' || *str == SPACE) && pastWord == TRUE )
-		{
+		else if (  c == 0x60  && pastWord )
+		{/* the space after a word. Stop here*/
 			break;
 		}
 		else
-		{
-			char c = *str;
+		{ /*print chars and leading white space*/
 			
-			if (c != ' ' && c != SPACE)
+			if (c != 0x020 && c != 0x60) //spaces
+			{
 				pastWord = TRUE; /* hit a letter */
-			
-			
+			}		
+				
+			c = to_uchar(c);	//convert 97+ to uppercase
 			if (c >= 0x20 && c < 0x40)
 				c += 0x40;
 		
+			 
+		
 			*cursor = c;
 			cursor++;			
+			str++;	
 		}
-		
-		str++;
-
+		 
 //		break;
 	} 
 	return str;
@@ -58,7 +67,7 @@ char* printwrd(char *str)
 
 void readlinenb()
 {
-	memset(Line,0,32);
+	memset(Line,0,INBUF_SIZE);
 	LineIndex = 0;
 	char *startPtr = cursor;
 	BYTE done = FALSE;
@@ -93,7 +102,7 @@ void readlinenb()
 			
 					if (keyStatus[vbit][i] == FALSE)
 					{//it wasn't down before
-						char ch = matrix[vbit][i];
+						unsigned char ch = matrix[vbit][i];
 						
 						if (ch == 0) continue;
 						
@@ -112,7 +121,7 @@ void readlinenb()
 								
 							}
 						}
-						else if (ch == ENTER)
+						else if (ch == RETURN || ch == LF)
 						{
 							*cursor = SPACE;
 							Line[LineIndex]= 0;
@@ -123,15 +132,12 @@ void readlinenb()
 						{//regular key
 							if (shift_down())
 							{
-								*cursor = get_shifted_key(ch);
-								Line[LineIndex]= ch;
-							}
-							else
-							{ 
-								*cursor = ch;
-								Line[LineIndex]= ch;
+								ch = get_shifted_key(ch);
 							}
 							
+							*cursor = ch;
+							Line[LineIndex]= ch;
+								
 							LineIndex++;
 							cursor++;
 						}
@@ -148,8 +154,10 @@ void readlinenb()
 				vbit++;
 			}
 		}
+		
 	}
-	printstr("OK\n");
+	
+	fix_spaces();
 }
 
 asm BYTE PollKbCol(byte col)
@@ -164,6 +172,7 @@ asm BYTE PollKbCol(byte col)
 
 void carriage_return()
 {
+	 
 	cursor =  (char*)((( (short)cursor - 0x0400) / scrWidth ) * scrWidth);
 	cursor += 0x0400;
 	if ((short)cursor >= (short)lastLine)
@@ -194,7 +203,7 @@ void scroll()
 		
 }
 
-void cls()
+void clsfs()
 {
 	memset(0x400, SPACE, scrHeight * scrWidth);
 	cursor = 0x0400;
@@ -220,22 +229,23 @@ BYTE get_shifted_key(BYTE ch)
 	return ch;
 }
 
-int NextWordLen(char *word)
+/*returns the length of the next word including any leading white space*/
+int NextWordLen(char *wrd)
 {
-	char *ptr = word;
+	char *ptr = wrd;
 	
 	/* skip any white space */
-	if (*ptr == ' ')
+	if (*ptr == 0x20) //starts with space
 	{
-		while (*ptr == ' ' && *ptr != 0)
+		while ( *ptr == 0x20  && *ptr != 0)
 			ptr++;
 	}
  
 	/* now move to end of word */
-	while (*ptr != ' ' && *ptr != 0)
+	while (*ptr != 0x20 && *ptr != 0)
 		*ptr++;
 	
-	return (ptr - word);
+	return (ptr - wrd);
 }
 
 int CharsLeft()
@@ -250,7 +260,32 @@ BYTE shift_down()
 
 char *SkipWhiteSpace(char *ptr)
 {
-	while (*ptr == ' ')	
+	while (*ptr == 0x20 || *ptr == 0x60)	
 		ptr++;
 	return ptr;
+}
+
+char to_uchar(char ch)
+{
+	if (ch >= 97 && ch <= 122)
+	{
+		return ch - 32;
+	}
+	
+	return ch;
+}
+
+/* converts spaces from 96 to 32 */
+void fix_spaces()
+{
+	char *str= Line;
+	
+	while (*str != 0)
+	{
+		if (*str == 96) 
+			*str = 32;
+		str++;
+	}
+	
+	
 }
