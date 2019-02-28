@@ -1,5 +1,5 @@
-cmoc -c main.c
-cmoc -o main.bin --org=E00  main.o setNumBytesUsedInLastSector.o \
+cmoc -c -i  main.c
+cmoc -o main.bin --org=C00  main.o setNumBytesUsedInLastSector.o \
 	writeSector.o \
 	setFATEntry.o dskcon.o \
 	getFileGranuleFromIndex.o init.o isValidFATEntry.o shutdown.o closeSectorFile.o \

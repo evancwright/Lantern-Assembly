@@ -2,9 +2,9 @@
 <xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <project>
     <projname>RichardMines</projname>
-    <welcome>WELCOME TO THE RICHARD MINES.</welcome>
-    <author>AUTHOR: EVAN WRIGHT</author>
-    <version>VERSION 1.1, 2018</version>
+    <welcome>Welcome to the Richard Mines.</welcome>
+    <author>Author: Evan Wright</author>
+    <version>Version 1.1 2018</version>
     <preps>
       <prep>in</prep>
       <prep>on</prep>
@@ -75,22 +75,22 @@
       </userverbs>
     </verbs>
     <objects>
-      <object id="0" holder="0" name="OFFSCREEN" printedname="OFFSCREEN">
-        <description>OFFSCREEN</description>
-        <initialdescription>YOU SHOULDN'T BE HERE.</initialdescription>
+      <object id="0" holder="0" name="OFFSCREEN" printedname="Offscreen">
+        <description>Offscreen</description>
+        <initialdescription>You shouldn't be here.</initialdescription>
         <directions n="1" s="2" e="3" w="4" ne="5" se="6" sw="7" nw="8" up="9" down="10" in="255" out="12" mass="13" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
       </object>
-      <object id="1" holder="61" name="PLAYER" printedname="PLAYER">
-        <description>YOUR CLOTHES ARE BIT DIRTY FROM HIKING THROUGH THE WOODS. ASIDE FROM THAT, YOU'RE FINE.</description>
+      <object id="1" holder="61" name="PLAYER" printedname="Player">
+        <description>Your clothes are bit dirty from hiking through the woods. Aside from that, you're fine.</description>
         <initialdescription />
         <directions n="0" s="0" e="0" w="0" ne="0" se="0" sw="0" nw="0" up="0" down="0" in="255" out="0" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="ME,SELF" />
       </object>
-      <object id="2" holder="0" name="DIRT_ROAD" printedname="DIRT ROAD">
-        <description>THIS IS A DIRT ROAD THAT HEADS NORTH TOWARD A LOW RISING HILL. TO THE EAST, WEST IS FOREST.  TO THE SOUTH, THE ROAD DISSAPEARS INTO THE FOREST.</description>
+      <object id="2" holder="0" name="DIRT_ROAD" printedname="Dirt Road">
+        <description>This is a dirt road that heads north toward a low rising hill. To the east, west is forest.  To the south, the road dissapears into the forest.</description>
         <initialdescription />
         <directions n="5" s="63" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -108,15 +108,15 @@
           <down />
         </nogo>
       </object>
-      <object id="3" holder="2" name="GUARD_HUT" printedname="GUARD HUT">
-        <description>THE HUT IS BARELY LARGE ENOUGH TO PROTECT ONE OR TWO SENTRIES FROM THE ELEMENTS.</description>
-        <initialdescription>A DILAPIDATED GUARD HUT STANDS NEARBY.</initialdescription>
+      <object id="3" holder="2" name="GUARD_HUT" printedname="Guard Hut">
+        <description>The hut is barely large enough to protect one or two sentries from the elements.</description>
+        <initialdescription>A dilapidated guard hut stands nearby.</initialdescription>
         <directions n="255" s="255" e="255" w="2" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="4" out="2" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
       </object>
-      <object id="4" holder="0" name="INSIDE_HUT" printedname="INSIDE HUT">
-        <description>YOU ARE INSIDE THE SMALL GUARD HUT. THE OPEN DOORWAY LEADS OUTSIDE TO THE WEST.</description>
+      <object id="4" holder="0" name="INSIDE_HUT" printedname="Inside Hut">
+        <description>You are inside the small guard hut. The open doorway leads outside to the west.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="2" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="2" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -132,8 +132,8 @@
           <up>THE ONLY EXIT IS TO THE WEST.</up>
         </nogo>
       </object>
-      <object id="5" holder="0" name="TUNNEL_ENTRACE" printedname="TUNNEL ENTRACE">
-        <description>YOU ARE AT THE MOUTH OF A LARGE, COLLAPSED TUNNEL CUT INTO A STEEP HILLSIDE TO THE NORTH. A DIRT PATH RUNS EAST AND WEST AROUND THE ESCARPMENT AND WINDS SOUTH INTO THE THICK FOREST.</description>
+      <object id="5" holder="0" name="TUNNEL_ENTRACE" printedname="Tunnel Entrace">
+        <description>You are at the mouth of a large, collapsed tunnel cut into a steep hillside to the north. A dirt path runs east and west around the escarpment and winds south into the thick forest.</description>
         <initialdescription />
         <directions n="255" s="2" e="6" w="7" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -147,8 +147,8 @@
           <up>THE HILLSIDE IS TOO STEEP.</up>
         </nogo>
       </object>
-      <object id="6" holder="0" name="SOUTHEAST_OF_HILLSIDE" printedname="SOUTHEAST OF HILLSIDE">
-        <description>YOU ARE ON A DIRT PATH CURVING AROUND THE BASE OF A ROCKY HILLSIDE. THE PATH EXTENDS WEST AND NORTHEAST.</description>
+      <object id="6" holder="0" name="SOUTHEAST_OF_HILLSIDE" printedname="Southeast Of Hillside">
+        <description>You are on a dirt path curving around the base of a rocky hillside. The path extends west and northeast.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="5" ne="8" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -162,8 +162,8 @@
           <up>THE HILLSIDE IS TOO STEEP.</up>
         </nogo>
       </object>
-      <object id="7" holder="0" name="SOUTHWEST_OF_HILLSIDE" printedname="SOUTHWEST OF HILLSIDE">
-        <description>YOU ARE ON A DIRT PATH CURVING AROUND THE BASE OF A ROCKY HILLSIDE. THE PATH EXTENDS BACK TO THE EAST.</description>
+      <object id="7" holder="0" name="SOUTHWEST_OF_HILLSIDE" printedname="Southwest Of Hillside">
+        <description>You are on a dirt path curving around the base of a rocky hillside. The path extends back to the east.</description>
         <initialdescription />
         <directions n="255" s="255" e="5" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -178,8 +178,8 @@
           <up>THE HILLSIDE IS TOO STEEP.</up>
         </nogo>
       </object>
-      <object id="8" holder="0" name="EASTERN_HILLSIDE" printedname="EASTERN HILLSIDE">
-        <description>YOU ARE ON THE EASTERN EDGE OF A ROCKY HILLSIDE.  A LARGE,DARK TUNNEL EXTENDS WESTWARD INTO THE HILLSIDE.  ALTHOUGH IT APPEARS ATTEMPTS WERE MADE TO DEMOLISH IT, IT MAY BE POSSIBLE TO CLIMB OVER THE DEBRIS. A DIRT PATH EXTENDS SOUTHWEST.</description>
+      <object id="8" holder="0" name="EASTERN_HILLSIDE" printedname="Eastern Hillside">
+        <description>You are on the eastern edge of a rocky hillside.  A large,dark tunnel extends westward into the hillside.  Although it appears attempts were made to demolish it, it may be possible to climb over the debris. A dirt path extends southwest.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="9" ne="255" se="255" sw="6" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -193,8 +193,8 @@
           <up>THE HILLSIDE IS TOO STEEP.</up>
         </nogo>
       </object>
-      <object id="9" holder="0" name="TOP_OF_DEBRIS" printedname="TOP OF DEBRIS">
-        <description>YOU ARE ONTOP OF A LARGE ROCK PILE JUST INSIDE THE MOUTH OF A LARGE TUNNEL. TO THE WEST, THE PILE DROPS PRECIPITOUSLY INTO THE DARKESS.</description>
+      <object id="9" holder="0" name="TOP_OF_DEBRIS" printedname="Top Of Debris">
+        <description>You are ontop of a large rock pile just inside the mouth of a large tunnel. To the west, the pile drops precipitously into the darkess.</description>
         <initialdescription />
         <directions n="255" s="255" e="8" w="10" ne="255" se="255" sw="6" nw="255" up="255" down="8" in="255" out="8" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -203,8 +203,8 @@
           <up>YOU HIT YOUR HEAD THE ROOF OF THE TUNNEL.</up>
         </nogo>
       </object>
-      <object id="10" holder="0" name="EAST_TUNNEL" printedname="EAST TUNNEL">
-        <description>YOU ARE AT THE EASTERN END OF AN EAST-WEST TUNNEL. TO THE EAST, A HUGE DEBRIS PILE, THE RESULT OF INTENTIONAL DEMOLITION, COMPLETELY BLOCKS THE EXIT.</description>
+      <object id="10" holder="0" name="EAST_TUNNEL" printedname="East Tunnel">
+        <description>You are at the eastern end of an east-west tunnel. To the east, a huge debris pile, the result of intentional demolition, completely blocks the exit.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="11" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -213,23 +213,23 @@
           <up>THE DEBRIS PILE IS TOO STEEP.</up>
         </nogo>
       </object>
-      <object id="11" holder="0" name="TUNNEL_JUNCTION" printedname="TUNNEL JUNCTION">
-        <description>YOU ARE AT A TUNNEL JUNCTION. TUNNELS EXTEND EAST, WEST, AND SOUTH.</description>
+      <object id="11" holder="0" name="TUNNEL_JUNCTION" printedname="Tunnel Junction">
+        <description>You are at a tunnel junction. Tunnels extend east, west, and south.</description>
         <initialdescription />
         <directions n="255" s="12" e="10" w="17" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <nogo />
       </object>
-      <object id="12" holder="0" name="STAFF_ROOM" printedname="STAFF ROOM">
-        <description>THIS IS A SMALL OFFICE AREA. DOORWAYS LEADS NORTH AND SOUTH.  AN OFFICE DOOR  IS TO THE EAST. ON THE WEST WALL IS A LARGE MAP.</description>
+      <object id="12" holder="0" name="STAFF_ROOM" printedname="Staff Room">
+        <description>This is a small office area. Doorways leads north and south.  An office door  is to the east. On the west wall is a large map.</description>
         <initialdescription />
         <directions n="11" s="13" e="14" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="13" holder="0" name="BATHROOM" printedname="BATHROOM">
-        <description>THIS IS A DANK LAVATORY. A DOORWAY LEADS NORTH.</description>
+      <object id="13" holder="0" name="BATHROOM" printedname="Bathroom">
+        <description>This is a dank lavatory. A doorway leads north.</description>
         <initialdescription />
         <directions n="12" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="12" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -244,38 +244,38 @@
           <sw>THE ONLY EXIT IS TO THE NOTRH.</sw>
         </nogo>
       </object>
-      <object id="14" holder="12" name="DOOR" printedname="DOOR">
-        <description>THE DOOR SPORTS A LARGE LOCK.</description>
+      <object id="14" holder="12" name="DOOR" printedname="Door">
+        <description>The door sports a large lock.</description>
         <initialdescription />
         <directions n="255" s="255" e="15" w="12" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="1" open="0" backdrop="0" wearable="0" emittinglight="0" locked="1" lockable="1" beingworn="0" lightable="0" door="1" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="15" holder="0" name="SMALL_OFFICE" printedname="SMALL OFFICE">
-        <description>THIS IS A SMALL OFFICE. A DOOR LEADS WEST.</description>
+      <object id="15" holder="0" name="SMALL_OFFICE" printedname="Small Office">
+        <description>This is a small office. A door leads west.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="12" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="12" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="16" holder="0" name="DOWNWARD_SLOPING_TUNNEL" printedname="DOWNWARD SLOPING TUNNEL">
-        <description>THIS IS A LONG EAST-WEST TUNNEL THAT SLOPES DOWNWARD TOWARD THE WEST. A SMALLER TUNNEL EXTENDS TO THE NORTH.</description>
+      <object id="16" holder="0" name="DOWNWARD_SLOPING_TUNNEL" printedname="Downward Sloping Tunnel">
+        <description>This is a long east-west tunnel that slopes downward toward the west. A smaller tunnel extends to the north.</description>
         <initialdescription />
         <directions n="20" s="255" e="17" w="21" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <nogo />
       </object>
-      <object id="17" holder="0" name="FOUR_WAY_JUNCTION" printedname="FOUR WAY JUNCTION">
-        <description>THIS IS A FOUR WAY JUNCTION.  PASSAGES LEAD NORTH, SOUTH, EAST AND WEST.</description>
+      <object id="17" holder="0" name="FOUR_WAY_JUNCTION" printedname="Four Way Junction">
+        <description>This is a four way junction.  Passages lead north, south, east and west.</description>
         <initialdescription />
         <directions n="19" s="18" e="11" w="16" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <nogo />
       </object>
-      <object id="18" holder="0" name="SOUTH_TUNNEL" printedname="SOUTH TUNNEL">
-        <description>THIS IS A LARGE, NORTH-SOUTH TUNNEL THAT ENDS ABRUPTLY WHERE IT HAS COLLAPSED AT ITS SOUTHERN END.  A SMALLER TUNNEL LEADS OFF TO THE WEST. SCORCH MARKS SUGGEST THE TUNNEL ENTRANCE WAS DESTROYED DELIBERATELY.</description>
+      <object id="18" holder="0" name="SOUTH_TUNNEL" printedname="South Tunnel">
+        <description>This is a large, north-south tunnel that ends abruptly where it has collapsed at its southern end.  A smaller tunnel leads off to the west. Scorch marks suggest the tunnel entrance was destroyed deliberately.</description>
         <initialdescription />
         <directions n="17" s="255" e="255" w="65" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -284,23 +284,23 @@
           <s>THE TUNNEL STOPS ABRUPTLY WHERE IT WAS INTENTIONALLY DYNAMITED.</s>
         </nogo>
       </object>
-      <object id="19" holder="0" name="VAST_WORKHALL" printedname="VAST WORKHALL">
-        <description>YOU HAVE ENTERED A VAST SUBTERANEAN WORKHALL CARVED OUT OF THE NATIVE LIMESTONE. IT WAS APPARENTLY GUTTED OF EQUIPMENT BEFORE IT WAS ABANDONED. THERE IS AN EXIT TO THE SOUTH.</description>
+      <object id="19" holder="0" name="VAST_WORKHALL" printedname="Vast Workhall">
+        <description>You have entered a vast subteranean workhall carved out of the native limestone. It was apparently gutted of equipment before it was abandoned. There is an exit to the south.</description>
         <initialdescription />
         <directions n="255" s="17" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <nogo />
       </object>
-      <object id="20" holder="0" name="MACHINERY_ROOM" printedname="MACHINERY ROOM">
-        <description>THIS IS A SMALL CHAMBER HOUSING DETERIORATING MACHINERY.  A METAL BOX LABELED, 'SICHERUNGSKASTEN' IS MOUNTED ON THE EAST WALL. A VOLTMETER IS WIRED TO THE METAL BOX. TO THE SOUTH IS AN EAST-WEST RUNNING TUNNEL.</description>
+      <object id="20" holder="0" name="MACHINERY_ROOM" printedname="Machinery Room">
+        <description>This is a small chamber housing deteriorating machinery.  A metal box labeled, 'sicherungskasten' is mounted on the east wall. A voltmeter is wired to the metal box. To the south is an east-west running tunnel.</description>
         <initialdescription />
         <directions n="255" s="16" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="21" holder="0" name="FLOODED_TUNNEL" printedname="FLOODED TUNNEL">
-        <description>THIS IS A LOW POINT IN THE MAIN E-W TUNNEL.</description>
+      <object id="21" holder="0" name="FLOODED_TUNNEL" printedname="Flooded Tunnel">
+        <description>This is a low point in the main e-w tunnel.</description>
         <initialdescription />
         <directions n="255" s="255" e="16" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -310,16 +310,16 @@
           <sw>THE RISING WATER BLOCKS YOUR PATH.</sw>
         </nogo>
       </object>
-      <object id="22" holder="0" name="RADIO_WORKS" printedname="RADIO WORKS">
-        <description>THIS IS A LARGE CHAMBER, FORMERLY DEDICATED TO THE PRODUCTION OF RADIO TUBES.  THE ONLY EXIT IS TO THE NORTHEAST.</description>
+      <object id="22" holder="0" name="RADIO_WORKS" printedname="Radio Works">
+        <description>This is a large chamber, formerly dedicated to the production of radio tubes.  The only exit is to the northeast.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="21" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="23" holder="0" name="BASE_OF_SHAFT" printedname="BASE OF SHAFT">
-        <description>THIS IS THE BASE OF A VENTILATION SHAFT. RUNGS ANCHORED INTO THE CONCRETE LEAD UP, WHILE AN EXIT LEADS TO THE SOUTHEAST.</description>
+      <object id="23" holder="0" name="BASE_OF_SHAFT" printedname="Base Of Shaft">
+        <description>This is the base of a ventilation shaft. Rungs anchored into the concrete lead up, while an exit leads to the southeast.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="21" sw="255" nw="255" up="24" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -330,8 +330,8 @@
           <n>THE ONLY EXITS ARE UP AND SOUTHEAST.</n>
         </nogo>
       </object>
-      <object id="24" holder="0" name="ON_LADDER" printedname="ON LADDER">
-        <description>YOU ARE ON A LADDER HALF-WAY UP A VENTILATION SHAFT.</description>
+      <object id="24" holder="0" name="ON_LADDER" printedname="On Ladder">
+        <description>You are on a ladder half-way up a ventilation shaft.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="23" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -339,8 +339,8 @@
           <up>AS YOU ATTEMPT TO CLIMB THE LADDER, WASPS BEGIN TO SWARM AROUND YOU, FORCING YOU BACK DOWN.</up>
         </nogo>
       </object>
-      <object id="25" holder="0" name="TOP_OF_SHAFT" printedname="TOP OF SHAFT">
-        <description>YOU ARE AT THE TOP OF A VENTILATION SHAFT. A METAL CUPOLA, HELD IN PLACE BY LARGE BOLTS, CAPS THE SHAFT.</description>
+      <object id="25" holder="0" name="TOP_OF_SHAFT" printedname="Top Of Shaft">
+        <description>You are at the top of a ventilation shaft. A metal cupola, held in place by large bolts, caps the shaft.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="24" in="255" out="26" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -349,26 +349,26 @@
           <up>THE METAL CUPOLA IS IN YOUR WAY.</up>
         </nogo>
       </object>
-      <object id="26" holder="0" name="TOP_OF_HILL" printedname="TOP OF HILL">
-        <description>YOU ARE STANDING ATOP A HIGH ESCARPMENT SUROUNDED BY THICK FOREST. TO THE SOUTH, YOU CAN MAKE OUT THE TOWN OF TEREZIN ON THE FAR SIDE OF THE DANUBE RIVER. AN AIRSHAFT LEADS DOWN INTO AN ABANDONED GERMAN FACTORY COMPLEX.</description>
+      <object id="26" holder="0" name="TOP_OF_HILL" printedname="Top Of Hill">
+        <description>You are standing atop a high escarpment surounded by thick forest. To the south, you can make out the town of terezin on the far side of the danube river. An airshaft leads down into an abandoned german factory complex.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="25" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="27" holder="10" name="PILE_OF_LEAVES" printedname="PILE OF LEAVES">
-        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
-        <initialdescription>A PILE OF DAMP LEAVES, BLOWN IN BY THE WIND, LIES ON THE GROUND.</initialdescription>
+      <object id="27" holder="10" name="PILE_OF_LEAVES" printedname="pile of leaves">
+        <description>You notice nothing unexpected.</description>
+        <initialdescription>A pile of damp leaves, blown in by the wind, lies on the ground.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="1" lightable="1" door="0" unused="0" />
         <nogo>
           <down />
         </nogo>
       </object>
-      <object id="28" holder="0" name="TABLE" printedname="TABLE">
-        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
-        <initialdescription>THERE IS A LARGE TABLE IN THE CENTER OF THE ROOM.</initialdescription>
+      <object id="28" holder="0" name="TABLE" printedname="table">
+        <description>You notice nothing unexpected.</description>
+        <initialdescription>There is a large table in the center of the room.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="1" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
@@ -376,16 +376,16 @@
           <down />
         </nogo>
       </object>
-      <object id="29" holder="15" name="RUBBER_STAMP" printedname="RUBBER STAMP">
-        <description>THE DATE ON THE STAMP IS SET TO MARCH 10TH, 1945.</description>
-        <initialdescription>A RUBBER STAMP, USED FOR POSTMARKING MAIL, LIES ON THE DESK</initialdescription>
+      <object id="29" holder="15" name="RUBBER_STAMP" printedname="rubber stamp">
+        <description>The date on the stamp is set to march 10th, 1945.</description>
+        <initialdescription>A rubber stamp, used for postmarking mail, lies on the desk</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="30" holder="0" name="PAPERCLIP" printedname="PAPERCLIP">
-        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
+      <object id="30" holder="0" name="PAPERCLIP" printedname="paperclip">
+        <description>You notice nothing unexpected.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -394,8 +394,8 @@
           <down />
         </nogo>
       </object>
-      <object id="31" holder="12" name="LOCK" printedname="LOCK">
-        <description>THE METAL LOCK IS INSET INTO THE DOOR.</description>
+      <object id="31" holder="12" name="LOCK" printedname="lock">
+        <description>The metal lock is inset into the door.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -404,9 +404,9 @@
           <down />
         </nogo>
       </object>
-      <object id="32" holder="4" name="FLASHLIGHT" printedname="FLASHLIGHT">
-        <description>THE FLASHLIGHT IS RUSTED SHUT, BUT OTHERWISE OK.</description>
-        <initialdescription>A DISCARDED FLASHLIGHT LIES ON THE GROUND.</initialdescription>
+      <object id="32" holder="4" name="FLASHLIGHT" printedname="flashlight">
+        <description>The flashlight is rusted shut, but otherwise ok.</description>
+        <initialdescription>A discarded flashlight lies on the ground.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="1" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="1" door="0" unused="0" />
         <synonyms names="LIGHT,LAMP" />
@@ -414,9 +414,9 @@
           <down />
         </nogo>
       </object>
-      <object id="33" holder="15" name="SMALL_OFFICE_SAFE" printedname="SMALL OFFICE SAFE">
-        <description>THE SMALL OFFICE SAFE WAS APPARENTLY CLEANED OUT WHEN THE PREVIOUS OCCUPIERS EVACUATED.</description>
-        <initialdescription>A SMALL OFFICE SAFE SITS ON THE FLOOR.</initialdescription>
+      <object id="33" holder="15" name="SMALL_OFFICE_SAFE" printedname="small office safe">
+        <description>The small office safe was apparently cleaned out when the previous occupiers evacuated.</description>
+        <initialdescription>A small office safe sits on the floor.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="1" supporter="0" transparent="0" openable="1" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
@@ -424,9 +424,9 @@
           <down />
         </nogo>
       </object>
-      <object id="34" holder="13" name="FILTHY_TOILET" printedname="FILTHY TOILET">
-        <description>THE INSIDE OF THE BOWL IS CHARRED. IT APPEARS IT WAS USED AS A PLACE TO BURN DOCUMENTS.</description>
-        <initialdescription>A FILTHY TOILET SITS IN THE CORNER.</initialdescription>
+      <object id="34" holder="13" name="FILTHY_TOILET" printedname="filthy toilet">
+        <description>The inside of the bowl is charred. It appears it was used as a place to burn documents.</description>
+        <initialdescription>A filthy toilet sits in the corner.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="1" supporter="0" transparent="0" openable="0" open="1" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="BOWL" />
@@ -434,8 +434,8 @@
           <down />
         </nogo>
       </object>
-      <object id="35" holder="34" name="PILE_OF_GUNK" printedname="PILE OF GUNK">
-        <description>THE GUNK APPEARS TO BE CHARRED PAPERS, WHICH HAVE DECAYED AS A RESULT OF THE CAVERN'S HIGH HUMIDITY.</description>
+      <object id="35" holder="34" name="PILE_OF_GUNK" printedname="pile of gunk">
+        <description>The gunk appears to be charred papers, which have decayed as a result of the cavern's high humidity.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -444,135 +444,135 @@
           <down />
         </nogo>
       </object>
-      <object id="36" holder="56" name="CIGARETTE_LIGHTER" printedname="CIGARETTE LIGHTER">
-        <description>THE METAL LIGHTER IS ADORNED WITH A RAISED EAGLE HOLDING A WREATH.</description>
+      <object id="36" holder="56" name="CIGARETTE_LIGHTER" printedname="cigarette lighter">
+        <description>The metal lighter is adorned with a raised eagle holding a wreath.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="1" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="37" holder="21" name="WATER" printedname="WATER">
-        <description>THE WATER RISES TO THE ROOF OF THE TUNNEL AT ITS WESTERN END.</description>
-        <initialdescription>RISING WATER BLOCKS THE WESTERN END OF THE TUNNEL.</initialdescription>
+      <object id="37" holder="21" name="WATER" printedname="water">
+        <description>The water rises to the roof of the tunnel at its western end.</description>
+        <initialdescription>Rising water blocks the western end of the tunnel.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="1" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="38" holder="12" name="MAP" printedname="MAP">
-        <description>THE MAP APPARENTLY SHOWS THE LAYOUT OF THIS COMPLEX.  THREE LARGE CAVERNS ARE LABELED RICHARD I,II, AND III.  SOME TUNNELS HAVE BEEN CROSSED OUT IN RED.</description>
+      <object id="38" holder="12" name="MAP" printedname="map">
+        <description>The map apparently shows the layout of this complex.  Three large caverns are labeled richard i,ii, and iii.  Some tunnels have been crossed out in red.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="39" holder="20" name="MACHINE" printedname="MACHINE">
-        <description>THE LARGE MACHINE WITH NUMEROUS PIPES RUNNING THROUGH IT OCCUPIES MOST OF THE ROOM.</description>
+      <object id="39" holder="20" name="MACHINE" printedname="machine">
+        <description>The large machine with numerous pipes running through it occupies most of the room.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="PUMP,PUMPS" />
         <nogo />
       </object>
-      <object id="40" holder="0" name="RUSTING_CRANKSHAFT" printedname="RUSTING CRANKSHAFT">
-        <description>THIS LARGE CRANKSHAFT NEVER MADE IT INTO A TANK ENGINE.</description>
-        <initialdescription>A LARGE CRANKSHAFT LIES RUSTING ON THE GROUND.</initialdescription>
+      <object id="40" holder="0" name="RUSTING_CRANKSHAFT" printedname="rusting crankshaft">
+        <description>This large crankshaft never made it into a tank engine.</description>
+        <initialdescription>A large crankshaft lies rusting on the ground.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="41" holder="25" name="CUPOLA" printedname="CUPOLA">
-        <description>THE CUPOLA IS A SMALL, RAISED STEEL DOME.</description>
+      <object id="41" holder="25" name="CUPOLA" printedname="cupola">
+        <description>The cupola is a small, raised steel dome.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="30" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="42" holder="19" name="WRENCH" printedname="WRENCH">
-        <description>YOU NOTICE NOTHING UNEXPECTED.</description>
-        <initialdescription>A RUSTED WRENCH LIES ON THE FLOOR.</initialdescription>
+      <object id="42" holder="19" name="WRENCH" printedname="wrench">
+        <description>You notice nothing unexpected.</description>
+        <initialdescription>A rusted wrench lies on the floor.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="1" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="43" holder="1" name="NOSE" printedname="NOSE">
-        <description>YOUR NOSE IS FINE. STOP WORRYING ABOUT IT.</description>
+      <object id="43" holder="1" name="NOSE" printedname="nose">
+        <description>Your nose is fine. Stop worrying about it.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="44" holder="0" name="SUN" printedname="SUN">
-        <description>THE SUN IS HIDDEN BEHIND THE GRAY OVERCAST.</description>
+      <object id="44" holder="0" name="SUN" printedname="sun">
+        <description>The sun is hidden behind the gray overcast.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="1" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <nogo />
         <backdrop rooms="2,5,6,7">jhjhjhg</backdrop>
       </object>
-      <object id="45" holder="20" name="VOLT_METER" printedname="VOLT METER">
-        <description>THE NEEDLE INDICATES ZERO VOLTAGE.</description>
+      <object id="45" holder="20" name="VOLT_METER" printedname="volt meter">
+        <description>The needle indicates zero voltage.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="VOLTMETER" />
         <nogo />
       </object>
-      <object id="46" holder="33" name="COIN" printedname="COIN">
-        <description>THE COIN IS  A CZECH KORUNA.  THE DATE ON IT READS 1929.</description>
+      <object id="46" holder="33" name="COIN" printedname="coin">
+        <description>The coin is  a czech koruna.  The date on it reads 1929.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="47" holder="22" name="WOODEN_CRATE" printedname="WOODEN CRATE">
-        <description>THE WOODEN CRATE IS NAILED SHUT.</description>
-        <initialdescription>A LARGE WOODEN CRATE SITS IN THE CENTER OF THE CHAMBER.</initialdescription>
+      <object id="47" holder="22" name="WOODEN_CRATE" printedname="wooden crate">
+        <description>The wooden crate is nailed shut.</description>
+        <initialdescription>A large wooden crate sits in the center of the chamber.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="20" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="48" holder="0" name="SPLINTERED_WOOD" printedname="SPLINTERED WOOD">
-        <description>THE FORMER WOODEN CRATE IS NOW SMASHED.</description>
-        <initialdescription>A PILE OF BROKEN WOOD (FORMERLY A CRATE), IS HERE.</initialdescription>
+      <object id="48" holder="0" name="SPLINTERED_WOOD" printedname="splintered wood">
+        <description>The former wooden crate is now smashed.</description>
+        <initialdescription>A pile of broken wood (formerly a crate), is here.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="49" holder="48" name="GOLD_BARS" printedname="GOLD BARS">
-        <description>OOOOH...SHINY!</description>
-        <initialdescription>A PILE OF SHINY GOLD BARS LIE ON TOP OF THE SMASHED CRATE.</initialdescription>
+      <object id="49" holder="48" name="GOLD_BARS" printedname="gold bars">
+        <description>Ooooh...Shiny!</description>
+        <initialdescription>A pile of shiny gold bars lie on top of the smashed crate.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="5" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="BARS" />
         <nogo />
       </object>
-      <object id="50" holder="8" name="CREVICE" printedname="CREVICE">
-        <description>THE GAP IS TOO DARK TO SEE INTO.</description>
+      <object id="50" holder="8" name="CREVICE" printedname="crevice">
+        <description>The gap is too dark to see into.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms names="GAP" />
         <nogo />
       </object>
-      <object id="51" holder="25" name="BOLTS" printedname="BOLTS">
-        <description>THE RUSTED BOLTS ARE SECURING THE CUPOLA IN PLACE.</description>
+      <object id="51" holder="25" name="BOLTS" printedname="bolts">
+        <description>The rusted bolts are securing the cupola in place.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <nogo />
       </object>
-      <object id="52" holder="0" name="DEBRIS" printedname="DEBRIS">
-        <description>THE DEBRIS PILE CONTISTS OF CONCRETE AND LARGE ROCKS - A RESULT OF THE TUNNEL BEING INTENTIONALLY DYANMITED.</description>
+      <object id="52" holder="0" name="DEBRIS" printedname="debris">
+        <description>The debris pile contists of concrete and large rocks - a result of the tunnel being intentionally dyanmited.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="1" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -580,8 +580,8 @@
         <nogo />
         <backdrop rooms="5,8,9,10,18" />
       </object>
-      <object id="53" holder="0" name="FOREST" printedname="FOREST">
-        <description>THE FOREST IS A TANGLED MASS OF THICKETS AND ELDERY DECIDUOUS TREES.</description>
+      <object id="53" holder="0" name="FOREST" printedname="forest">
+        <description>The forest is a tangled mass of thickets and eldery deciduous trees.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="1" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -589,8 +589,8 @@
         <nogo />
         <backdrop rooms="2,5,6,7,8" />
       </object>
-      <object id="54" holder="55" name="SMALL_ROUND_RECESS" printedname="SMALL ROUND RECESS">
-        <description>THE SHALLOW, CIRCULAR RECESS IS THREADED AS THOUGH IT WAS DESIGNED TO HAVE SOMETHING SCREWED INTO IT.</description>
+      <object id="54" holder="55" name="SMALL_ROUND_RECESS" printedname="small round recess">
+        <description>The shallow, circular recess is threaded as though it was designed to have something screwed into it.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="1" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -598,8 +598,8 @@
         <nogo />
         <backdrop />
       </object>
-      <object id="55" holder="20" name="METAL_BOX" printedname="METAL BOX">
-        <description>THE HINGED, METAL BOX IS LABELED 'SICHERUNGSKASTEN'.</description>
+      <object id="55" holder="20" name="METAL_BOX" printedname="metal box">
+        <description>The hinged, metal box is labeled 'sicherungskasten'.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="1" supporter="0" transparent="0" openable="1" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -607,17 +607,17 @@
         <nogo />
         <backdrop />
       </object>
-      <object id="56" holder="15" name="DESK" printedname="DESK">
-        <description>THE HEAVY DESK WAS APPARENTLY NOT WORTH TAKING WHEN THE OCCUPIERS LEFT.</description>
-        <initialdescription>A LARGE DESK OCCUPIES ONE CORNER OF THE ROOM.</initialdescription>
+      <object id="56" holder="15" name="DESK" printedname="desk">
+        <description>The heavy desk was apparently not worth taking when the occupiers left.</description>
+        <initialdescription>A large desk occupies one corner of the room.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="1" supporter="0" transparent="0" openable="1" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms />
         <nogo />
         <backdrop />
       </object>
-      <object id="57" holder="0" name="FOREST" printedname="FOREST">
-        <description>YOUR ARE STANDING IN THE MIDST OF DENSE FOREST.  A RUSTING, OVERGROWN BARBED WIRE FENCE, BLOCKS THE WAY NORTH.</description>
+      <object id="57" holder="0" name="FOREST" printedname="Forest">
+        <description>Your are standing in the midst of dense forest.  A rusting, overgrown barbed wire fence, blocks the way north.</description>
         <initialdescription />
         <directions n="255" s="60" e="59" w="59" ne="59" se="255" sw="61" nw="59" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -636,17 +636,17 @@
         </nogo>
         <backdrop />
       </object>
-      <object id="58" holder="57" name="ROTTING_TREE" printedname="ROTTING TREE">
-        <description>THE TRUNK IS HEAVILY ROTTED.</description>
-        <initialdescription>NEARBY, A DEAD TREE LEANS PRECARIOULSY.</initialdescription>
+      <object id="58" holder="57" name="ROTTING_TREE" printedname="rotting tree">
+        <description>The trunk is heavily rotted.</description>
+        <initialdescription>Nearby, a dead tree leans precarioulsy.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms />
         <nogo />
         <backdrop />
       </object>
-      <object id="59" holder="0" name="FOREST" printedname="FOREST">
-        <description>THIS IS A DENSE FOREST WHICH EXTENDS IN ALL DIRECTIONS.</description>
+      <object id="59" holder="0" name="FOREST" printedname="Forest">
+        <description>This is a dense forest which extends in all directions.</description>
         <initialdescription />
         <directions n="57" s="60" e="57" w="59" ne="57" se="255" sw="60" nw="57" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -654,8 +654,8 @@
         <nogo />
         <backdrop />
       </object>
-      <object id="60" holder="0" name="FOREST" printedname="FOREST">
-        <description>THIS IS A DENSE FOREST WHICH EXTENDS IN ALL DIRECTIONS. TOWARDS THE NORTH, THE VEGETATION APPEARS TO THIN.</description>
+      <object id="60" holder="0" name="FOREST" printedname="Forest">
+        <description>This is a dense forest which extends in all directions. Towards the north, the vegetation appears to thin.</description>
         <initialdescription />
         <directions n="57" s="59" e="59" w="59" ne="57" se="255" sw="59" nw="57" up="59" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -674,8 +674,8 @@
         </nogo>
         <backdrop />
       </object>
-      <object id="61" holder="0" name="FOREST" printedname="FOREST">
-        <description>THIS IS A FOREST WHICH EXTENDS IN ALL DIRECTIONS.  THE TERRAIN RISES SLIGHTLY NORTHWARD.</description>
+      <object id="61" holder="0" name="FOREST" printedname="Forest">
+        <description>This is a forest which extends in all directions.  The terrain rises slightly northward.</description>
         <initialdescription />
         <directions n="60" s="61" e="59" w="59" ne="60" se="255" sw="61" nw="60" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -694,8 +694,8 @@
         </nogo>
         <backdrop />
       </object>
-      <object id="62" holder="57" name="BARBED_WIRE_FENCE" printedname="BARBED WIRE FENCE">
-        <description>THE BARBED WIRE FENCE HAS RUSTED AFTER MANY YEARS EXPOSED TO THE ELEMENTS.</description>
+      <object id="62" holder="57" name="BARBED_WIRE_FENCE" printedname="barbed wire fence">
+        <description>The barbed wire fence has rusted after many years exposed to the elements.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="1" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -703,8 +703,8 @@
         <nogo />
         <backdrop />
       </object>
-      <object id="63" holder="0" name="OVERGROWN_ROAD" printedname="OVERGROWN ROAD">
-        <description>YOU ARE ON AN OVERGROWN DIRT ROAD THAT RUNS NORTH-SOUTH.  THERE IS FOREST TO THE EAST,WEST, AND SOUTH.</description>
+      <object id="63" holder="0" name="OVERGROWN_ROAD" printedname="Overgrown Road">
+        <description>You are on an overgrown dirt road that runs north-south.  There is forest to the east,west, and south.</description>
         <initialdescription />
         <directions n="2" s="57" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="1" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -723,17 +723,17 @@
         </nogo>
         <backdrop />
       </object>
-      <object id="64" holder="65" name="PAIR_OF_GLOVES" printedname="PAIR OF GLOVES">
-        <description>THE GLOVES APPEAR TO BE MADE FROM A RUBBERIZED LEATHER.</description>
-        <initialdescription>A PAIR OF GLOVES LIES ON THE GROUND.</initialdescription>
+      <object id="64" holder="65" name="PAIR_OF_GLOVES" printedname="pair of gloves">
+        <description>The gloves appear to be made from a rubberized leather.</description>
+        <initialdescription>A pair of gloves lies on the ground.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="1" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="1" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
         <synonyms />
         <nogo />
         <backdrop />
       </object>
-      <object id="65" holder="0" name="COLLAPSED_TUNNEL" printedname="COLLAPSED TUNNEL">
-        <description>THE WESTERN END OF THIS TUNNEL HAS COLLAPSED.  THE ONLY EXIT IS BACK TO THE EAST.</description>
+      <object id="65" holder="0" name="COLLAPSED_TUNNEL" printedname="Collapsed Tunnel">
+        <description>The western end of this tunnel has collapsed.  The only exit is back to the east.</description>
         <initialdescription />
         <directions n="255" s="255" e="18" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags scenery="0" portable="0" container="0" supporter="0" transparent="0" openable="0" open="0" backdrop="0" wearable="0" emittinglight="0" locked="0" lockable="0" beingworn="0" lightable="0" door="0" unused="0" />
@@ -795,6 +795,8 @@
       <check verb="look,l" check="check_light" />
       <check verb="open" check="check_dobj_closed" />
       <check verb="open" check="check_dobj_unlocked" />
+      <check verb="lock" check="check_dobj_lockable" />
+      <check verb="unlock" check="check_dobj_lockable" />
     </checks>
     <sentences>
       <sentence verb="burn" do="pile_of_leaves" prep="" io="" type="instead" sub="burn_leaves" />
@@ -955,11 +957,11 @@ score = score + 5;
       <routine name="flashlight_on">
 if (flashlight.lit==1)
 {
-     println("IT'S ALREADY ON.");
+     println("It's already on.");
 }
 else
 {
-     println("CLICK.");
+     println("Click.");
      flashlight.lit=1;
      look();
 }

@@ -1,19 +1,19 @@
-// #pragma org 0xE00
-
-
-#include <cmoc.h>
-#include "coco.h"
-#include "decbfile.h"
-#include "VerbDefs8086.h"
-#include "cocokb.h"
-#include "CocoVGA.h"
-
 /*text adventure shell
  *Evan Wright
  *2018-2019
  */
 
-//#define KYBD_BUFFER 733 /*global input buffer */
+#pragma pack(0)
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <stack>
+
+#include "VerbDefs.h"
+
+
 #define EOL 1 
 #define TRUE 1
 #define FALSE 0
@@ -33,19 +33,6 @@
 #define HOLDER_ID  1
 #define INITIAL_DESC_ID   2
 #define DESC_ID  3
-#define FALSE 0
-#define TRUE 1
-#define NEWLINE 0x0A
-#define BYTE unsigned char
-#define byte unsigned char
-
-#include "defs.h"  // coco defs
- 
-#define disableInterrupts() asm("ORCC",  "#$50")
-#define enableInterrupts()  asm("ANDCC", "#$AF")
- 
- 
- 
 #define NORTH  4
 #define SOUTH  5
 #define EAST  6
@@ -105,59 +92,49 @@
    
 BYTE temp;
 BYTE temp2;
+int scrWidth = 80;
 
-BYTE LCase = FALSE;
-char UCaseBuffer[INBUF_SIZE];
-
-DECBDrive drives[4];
-unsigned int numDrives=4;
- 
-typedef struct PREAMBLE
-{
-	BYTE type;
-	BYTE dataHi;
-	BYTE dataLo;
-	BYTE execHi;
-	BYTE execLo;
-}PREAMBLE;
-
-typedef struct _WordEntry 
+  
+#pragma pack(0)
+struct  __attribute__((__packed__)) WordEntry 
 {
 	BYTE id;
 	char *wrd;
-} WordEntry;
+} _WordEntry; 
 
-typedef struct _Object
+ 
+#pragma pack(0)
+struct __attribute__((__packed__)) Object 
 {
 	BYTE attrs[17];
 	unsigned short flags;
-} Object;
+} _Object;
 
-typedef struct Sentence
+#pragma pack(0)
+struct  Sentence
 {
 	BYTE verb;
 	BYTE dobj;
 	BYTE prep;
 	BYTE iobj;
 	void (*handler)();
-} Sentence;
+} _Sentence;
 
-typedef struct _ObjectWordEntry
+struct __attribute__((__packed__)) ObjectWordEntry
 {
-	BYTE id;
+	BYTE id; 
 	BYTE word1;
 	BYTE word2;
 	BYTE word3;
-} ObjectWordEntry;
+} _ObjectWordEntry;
 
-typedef struct _VerbCheck
+struct __attribute__((__packed__)) VerbCheck
 {
 	BYTE verbId;
 	BOOL (*check)();
-} VerbCheck;
+} _VerbCheck;
 
-
-
+char Buffer[256]; 
 char VerbBuffer[55];
 char *words[10];
 char NumWords=0;
@@ -165,36 +142,40 @@ char *startPtr;
 
 
 void init();
+short param_stack_pop();
+void set_var(const char *name, short value);
 void draw_status_bar();
-void strtok();
 BOOL parse_and_map();
 void clear_buffers();
-BYTE move_start();
-BOOL streq(char  *src, char *dest);
-void move_next();
 void get_verb();
-BYTE get_verb_id();
+BYTE get_verb_id(char *verb);
 BYTE get_word_id(char *wordPtr, const char *table[], int tableSize);
 void look_sub();
 void inventory_sub();
-BOOL is_article();
+BOOL is_article(char *);
 BOOL is_prep(char *wrd);
 BOOL found_prep();
 void clear_scores();
 void score_word(BYTE wordId);
 BYTE get_prep_id(char *ptr);
-void get_max_score();
-BOOL is_noun_ambiguous();
+int get_max_score();
 BOOL is_visible(BYTE objectId);
 BOOL can_see();
 BOOL is_door(unsigned char objectId);
+BOOL word_matches_object(int wordId, int objectId);
+unsigned char max_score_object(int max);
 
 void examine_sub();
+void dump_obj_table();			
+void sethpos();
+void setvpos();
 void dump_matches();
 void set_object_prop(BYTE objNum, BYTE propNum, BYTE val);
 void set_object_attr(BYTE objNum, BYTE attrNum, BYTE  val);
 BYTE get_object_prop(BYTE obj, BYTE propNum);
 BYTE get_object_attr(BYTE obj, BYTE attrNum);
+int max_score_matches(int max);
+void collapse_verb();
 void quit_sub();
 void get_sub();
 void close_sub();
@@ -213,6 +194,9 @@ void restore_sub();
 void save_sub();
 void run_events();
 void dump_dict();
+BOOL any_visible();
+void print_word(char *wrd);
+void score_objects(unsigned char wordId);
 BYTE stricmp(const char * str1,const char * str);
 BYTE verb_to_dir(BYTE verbId);;
 BYTE is_supporter(BYTE objectId);
@@ -225,33 +209,42 @@ BOOL check_not_self_or_child();
 BOOL check_dont_have_dobj();
 BOOL check_have_dobj();
 BOOL check_iobj_container();
+BOOL check_dobj_open();
+BOOL check_dobj_closed();
+BOOL check_dobj_wearable();
 BOOL check_dobj_lockable();
 BOOL check_dobj_unlocked();
 BOOL check_prep_supplied();
 BOOL check_dobj_opnable();
 BOOL check_iobj_open();
+BOOL check_dobj_portable();
 BOOL check_dobj_visible();
 BOOL check_dobj_supplied();
 BOOL check_iobj_supplied();
 BOOL check_light();
+BOOL check_see_dobj();
 BOOL is_ancestor(BYTE parent, BYTE child);
 BOOL is_visible_to(BYTE roomId, BYTE objectId);
 BOOL has_visible_children(BYTE objectId);
 BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards);
+BOOL score_object(int startIndex, int endIndex, unsigned char *objId);
 BOOL is_closed(BYTE objectId);
 BOOL check_rules();
 
+
+void print_cr();
+void print_string(BYTE id);
+void print_string_formatted(char *);
 void get_obj_name(BYTE objectId, char *buffer);
 void get_room_name(BYTE objectId, char *buffer);
 void dbg_goto();
 void purloin();
 void dump_flags();
 //void to_upper(char *s);
-void fix_endianess();
+//void fix_endianess();
 BYTE rand8(BYTE divisor);
-char to_uchar(char ch);
-char *ucase_string(char *str);
-const char *articles[] = {"A","AN","THE","OF"};
+const int NumArticles = 4;
+const char *ArticleTable[] = { "A","AN","THE","OF" };
 const char* preps[] = {"IN","ON","UNDER","AT"};
 //
 unsigned short PropMasks[] = {0,1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768};
@@ -267,8 +260,18 @@ BYTE VerbId = INVALID;
 BYTE PrepIndex=0;
 BYTE isAmbiguous = FALSE;
 
+
+int Col = 0;
+unsigned char *DobjPtr = 0;
+unsigned char *PrepPtr = 0;
+char *WordPtrs[10];
+
+
+
 BYTE maxScoreCount=0;
 BYTE maxScoreObj=INVALID;
+BYTE hpos;
+BYTE vpos;
 BYTE ScrWidth=32;
 BYTE MaxScore=0;
 BYTE MaxScoreObj=0;
@@ -279,7 +282,6 @@ char * nogo_table;  /* defined in ASM file */
 //char *DescriptionTable;
 /*end externs*/
 
-char *Buffer;  /*make this point to global input buffer*/
 ObjectWordEntry *ObjectWordTable;
 WordEntry *VerbTable;
 Object *ObjectTable = 0;
@@ -289,36 +291,34 @@ Sentence *InsteadTable;
 Sentence *AfterTable;
 
 BOOL done = FALSE;
-BYTE BufSize = 255;
 BOOL Handled=FALSE;
- 
+
 BYTE lowerCase=FALSE;
-#include "EventIncludes.h"
 
+std::stack<short> param_stack;
+short param1,param2,param3;
 
-#include "StringTable.h"
 #include "NogoTable.h"
-#include "Welcome8086.c"
+#include "Welcome.c"
 
 /*group save data together*/
 
-PREAMBLE Preamble;
-#include "ObjectTable8086.c"
+#include "ObjectTable.c"
 /*built in vars*/
 BYTE score=0;
 BYTE turnsWithoutLight=0;
 BYTE gameOver=FALSE;
 BYTE moves=0;
 BYTE health=100;
-#include "UserVars8086.c"
-PREAMBLE Postamble;
-BYTE EndData;
 
+#include "UserVars.c"
+#include "Events.h"
 #include "ObjectWordTable.c"
-#include "VerbTable8086.c"
-#include "CheckTable8086.h"
+#include "VerbTable.c"
+#include "CheckTable.h"
 #include "PrepTable.h"
 #include "Dictionary.h"
+#include "Strings.h"
 
 #include "BeforeTable.c"
 #include "InsteadTable.c"
@@ -344,59 +344,43 @@ const char * propNames[] = {
 "UNUSED"
 };
 
-BYTE scores[255];
+BYTE Scores[255];
+
+
+
+
 
 int main()
 {
-	//loader disabled the interrupts
-	setISR(IRQ_VECTOR, irqISR);
-    setISR(NMI_VECTOR, nmiISR);
-
-//    timer = 0;
-	lastLine = 15*32 + 0x0400;
-	Buffer = Line;
-    enableInterrupts();
-	clsfs();
-	unsigned int size = BufSize;
 	init();
- 
-	printstr("DO YOU A COCO-VGA? (Y/N)");
-	readlinenb();
+	printf("\x1b[2J"); //cls
+	printf("\x1b[2;0H"); //position cursor583
 	
-	if (Buffer[0] == 'y' || Buffer[0]=='Y')
-	{
-		InitCocoVGA();
-	}
-	printstr("\n"); //make room for status bar
+	
+
+	printf("\n");
+ 	printf("%s\n", WelcomeStr);
+	printf("%s\n", AuthorStr);
+	printf("\n");
 	 
-	
-	Buffer[1]=0;
-	for (int i=0; i < 256; i++)
-	{
-		Buffer[0] = (char)i;
-		prinstr(Buffer);
-	}
-	
- 	printstr( WelcomeStr );
-	printstr("\n");
-	printstr( AuthorStr);
-	printstr("\n");
  
 	look_sub();
-	dump_dict();
- 
-//	Buffer = KYBD_BUFFER;
 	
 	while (!done)
 	{
-		/* read a line */
 		draw_status_bar();
-		
-		printstr(">");
+
+		/* read a line */
+		size_t len=255;
+		char *line=Buffer;
+		printf(">");
 		/*gets(Buffer);*/
 		clear_buffers();
 				
-		readlinenb(); /* reads into global input buffer */
+		getline(&line, &len,stdin); /* reads into global input buffer */
+		line[strlen(line)-1]=0;
+		
+		strncpy(Buffer,line,255);
 	
 		if (stricmp(Buffer,"flags")==0)
 		{
@@ -416,166 +400,197 @@ int main()
 			continue;
 		}
 		
-		if (strlen(Buffer)==0)
-		{
-			printstr("Pardon?");
-			continue;
-		}
-		
-		if (strcmp(Buffer,"score")==0 || strcmp(Buffer,"SCORE")==0)
+		if (stricmp(Buffer,"score")==0)
 		{
 			sprintf(Buffer,"Your score is %d/100.\n",score);
-			printstr(Buffer);
+			printf(Buffer);
 			continue;
 		}
 		
-		
-		
 		/* parse a line */
-	//	if (parse()==TRUE)
+ 
+		 
+		printf("\n");
+		hpos=0;
+		if (parse_and_map()==TRUE)
 		{
-			printstr("\n");
-			if (parse_and_map()==TRUE)
+			Col=0;
+			if (check_rules()==TRUE)
 			{
-			 
-				if (check_rules()==TRUE)
-				{
-					execute();
-				}
+				execute();
+				moves++;
 			}
-//			else
-//				printf("mapping failed.\n");
 		}
-//		exit(0);	
+  
 	}
 
 	return 0;
 }
 
+
+void tokenize_input()
+{
+	int i = 0;
+	char *token = 0;
+	const char *delim = " ";
+
+	NumWords = 0;
+	/*clear word pointers*/
+	for (i = 0; i < 10; i++)
+	{
+		WordPtrs[i] = 0;
+	}
+
+	token = strtok(Buffer, delim);
+
+	/* walk through other tokens */
+	while (token != NULL)
+	{
+
+		if (!is_article(token))
+		{
+			WordPtrs[NumWords] = token;
+			NumWords++;
+		}
+		token = strtok(NULL, delim);
+	}
+
+}
+
+
+
+
+/*parses input and determines verb, noun, and prep id numbers*/
 BOOL parse_and_map()
 {
-	BYTE wordId;
+	int i = 0;
+	int wordId = 0;
+	int maxScore = 0;
+	DobjId = INVALID;
 	PrepId = INVALID;
-	clear_scores();
-	
-	strtok();
-	get_verb(); /*get 1st word and prep if supplied */
-	
-	VerbId = get_verb_id();
-	//printf("Verb Id=%d\n",VerbId);
-	if (VerbId == INVALID)
+	IobjId = INVALID;
+	DobjSupplied = FALSE;
+	IobjSupplied = FALSE;
+
+	tokenize_input();
+
+	if (NumWords == 0)
 	{
-		sprintf(Buffer,"I don't know the verb: %s\n",VerbBuffer);
-		printstr(Buffer);
+		printf("Pardon?\n");
 		return FALSE;
 	}
-	
-	/* are there any more words */
-	if (NumWords > 1)
-	{
-		/* is there a prep */
-		BOOL prep = found_prep();
-		if (prep == TRUE)
-		{/* score do and io */
-			
-			PrepId  = get_prep_id(words[PrepIndex]);
-			
-			for (short i = 1; i < PrepIndex; i++)
-			{
-				wordId = get_word_id(words[i],Dictionary,DictionarySize);
-				
-				if (wordId == INVALID) 
-				{
-					sprintf(UCaseBuffer,"I don't know the word: %s\n",words[i]);
-					printstr(UCaseBuffer);
-					return FALSE;
-				}
-				//sprintf(UCaseBuffer,"word id is: %d\n",wordId);
-				//printstr(UCaseBuffer);
-				score_word(wordId);
-			}
-			
-			/*find best match*/
-			//printstr("Scoring dobj\n");
-			get_max_score();					
-			if (MaxScoreCount > 1)
-			{
-				printstr("I don't know which one you mean.\n");
-				//dump_matches();
-				return FALSE;
-			}
-			
-			DobjId = MaxScoreObj;
-//			printstr("dobj is %d\n",MaxScoreObj);
-			//sprintf(UCaseBuffer,"Noun 1: %d\n",DobjId);
-			//printstr(UCaseBuffer);
-			/*now score io*/
-			//printstr("Scoring noun2\n");
-			clear_scores();
-			for (short i = PrepIndex+1; i < NumWords; i++)
-			{
-			//	sprintf(UCaseBuffer,"Examining word %s\n", words[i]);
-			//	printstr(UCaseBuffer);
-				wordId = get_word_id(words[i],Dictionary,DictionarySize);
-				
-				if (wordId == INVALID) 
-				{
-					sprintf(UCaseBuffer,"I don't know the word: %s\n",words[i]);
-					printstr(UCaseBuffer);
-					return FALSE;
-				}
-				//sprintf(UCaseBuffer,"Word id was : %d\n",wordId);
-				//printstr(UCaseBuffer);
-				score_word(wordId);
-			}
-			
-			/*find best match*/
-			get_max_score();					
-			if (MaxScoreCount > 1)
-			{
-				printstr("I don't know which one you mean.\n");
-				dump_matches();
-				return FALSE;
-			}
-			
-			IobjId = MaxScoreObj;
-			//sprintf(UCaseBuffer,"Noun 2: %d\n",IobjId);
-			//printstr(UCaseBuffer);
-			//printstr("iobj is %d\n",MaxScoreObj);
 
-		}
-		else
-		{ /* just score dobj */
-			for (short i = 1; i < NumWords; i++)
+	collapse_verb();
+
+//	printf("Verb=%s\n",VerbBuffer);	
+
+	VerbId = get_verb_id(VerbBuffer);
+
+	if (VerbId == INVALID)
+	{
+		printf("I don't know the verb '%s'\n", VerbBuffer);
+		return FALSE;
+	}
+
+	if (NumWords == 1)
+		return TRUE; //nothing left to do
+
+	//map noun1 and noun2
+	memset(Scores, 0, NumObjects); //clear scores
+
+	for (i = 1; i < NumWords; i++)
+	{
+		if (is_prep(WordPtrs[i]))
+		{
+			//	printf("prep found:%s\n",WordPtrs[i]);
+
+			PrepId = get_word_id(WordPtrs[i], PrepTable, PrepTableSize);
+			IobjSupplied = TRUE;
+			DobjSupplied = TRUE;
+			if (score_object(1, i, &DobjId) == TRUE)
 			{
-				//sprintf(UCaseBuffer,"scoring word: %s.\n", words[i]);
-				//printstr(UCaseBuffer);
-				
-				wordId = get_word_id(words[i],Dictionary,DictionarySize);
-				
-				if (wordId == INVALID) 
+				if (score_object(i + 1, NumWords, &IobjId) == TRUE)
 				{
-					sprintf(UCaseBuffer,"I don't know the word: %s\n",words[i]);
-					printstr(UCaseBuffer);
-					return FALSE;
+					return TRUE;
 				}
-				
-				score_word(wordId);
 			}
-		
-			/*find best match*/
-			get_max_score();					
-			if (MaxScoreCount > 1)
-			{ 
-				printstr("I don't know which one you mean.\n");
-				//dump_matches();
-				return FALSE;
-			}
-			DobjId = MaxScoreObj;
-			//printstr("dobj is %d\n",MaxScoreObj);
+			return FALSE;
 		}
 	}
+
+	/*no prep found - whole thing is noun1*/
+	DobjSupplied = TRUE;
+	return score_object(1, NumWords, &DobjId);
+}
+
+/*returns number of objects matching the max score*/
+int max_score_matches(int max)
+{
+	int i=0;
+	int count=0;
+	for (i=0; i < NumObjects; i++)
+	{
+		if (Scores[i] == max)
+			count++;
+	}
+//	printf("After parsing, there are %d matches.\n", count);
+	return count;
+}
+
+
+
+/*loops over a range of words and tries to map the result to objId*/
+BOOL score_object(int startIndex, int endIndex, unsigned char *objId)
+{
+	int maxScore = 0;
+	int wordId = INVALID;
+	int i = startIndex;
+
+	memset(Scores, 0, NumObjects); //clear scores
+
+	for (; i < endIndex; i++)
+	{
+		//		printf("scoring word %s\n", WordPtrs[i]);
+		wordId = get_word_id(WordPtrs[i], Dictionary, DictionarySize);
+		if (wordId == INVALID) {
+			printf("I don't know the word '%s'\n", WordPtrs[i]);
+			return FALSE;
+		}
+		score_objects(wordId);
+	}
+
+	maxScore = get_max_score();
+	if (max_score_matches(maxScore) > 1)
+	{
+		if (any_visible())
+		{
+			printf("I don't know which one you mean.\n");
+		}
+		else
+		{
+			printf("You don't see that.\n");
+		}
+		return FALSE;
+	}
+
+	*objId = max_score_object(maxScore);
 	return TRUE;
+}
+
+//returns whether or not any of the mapped objects were visible
+BOOL any_visible()
+{
+	for (int i =0; i < NumObjects; i++)
+	{
+		if (Scores[i] > 0)
+		{
+			if (is_visible(i))
+			{
+				return TRUE;
+			}
+		}			
+	}
+	return FALSE;
 }
 
 void clear_buffers()
@@ -584,15 +599,8 @@ void clear_buffers()
 	DobjId = INVALID;
 	IobjId = INVALID;
 	
-	char *buffer = Line;
-	
- 	for (int i=0; i < INBUF_SIZE; i++)
-		buffer[i]=0;
-	
-	for (int i=0; i < 55; i++)
-		VerbBuffer[i]=0;
-	for (int i=0; i < 10; i++)
-		words[i]=0;
+	memset(Buffer,0,80);		
+	memset(VerbBuffer,0,55);
 	NumWords=0;
 }
 
@@ -603,15 +611,15 @@ the verb buffer*/
 void get_verb()
 {
 	strcpy(VerbBuffer, words[0]);
-	//printstr("1st word is %s\n",VerbBuffer);
+	printf("1st word is %s\n",VerbBuffer);
 	if (NumWords > 1)
 	{
 		if (is_prep(words[1]))
 		{
-//			printstr("Appending preposition.");
+//			printf("Appending preposition.");
 			strcat(VerbBuffer," ");	
 			strcat(VerbBuffer,words[1]);
-//			printstr("Verb is %s\n",VerbBuffer);
+//			printf("Verb is %s\n",VerbBuffer);
 			/* shift words down */
 			for (short i=1; i < NumWords; i++)
 			{
@@ -622,40 +630,7 @@ void get_verb()
 	}
 }
 
-/*puts startPtr at the next word
-  by skipping over nulls (white space)
-/*if a EOL is encountered, false is returned*/
- BYTE move_start()
- {
-	  while (*startPtr == 0)
-	  {		
-		  startPtr++;
-	  }
-	  /* startPtr now points to a letter or and EOL*/
-	  if (*startPtr == EOL)
-			return FALSE;
-	  return TRUE;
- }
 
-/*skips over letters until a null or 1 is hit*/
-void move_end()
-{
-	while (*startPtr != 0 && *startPtr != EOL)
-		startPtr++;
-}
-
-/* returns true if the word at startPtr is in the article list */
-BOOL is_article()
-{
-	for (short i=0; i < 3; i++)
-	{
-		if (stricmp(startPtr, (char*)articles[i]) == 0)
-		{
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
 
 /* returns true if the word at startPtr is in the article list */
 BOOL is_prep(char *wrd)
@@ -671,48 +646,6 @@ BOOL is_prep(char *wrd)
 }
 
 
-/* puts the start addr of each word into the table */
-void strtok()
-{
-	startPtr = Buffer;
-	/*replaces each space with a null*/
-	while (*startPtr != 0)
-	{
-		if (*startPtr == ' ')
-			*startPtr=0;
-		startPtr++;
-	}
-	*startPtr = EOL; /* terminate with something other than a null */
-	
-	startPtr = Buffer;
-	
-	while (startPtr != 1)
-	{
-		if (!move_start())
-			break;
-		
-//		printstr("Word: %s\n", startPtr);
-		if (!is_article())
-		{
-			words[NumWords] = startPtr;
-			NumWords++;
-		}
-//		else
-//		{
-			//printstr("skipping article\n");
-	//	}
-		move_end();
-		
-		if (*startPtr == EOL)
-		{	
-			*startPtr = 0; /*replace the null*/
-			break;
-		}
-	}
-	
-	//sprintf(UCaseBuffer,"Numwords=%d\n", NumWords);
-	//printstr(UCaseBuffer);
-}
 
 /*returns TRUE if the two strings are equal
 compares until a space or null is hit
@@ -744,18 +677,17 @@ BOOL streq(char *str1, char *str2)
 /* sets the index of PrepIndex if found */ 
 BOOL found_prep()
 {
-//	printstr("Looking for prep\n");
 	PrepIndex=0;
 	for (int i=2; i < NumWords; i++)
 	{
 		if (is_prep(words[i]))
 		{
-		//	printstr("Found prep in index %d\n",i);
+		//	printf("Found prep in index %d\n",i);
 			PrepIndex = (BYTE)i;
 			return TRUE;
 		}
 	}
-//	printstr("no prep found.\n");
+//	printf("returning FALSE");
 	return FALSE;
 }
 
@@ -764,116 +696,92 @@ void clear_scores()
 	MaxScore=0;
 	MaxScoreCount=0;
 	for (short i=0; i < 255; i++)
-		scores[i]=0;
+		Scores[i]=0;
 }
 
-/*
-*if the word doesn't apply to an object
-*the score is set to 255
-*if the word does apply to an object and the object wasn't previously marked invalid, 1 is added to the score
-*scores synonyms as well
-*if object is visible, it is scored higher
-*/
-void score_word(BYTE wordId)
+
+void print_cr()
 {
-	char *tablePtr = (char*)ObjectWordTable;
-	
-	for (char i=0; i < ObjectWordTableSize; i++)
-	{
-		if (scores[i] != INVALID)
-		{
-			BYTE id = tablePtr[0];
-			
-			if (tablePtr[1] == wordId ||
-				tablePtr[2] == wordId ||
-				tablePtr[3] == wordId) 
-			{
-			
-				scores[i]++;				
-//				printstr("Object %d,%d is a match\n", i, ObjectWordTable[i].id);
-				
-				/*if it's visible, add another point!*/
-				if (is_visible_to(ObjectTable[PLAYER_ID].attrs[HOLDER_ID],(BYTE)id))
-					scores[i]++;
-				
-			}
-	 
-			tablePtr += 4;  /* id plus up to three words */
-		}			
-	}
+	printf("\n");
+	Col=0;
 }
 
-/*
-* gets the max score 
-* sets maxScoreObj
-* sets maxScoreCount
-*/
-void get_max_score()
+
+/*tokenizes the string and prints it out one word at a time*/
+void print_string(BYTE entryNum)
 {
-	BYTE max = 0;
-	MaxScore = 0;
-	MaxScoreCount = 0; /*how many matches for max*/
-	MaxScoreObj = 0;
+	char *token=0;
+	char *delim  = " ";
+	char buf[256];
 	
-	for (BYTE i=0; i < ObjectWordTableSize; i++)
+	if (entryNum < StringTableSize)
 	{
-		if (scores[i] == INVALID)
-			scores[i]=0;
-		
-//		if (scores[i] != 0)
-//			printstr("Object %d is possible match %d\n", i,scores[i]);
-		
-		if (scores[i] > MaxScore)
-		{ /* new best match */
-			MaxScore = scores[i];
-			MaxScoreObj = ObjectWordTable[i].id;
+		//print_table_entry(entryNum, StringTable);
+		char *s = (char*)StringTable[entryNum];
+		strcpy(buf,s);
+		token = strtok(buf, delim);
+	
+		while( token != NULL ) 
+		{	
+			print_word(token);
+			token = strtok(NULL, delim);
 		}
 	}
-	
-//	printstr("%d is max score\n", MaxScore);
-//	printstr("object %d is best match\n", MaxScoreObj);
-	
-	//count the number with the max score
-	for (char i=0; i < ObjectWordTableSize; i++)
+	else
 	{
-		if (scores[i] == MaxScore) MaxScoreCount++;
+		printf("ERROR! Invalid string id %d\n", entryNum);
 	}
-	
-//	printstr("%d is max count\n", MaxScoreObj);
 }
 
 
- 
 
-/*move2s ptr to first space or null*/
-
-void move_word_end(char **ptr)
+void print_word(char* w)
 {
-	while (**ptr != ' ' && **ptr != 0)
+	int len = 0;
+	int rem = 0;
+	len = strlen(w);
+	rem = scrWidth-Col;
+	
+	if ((len+1) < rem)
 	{
-		*ptr++;
+		printf("%s ",w);
+		Col = Col+len+1;
+	}	
+	else if (len==rem)
+	{
+		printf("%s",w);
+		Col=0;
+	}
+	else
+	{ //not enough room left
+		Col=0;
+		printf("\n%s ",w);
+		Col=len+1;
 	}
 }
 
- 
+
+
 
 /*looks at the verb buffer and attempts to find a match in the verb table*/
 /*verb has an id, a length, and is null terminated.
  *the last verb has an id of 255
  */
-BYTE get_verb_id()
+
+BYTE get_verb_id(char *verb)
 {
-	int i=0;
-	for (i=0; i < NumVerbs; i++)
+	int i = 0;
+	for (i = 0; i < NumVerbs; i++)
 	{
-//		printstr("verb %d=%s\n",i,VerbTable[i].word);
-		if (stricmp(VerbBuffer,VerbTable[i].wrd)==0)
+		/*		printf("verb %d=%s\n",i,VerbTable[i].word); */
+		if (stricmp(verb, VerbTable[i].wrd) == 0)
 		{
 			return VerbTable[i].id;
 		}
 	}
 	return INVALID;
 }
+
 
 /*returns true if objectId is visible to the player*/
 BOOL is_visible(BYTE objectId)
@@ -902,9 +810,6 @@ BOOL is_visible(BYTE objectId)
 
 BYTE get_object_attr(BYTE obj, BYTE attrNum)
 {
-//	char name[80];
-//	get_obj_name(obj,name);
-//  printstr("getting attr:  %d.%d \n", obj,attrNum);
 	return ObjectTable[obj].attrs[attrNum];
 }
 
@@ -918,14 +823,11 @@ BYTE get_object_prop(BYTE obj, BYTE propNum)
 	
 	if (temp !=0) temp = 1;
 	
-//	printstr("getting prop:  %d.%d=%d \n", obj,propNum,temp);
-	
 	return (BYTE)temp;
 }
 
 void set_object_attr(BYTE objNum, BYTE attrNum, BYTE  val)
 {
-//	printstr("setting attr:  %d.%d to %d\n", objNum,attrNum,val);
 	ObjectTable[objNum].attrs[attrNum] = (BYTE)val;
 }
 
@@ -933,7 +835,6 @@ void set_object_prop(BYTE objNum, BYTE propNum, BYTE val)
 {
 	unsigned short mask;
 	unsigned short temp; 
-//	printstr("setting prop:  %d.%d  to %d\n", objNum,propNum,val);
 	
 	if (val == 0)
 	{//clear it
@@ -978,7 +879,7 @@ BOOL can_see()
 
 void quit_sub()
 {
-	printstr("Goodbye.\n");
+	printf("Goodbye.\n");
 	done = TRUE;
 }
 
@@ -994,7 +895,7 @@ BYTE is_container(BYTE objectId)
 
 void get_sub()
 {
-	printstr("Taken.\n");
+	printf("Taken.\n");
 	ObjectTable[DobjId].attrs[HOLDER_ID] = PLAYER_ID; 
 	ObjectTable[DobjId].attrs[INITIAL_DESC_ID] = INVALID;  //clear initial desc
 }
@@ -1007,7 +908,7 @@ void drop_sub()
 		unwear_sub();
 	}
 	
-	printstr("Dropped.\n");
+	printf("Dropped.\n");
 	ObjectTable[DobjId].attrs[HOLDER_ID] = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
 	
 }
@@ -1016,23 +917,23 @@ void put_sub()
 {
 	if (is_supporter(IobjId)==FALSE && is_open_container(IobjId) == FALSE)
 	{
-		printstr("You can't do that.\n");
+		printf("You can't do that.\n");
 		return;
 	}
-	printstr("Done.\n");
+	printf("Done.\n");
 	ObjectTable[DobjId].attrs[HOLDER_ID] = IobjId;
 }
 
 void open_sub()
 {
 	char name[80];
-	printstr("Opened.\n");
+	printf("Opened.\n");
 	set_object_prop(DobjId, OPEN, 1);
 	get_obj_name(DobjId, name);
 	if (has_visible_children(DobjId)==TRUE)
 	{
 		sprintf(Buffer,"Opening the %s reveals:\n",name);
-		printstr(Buffer);
+		printf(Buffer);
 		print_obj_contents(DobjId);
 	}
 	
@@ -1040,7 +941,7 @@ void open_sub()
 
 void close_sub()
 {
-	printstr("Closed.\n");
+	printf("Closed.\n");
 	set_object_prop(DobjId, OPEN, 0);
 }
 
@@ -1050,7 +951,7 @@ void wear_sub()
 	memset(name,0,80);
 	get_obj_name(DobjId,name);
 	sprintf(Buffer,"You put on the %s.\n", name);
-	printstr(Buffer);
+	printf(Buffer);
 	set_object_prop(DobjId, BEINGWORN, 1);
 }
 
@@ -1060,21 +961,17 @@ void unwear_sub()
 	memset(name,0,80);
 	get_obj_name(DobjId,name);
 	sprintf(Buffer,"You remove the %s.\n", name);
-	printstr(Buffer);
+	printf(Buffer);
 	set_object_prop(DobjId, BEING_WORN, 0);
 }
 
 
-void print_string(BYTE entryNum)
-{
-//	printstr("entryNum=%d\n",entryNum);
-	print_table_entry(entryNum, StringTable);
-}
 
 void examine_sub()
 {
 	print_table_entry(ObjectTable[DobjId].attrs[DESC_ID],StringTable);
-	printstr("\n");
+	printf("\n");
+	hpos=0;
 	list_any_contents(DobjId);
 }
 
@@ -1082,11 +979,11 @@ void look_in_sub()
 {
 	if (!is_container(DobjId))
 	{
-		printstr("You can't see inside that.\n");
+		printf("You can't see inside that.\n");
 	}
 	else if (is_closed(DobjId))
 	{
-		printstr("It's closed.\n");
+		printf("It's closed.\n");
 	}
 	else
 		list_any_contents(DobjId);
@@ -1101,16 +998,14 @@ void list_any_contents(BYTE objectId)
 	{
 		memset(name,0,80);
 		get_obj_name(objectId,name);
-		sprintf(Buffer,"The %s contains:\n", name);
-		printstr(Buffer);
+		printf("The %s contains:\n", name);
 		print_obj_contents(objectId);
 	}
 	else if (is_supporter(objectId)==TRUE && has_visible_children(objectId) == TRUE)
 	{
 		memset(name,0,80);
 		get_obj_name(objectId,name);
-		sprintf(Buffer,"On the %s is:\n", name);
-		printstr(Buffer);
+		printf("On the %s is:\n", name);
 		print_obj_contents(objectId);
 	}		
 }
@@ -1126,18 +1021,16 @@ void print_obj_contents(BYTE objectId)
 			char name[80];
 			memset(name,0,80);
 			get_obj_name(i,name);
-			sprintf(Buffer,"A %s.", name);
-			printstr(Buffer);
-			
+			printf("A %s.", name);
 			if (get_object_prop(i,BEINGWORN)  == TRUE)
 			{
-				printstr("(being worn)");
+				printf("(being worn)");
 			}
 			if (get_object_prop(i,LIT) == TRUE)
 			{
-				printstr("(providing light)");
+				printf("(providing light)");
 			}
-			printstr("\n");
+			printf("\n");
 			list_any_contents(i);	
 		}
 	}
@@ -1149,7 +1042,7 @@ BOOL check_see_dobj()
 	BYTE playerRoom = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
 	if (is_visible_to(playerRoom, DobjId)==0)
 	{
-		printstr("You don't see that.\n");
+		printf("You don't see that.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -1161,10 +1054,10 @@ BOOL check_dobj_portable()
  	flags = flags & PORTABLE_MASK;
  	if ( flags == 0 )
 	{
-		printstr("That's not portable.\n");
+		printf("That's not portable.\n");
 		return FALSE;
 	}
-//	printstr("DObj is portable.\n");
+//	printf("DObj is portable.\n");
 	return TRUE;
 }
 
@@ -1177,7 +1070,7 @@ BOOL check_dobj_lockable()
  	if ( flags == 0 )
 	{
 		get_obj_name(DobjId,name);
-		printstr("You can't lock or unlock that.\n");
+		printf("You can't lock or unlock that.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -1190,7 +1083,7 @@ BOOL check_dobj_wearable()
 
 	if (flags == 0)
 	{
-		printstr("You can't that.\n");
+		printf("You'd look rediculous.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -1203,8 +1096,7 @@ BOOL check_dobj_open()
 	if (!is_open(DobjId))
 	{
 		get_obj_name(DobjId,name);
-		sprintf(Buffer,"The %s is closed.\n",name);
-		printstr(Buffer);
+		printf("The %s is closed.\n",name);
 		return FALSE;
 	}
 	return TRUE;
@@ -1216,8 +1108,7 @@ BOOL check_dobj_closed()
 	if (is_open(DobjId))
 	{
 		get_obj_name(DobjId,name);
-		sprintf(Buffer, "The %s already is open.\n",name);
-		printstr(Buffer);
+		printf("The %s already is open.\n",name);
 		return FALSE;
 	}
 	return TRUE;
@@ -1242,7 +1133,7 @@ BOOL check_dobj_supplied()
 //	if (DobjSupplied == 255)
 	if (DobjId == INVALID)
 	{
-		printstr("Missing noun.\n");
+		printf("Missing noun.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -1252,7 +1143,7 @@ BOOL check_iobj_supplied()
 {
 	if (IobjId	== INVALID)
 	{
-		printstr("Missing noun.\n");
+		printf("Missing noun.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -1269,8 +1160,7 @@ BOOL check_iobj_open()
 	if  (flags == 0)
 	{
 		get_obj_name(IobjId,buffer);
-		sprintf(Buffer,"The %s is closed.\n", buffer);
-		printstr(Buffer);
+		printf("The %s is closed.\n", buffer);
 		return FALSE;
 	}
 	return TRUE;
@@ -1283,7 +1173,7 @@ BOOL check_dobj_opnable()
 	
 	if (flags == 0)
 	{
-		printstr("You can't open that.\n");
+		printf("You can't open that.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -1304,8 +1194,7 @@ BOOL check_dobj_unlocked()
 		char name[80];
 		get_obj_name(DobjId,name);
 
-		sprintf(Buffer,"The %s is locked.\n",name);
-		printstr(Buffer);
+		printf("The %s is locked.\n",name);
 		return FALSE;
 	}	
 	return TRUE;
@@ -1317,7 +1206,7 @@ BOOL check_iobj_container()
 	flags = flags & CONTAINER_MASK;
 	if (flags == 0)
 	{
-		printstr("You can't do that.\n");
+		printf("You can't do that.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -1327,7 +1216,7 @@ BOOL check_have_dobj()
 {
 	if (is_ancestor(PLAYER_ID,DobjId)==FALSE)
 	{
-		printstr("You don't have that.\n");
+		printf("You don't have that.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -1337,7 +1226,7 @@ BOOL check_dont_have_dobj()
 {
 	if (is_ancestor(PLAYER_ID,DobjId)==TRUE)
 	{
-		printstr("You already have it.\n");
+		printf("You already have it.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -1347,7 +1236,7 @@ BOOL check_not_self_or_child()
 {
 	if (DobjId == IobjId || is_ancestor(DobjId,IobjId))
 	{
-		printstr("That's not possible.\n");
+		printf("That's not possible.");
 		return FALSE;
 	}
 		
@@ -1370,6 +1259,38 @@ BOOL check_rules()
 	return TRUE;
 }
 
+void draw_status_bar()
+{
+	//save cursor
+	printf("\x1b[s");
+	//goto top left
+	printf("\x1b[0;0f");
+	printf("\x1b[47m"); //white background
+
+	for (int i=0; i < 80; i++)
+	{
+		printf(" ");
+	}
+	//back to top left
+	printf("\x1b[0;0f");
+	//set background to black
+	printf("\x1b[40m");
+	// inverse mode
+	printf("\x1b[7m");
+	char buffer[80];
+	get_room_name(ObjectTable[PLAYER_ID].attrs[HOLDER_ID], buffer);
+	printf(buffer);
+	printf("\x1b[0;50f");
+	sprintf(buffer,"Score: %d/100",score);
+	printf(buffer);
+	printf("\x1b[0;70f");
+	sprintf(buffer,"Moves: %d",moves);
+	printf(buffer);
+	printf("\x1b[0m"); //clear invese 
+	printf("\x1b[u");
+
+
+}
 
 /*
 *Sets up pointers to the data tables
@@ -1379,7 +1300,7 @@ void init()
 	ObjectTable = (Object*)ObjectData;
 	ObjectWordTable = (ObjectWordEntry*)ObjectWordTableData;
 	VerbCheckTable = (VerbCheck*)VerbCheckTableData;
-	fix_endianess();
+//	fix_endianess();
 	init_verb_table();
 	init_verb_checks();
 	init_before_functions();
@@ -1394,7 +1315,7 @@ BOOL is_ancestor(BYTE parent, BYTE child)
 	
 	while (child != 0)
 	{
-//		printstr("is ancestor..\n");
+//		printf("is ancestor..\n");
 		if (ObjectTable[child].attrs[HOLDER_ID] == parent)
 			return TRUE;
 		
@@ -1408,21 +1329,20 @@ BOOL is_ancestor(BYTE parent, BYTE child)
 /*concatenates all the words in a object's name into a single buffer*/
 void get_obj_name(unsigned char objectId, char *buffer)
 {
-	 	 
    strcpy(buffer, Dictionary[(int)(ObjectWordTable[(int)objectId].word1)]);
-   
+ 
    if (ObjectWordTable[objectId].word2 != INVALID)
    {
 	  strcat(buffer, " ");
 	  strcat(buffer, Dictionary[ObjectWordTable[objectId].word2]);
    }
    
-   if (ObjectWordTable[objectId].word3 != 255)
+   if (ObjectWordTable[objectId].word3 != INVALID)
    {
 	  strcat(buffer, " ");
 	  strcat(buffer, Dictionary[ObjectWordTable[objectId].word3]);
    }
-//   ucase_string(buffer);
+ 
 }
 
 /*prints room desc or too dark message*/
@@ -1455,36 +1375,36 @@ BOOL is_visible_to(BYTE roomId, BYTE objectId)
 	while (1)
 	{
 		unsigned char parent = ObjectTable[objectId].attrs[HOLDER_ID];		
-		//printstr("in vis loop, %d, %d, %d\n", roomId, parent, objectId);
+		//printf("in vis loop, %d, %d, %d\n", roomId, parent, objectId);
 
 		if (roomId == objectId)
 		{
-		//	printstr("found object!\n");
+		//	printf("found object!\n");
 			return TRUE;
 		}
 		
 		if (parent == OFFSCREEN)
 		{
-//			printstr("hit offscreen\n");
+//			printf("hit offscreen\n");
 			return FALSE;
 		}
 		
 		if (parent == roomId)
 		{
-	//		printstr("hit parent=success!\n");
+	//		printf("hit parent=success!\n");
 			return TRUE;
 		}	
 		
 		if (is_closed_container(parent))
 		{
-		//	printstr("parent is a closed container.\n");
+		//	printf("parent is a closed container.\n");
 			return FALSE;
 		}	
 		
 		objectId = parent;
 		
 	}
-//	printstr("%d is visible to %d\n", roomId, objectId);
+//	printf("%d is visible to %d\n", roomId, objectId);
 	return TRUE;
 }
 
@@ -1517,7 +1437,7 @@ BOOL is_open_container(BYTE objectId)
 	if (get_object_prop(objectId,CONTAINER)==1 && get_object_prop(objectId,OPEN)==1)
 	{
 		get_obj_name(objectId,name);
-//		printstr("%s is an open container.\n",name);
+//		printf("%s is an open container.\n",name);
 		return TRUE;
 	}	
 	return FALSE;
@@ -1527,22 +1447,7 @@ BOOL is_open_container(BYTE objectId)
 /*prints the entryNumth string from the table*/
 void print_table_entry(BYTE entryNum, const char *table[])
 {
-//	printstr("%s",table[entryNum]);
-	char *str = (char*)table[entryNum];
-	printstr(str);
-	/*
-	while (*str != 0)
-	{
-		while (*str == ' ') str++; //move next word
-		char* start = str; //save the start
-		while (*str != ' ' && *str != 0) str++;
-		char* end = str;
-		char oldTerm = *end;
-		*end = 0; //null terminate word
-		printwrd(start);
-		*end = oldTerm; //replace term
-	}
-	*/
+	printf("%s",table[entryNum]);
 }
 
 BOOL emitting_light(unsigned char objId)
@@ -1562,12 +1467,12 @@ void look_sub()
 	
 	get_room_name(ObjectTable[PLAYER_ID].attrs[HOLDER_ID],roomName);
 	
-	sprintf(Buffer,"%s\n", roomName);
-	printstr(Buffer);
-	
+	printf("%s\n",roomName);
+	hpos=0;
 	if (can_see()==0)
 	{	
-		printstr("It is pitch dark.\n");
+		printf("It is pitch dark.\n");
+		hpos=0;
 		return;
 	}
 	else
@@ -1576,7 +1481,8 @@ void look_sub()
 		BYTE descId = ObjectTable[roomId].attrs[DESC_ID];
 		//print_table_entry(descId, StringTable);
 		print_string(descId);
-		printstr("\n");
+		printf("\n");
+		hpos=0;
 	}
 	 
 	roomId = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
@@ -1590,7 +1496,8 @@ void look_sub()
 			if (initialDesc != INVALID)
 			{
 				print_table_entry(initialDesc,StringTable);
-				printstr("\n");
+				printf("\n");
+				hpos=0;
 			}
 			else
 			{
@@ -1598,7 +1505,8 @@ void look_sub()
 				{
 					get_obj_name(i,name);
 					sprintf(Buffer,"There is a %s here.\n", name);
-					printstr(Buffer);
+					printf(Buffer);
+					hpos=0;
 				}
 			}
 			
@@ -1610,18 +1518,17 @@ void look_sub()
 /* returns the id # of a word or 255 if not found*/
 BYTE get_word_id(char *wordPtr, const char *table[], int tableSize)
 {
-	int i=0;
+	BYTE i=0;
 	for (i=0; i < tableSize; i++)
 	{
-		//printstr("%s:%s\n",wordPtr,table[i]);
+		//printf("%s:%s\n",wordPtr,table[i]);
 		if (stricmp(wordPtr,table[i])==0 ||
 			strcmp(wordPtr,table[i])==0)
 		{
-//			printstr("FOUND MATCH. %d\n",i);
-			return (BYTE)i;
+//			printf("FOUND MATCH. %d\n",i);
+			return i;
 		}
 	}
-//	printstr("Word not found.\n");
 	return INVALID;
 }
 
@@ -1639,7 +1546,7 @@ void purloin()
 {
 	/*
 	int id;
-	printstr("Which object?");
+	printf("Which object?");
 	gets(Buffer);
 	id = word_to_object_id(Buffer);
 	if (id != INVALID)
@@ -1654,7 +1561,7 @@ void dbg_goto()
 {
 	/*
 	int id=0;
-	printstr("Which room?");
+	printf("Which room?");
 	gets(Buffer);
 	id = word_to_object_id(Buffer);
 	if (id != INVALID)
@@ -1670,19 +1577,19 @@ void dump_flags()
 {
 	/*
 	BYTE i=0;
-	printstr("enter object number:\n");
+	printf("enter object number:\n");
 	gets(Buffer);
 	i = word_to_object_id(Buffer);
 	
-	printstr("hflags: %x,%x\n", ObjectTable[i].flags/256, ObjectTable[i].flags%256);
-	printstr("iflags: %d\n", ObjectTable[i].flags);
-	if (get_object_prop(i,SCENERY)==1) printstr("scenery\n");
-	if (get_object_prop(i,LIT)==1) printstr("lit\n");
-	if (get_object_prop(i,PORTABLE)==1) printstr("portable\n");
-	if (get_object_prop(i,LOCKED)==1) printstr("locked\n");
-	if (get_object_prop(i,OPEN)==1) printstr("open\n");
-	if (get_object_prop(i,CONTAINER)==1) printstr("container\n");
-	if (get_object_prop(i,DOOR)==1) printstr("door\n");
+	printf("hflags: %x,%x\n", ObjectTable[i].flags/256, ObjectTable[i].flags%256);
+	printf("iflags: %d\n", ObjectTable[i].flags);
+	if (get_object_prop(i,SCENERY)==1) printf("scenery\n");
+	if (get_object_prop(i,LIT)==1) printf("lit\n");
+	if (get_object_prop(i,PORTABLE)==1) printf("portable\n");
+	if (get_object_prop(i,LOCKED)==1) printf("locked\n");
+	if (get_object_prop(i,OPEN)==1) printf("open\n");
+	if (get_object_prop(i,CONTAINER)==1) printf("container\n");
+	if (get_object_prop(i,DOOR)==1) printf("door\n");
 	*/
 }
 
@@ -1704,7 +1611,8 @@ void execute()
 			
 			if (Handled==0)
 			{
-				printstr("I don't understand.\n");
+				printf("I don't understand.\n");
+				hpos=0;
 			}
 		}
 		
@@ -1742,9 +1650,9 @@ BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards)
 			PrepId==table[i].prep &&
 			tempio==table[i].iobj)
 			{
-//				printstr("Executing a custom event with wildcards.\n");
+//				printf("Executing a custom event with wildcards.\n");
 				(*table[i].handler)();
-			//	printstr("Done.\n");
+			//	printf("Done.\n");
 				result=TRUE;
 				break;
 			}
@@ -1756,9 +1664,9 @@ BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards)
 				PrepId==table[i].prep &&
 				IobjId==table[i].iobj)
 				{
-		//			printstr("Executing a custom event. Addr=%x\n", table[i].handler);
+		//			printf("Executing a custom event. Addr=%x\n", table[i].handler);
 					(*table[i].handler)();
-			//		printstr("Done.\n");
+			//		printf("Done.\n");
 					result=TRUE;
 					break;
 				}
@@ -1772,7 +1680,7 @@ BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards)
 void try_default_sentence()
 {
 	Handled = TRUE;
-//	printstr("looking for a default match. verb id=%d\n", VerbId);
+//	printf("looking for a default match. verb id=%d\n", VerbId);
 	if (VerbId == GET_VERB_ID)
 		get_sub();
 	else if (VerbId == LOOK_VERB_ID)
@@ -1808,13 +1716,12 @@ void try_default_sentence()
 	else if (VerbId == RESTORE_VERB_ID)
 		restore_sub();
 	else if (VerbId == QUIT_VERB_ID)
-	{
-		printstr("Cold start machine to reboot.\n");
-//		exit(0);
+	{	printf("Bye.\n");
+		exit(0);
 	}
 	else
 	{
-//		printstr("couldn't find a default handler.\n");
+//		printf("couldn't find a default handler.\n");
 		Handled = FALSE;
 	}
 //	if (VerbId == UNWEAR_VERB_ID)
@@ -1825,13 +1732,13 @@ void try_default_sentence()
 
 void move_sub()
 {
-//	printstr("moving");
+//	printf("moving");
 	BYTE tgtRoom=INVALID;
 	BYTE dir=0;
 	BYTE room = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
 	dir = verb_to_dir(VerbId);
 	
-//	printstr("current room is %d\n", room);
+//	printf("current room is %d\n", room);
 	tgtRoom = ObjectTable[room].attrs[dir];
 	enter_object(tgtRoom, dir);
 }
@@ -1839,21 +1746,22 @@ void move_sub()
 void enter_sub()
 {
 	if (get_object_attr(DobjId,ENTER) == 255)
-		printstr("You can't enter that.");
+		printf("You can't enter that.\n");
 	else
 		enter_object(DobjId, ENTER);
 }
 
 void enter_object(BYTE tgtRoom, BYTE dir)
 {
-	//printstr("target room = %d\n",tgtRoom);
+	//printf("target room = %d\n",tgtRoom);
 	
 	if (tgtRoom > 127)
 	{
 		BYTE msgId = (255 - tgtRoom)+1;
-//		printstr("printing nogo message %d\n", msgId);
+//		printf("printing nogo message %d\n", msgId);
 		print_table_entry(msgId, NogoTable); 
-		printstr("\n");
+		printf("\n");
+		hpos=0;
 	}
 	else
 	{
@@ -1863,25 +1771,25 @@ void enter_object(BYTE tgtRoom, BYTE dir)
 			{
 				char name[80];
 				get_obj_name(tgtRoom,name);
-				sprintf(Buffer,"The %s is closed.\n",name);
-				printstr(Buffer);
+				printf("The %s is closed.\n",name);
+				hpos=0;
 				return;
 			}
 			else
 			{
-			//	printstr("passing through a door\n");
+			//	printf("passing through a door\n");
 				tgtRoom = ObjectTable[tgtRoom].attrs[dir];	/*move through door to room on other side*/
 			}
 		}
 //		else
 //		{
-//			printstr("%d is not a door\n", tgtRoom);
+//			printf("%d is not a door\n", tgtRoom);
 //		}
 		
 		//if the object has an 'enter' treat the object l
 		if (ObjectTable[tgtRoom].attrs[ENTER] != INVALID)
 		{
-//			printstr("entering inside %d\n", tgtRoom);
+//			printf("entering inside %d\n", tgtRoom);
 			tgtRoom = ObjectTable[tgtRoom].attrs[ENTER];
 		}
 		
@@ -1917,7 +1825,7 @@ BYTE verb_to_dir(BYTE verbId)
 	if (VerbId == DOWN_VERB_ID) return DOWN;
 	if (VerbId == ENTER_VERB_ID) return ENTER;
 	if (VerbId == OUT_VERB_ID) return OUT;
-	printstr((char*)"Invalid direction in verb_to_dir\n");
+	printf("Invalid direction in verb_to_dir\n");
 	return NORTH;
 }
 
@@ -1926,21 +1834,23 @@ void inventory_sub()
 {
 	if (has_visible_children(PLAYER_ID) == TRUE)
 	{
-		printstr("You are carrying:\n");
+		printf("You are carrying:\n");
 		print_obj_contents(PLAYER_ID);		
 	}
 	else 
 	{
-		printstr("You are empty handed.\n");
+		printf("You are empty handed.\n");
 	}
+	hpos=0;
 }
 
 void printcr()
 {
-	printstr((char*)"\n");
+	printf("\n");
+	hpos=0;
 }
 
-
+/*
 void fix_endianess()
 {
 	for (int i=0; i < NumObjects; i++)
@@ -1951,8 +1861,16 @@ void fix_endianess()
 		ObjectTable[i].flags = s;
 	}
 }	
-
-
+*/
+char to_uchar(char ch)
+{
+	if (ch >= 97 && ch <= 122)
+	{
+		return ch - 32;
+	}
+	
+	return ch;
+}
 
 BYTE stricmp(const char * str1, const char * str2)
 {
@@ -1977,13 +1895,12 @@ BYTE stricmp(const char * str1, const char * str2)
 }
 
 void dump_dict()
-{/*
+{
 	for (int i=0; i < DictionarySize; i++)
+	//for (int i=0; i < 3; i++)
 	{
-		printstr("%s|\n",Dictionary[i]);
-	}
-	*/
-	
+		printf("%s | \n",Dictionary[i]);
+	}	
 }
 
 BYTE rand8(BYTE divisor)
@@ -1991,71 +1908,202 @@ BYTE rand8(BYTE divisor)
 	return (BYTE)rand() % divisor;
 }
 
-void dump_matches()
+
+
+
+
+short param_stack_pop()
 {
-	char buf[80];
-	for (BYTE i=0; i < NumObjects; i++)
+	short top = param_stack.top();
+	param_stack.pop();
+	return top;
+}
+
+BOOL is_article(char *word)
+{
+	int i = 0;
+	for (i = 0; i < NumArticles; i++)
 	{
-		if (scores[i]==MaxScore)
+		if (stricmp(word, ArticleTable[i]) == 0)
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+/*if needed, turn verbs like 'look at' into one word*/
+void collapse_verb()
+{
+	int i = 1;
+	//	printf("Num words=%d\n", NumWords);
+	strcpy(VerbBuffer,WordPtrs[0]);
+	if (NumWords > 1)
+	{
+		if (is_prep(WordPtrs[1]))
 		{
-			get_obj_name(i,buf);
-	//		printstr("match:%s\n",buf);
+			strcat(VerbBuffer, " ");
+			strcat(VerbBuffer, WordPtrs[1]);
+
+			for (i = 1; i < NumWords - 1; i++)
+			{
+				WordPtrs[i] = WordPtrs[i + 1];
+			}
+			WordPtrs[NumWords - 1] = 0; /*erase last entry*/
+			NumWords--;
+		}
+	}
+
+
+	//	printf("verb=%s\n",VerbBuffer);
+}
+
+/*returns the object with the supplied score*/
+unsigned char max_score_object(int max)
+{
+	int i=0;
+	for (i=0; i < NumObjects; i++)
+	{
+		if (Scores[i] == max)
+			return i;
+	}
+	return INVALID;
+}
+
+int get_max_score()
+{
+	int i=0;
+	int max=0;
+	for (i=0; i < NumObjects; i++)
+	{
+		/*clear invalid flags*/
+		if (Scores[i] == INVALID)
+			Scores[i]=0;
+		
+		if (Scores[i] > max)
+		{
+			max = Scores[i];
+		}
+	}
+	return max;
+}
+
+/*scores each object if wordId applies to it*/
+void score_objects(unsigned char wordId)
+{
+	int i=0;
+	int playerRoom=0;
+	playerRoom = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
+
+	for (i=0; i < NumObjects; i++)
+	{
+		if (word_matches_object(wordId,i))
+		{
+			if (Scores[i] != INVALID)
+			{
+	//	 			printf("Word %d matches object %d\n", wordId,i);
+					Scores[i]+=1;
+					
+					if (is_visible_to(playerRoom,i))
+						Scores[i]+=1;
+			}
+ 		}
+		else
+		{
+			Scores[i] = INVALID; /*can't be this object*/
 		}
 	}
 }
 
-
-char *ucase_string(char *str)
+/*returns true of wordId applies to object objectId*/
+BOOL word_matches_object(int wordId, int objectId)
 {
-	if (LCase == FALSE)
+	/*need the loop to check for synonyms*/
+	int i=0;
+	for (; i < ObjectWordTableSize; i++)
 	{
-		BYTE len= (BYTE)strlen(str);
-		for (BYTE i=0; i < len; i++)
+		if (ObjectWordTable[i].id == objectId)
 		{
-			str[i] = to_uchar(str[i]);
-		}	
+			if (ObjectWordTable[i].word1 == wordId)
+				return TRUE;
+			if (ObjectWordTable[i].word2 == wordId)
+				return TRUE;
+			if (ObjectWordTable[i].word3 == wordId)
+				return TRUE;
+		}
 	}
-	return str;
+	return FALSE;
 }
- 
-void draw_status_bar()
+
+
+
+#include "event_jumps.c"
+
+
+void save_sub()
 {
-	char *saveCursor = cursor;
-	
-	memset(0x400, ' ', scrWidth);
-	
-	get_room_name(ObjectTable[PLAYER_ID].attrs[HOLDER_ID],UCaseBuffer);
-	cursor = 0x401;
-	printstr(UCaseBuffer);
-	
-	cursor = 0x400 + scrWidth - 15;
-	sprintf(UCaseBuffer,"SCORE:%d/100",score);
-	printstr(UCaseBuffer);
-	
-	cursor = saveCursor; //restore cursor
+	char buf[80];
+	char *line = buf;
+	size_t len = 80;
+	printf("Enter file name:");
+	getline(&line,&len,stdin);
+	buf[strlen(buf)-1]=0;
+	strcat(buf,".sav");
+	FILE *fp = fopen(buf,"w");
+	if (fp != 0)
+	{
+		fwrite(ObjectTable, sizeof(Object) * NumObjects, 1, fp);
+		//write built in vars
+		fwrite(&score, sizeof(score), 1, fp);
+		fwrite(&moves, sizeof(moves), 1, fp);
+		fwrite(&health, sizeof(health), 1, fp);
+		fwrite(&turnsWithoutLight, sizeof(turnsWithoutLight), 1, fp);
+		//write user vars
+		fwrite(&turnsWithoutLight+sizeof(score), sizeof(turnsWithoutLight), NumUserVars, fp);	
+		fclose(fp);
+		printf("game saved.\n");
+	}
 }
- // Invoked 60 times per second.
-//
-interrupt asm void irqISR()
+
+void restore_sub()
 {
-    asm
-    {
-        ldb     $FF03
-        bpl     @done           // do nothing if 63.5 us interrupt
-        ldb     $FF02           // 60 Hz interrupt. Reset PIA0, port B interrupt flag.
-        ;lbsr    dskcon_irqService      
-@done
-    }
+	char buf[80];
+	char *line = buf;
+	size_t len = 80;
+	printf("Enter file name:");
+	getline(&line,&len,stdin);
+	buf[strlen(buf)-1]=0;
+	strcat(buf,".sav");
+	FILE *fp = fopen(buf,"rb");
+	if (fp != 0)
+	{
+		fread(ObjectTable, sizeof(Object) * NumObjects, 1, fp);
+		//write built in vars
+		fread(&score, sizeof(score), 1, fp);
+		fread(&moves, sizeof(moves), 1, fp);
+		fread(&health, sizeof(health), 1, fp);
+		fread(&turnsWithoutLight, sizeof(turnsWithoutLight), 1, fp);
+		//write user vars
+		fread(&turnsWithoutLight+sizeof(score), sizeof(turnsWithoutLight), NumUserVars, fp);	
+		fclose(fp);
+		
+		look_sub();
+	}
 }
 
 
-interrupt asm void nmiISR()
+void dump_obj_table()
 {
+	int i,j;
+	for (i=0; i < NumObjects; i++)
+	{
+		for (j=0; j < 17; j++)
+		{
+			printf("%d ", ObjectTable[i].attrs[j]);
+		}
+		printf(" flags: %x", ObjectTable[i].flags);
+		printf("\n");
+	}
 }
 
 
-#include "event_jumps_6809.c"
-
-#include "coco_io.c"
-#include "cocokb.c"
-#include "CocoVGA.c"
+#include "Events.c"

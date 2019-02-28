@@ -1,4 +1,7 @@
-// #pragma org 0xE00
+/*Text adventure shell
+ *Evan C. Wright
+ *2018-2019
+ */
 
 
 #include <cmoc.h>
@@ -7,11 +10,7 @@
 #include "VerbDefs8086.h"
 #include "cocokb.h"
 #include "CocoVGA.h"
-
-/*text adventure shell
- *Evan Wright
- *2018-2019
- */
+#include "dskcon-standalone.h"
 
 //#define KYBD_BUFFER 733 /*global input buffer */
 #define EOL 1 
@@ -43,7 +42,6 @@
  
 #define disableInterrupts() asm("ORCC",  "#$50")
 #define enableInterrupts()  asm("ANDCC", "#$AF")
- 
  
  
 #define NORTH  4
@@ -103,6 +101,9 @@
 #define DOOR_MASK  16348
 #define USER_2 32768
    
+   
+#define BUILT_IN_VARS 5
+   
 BYTE temp;
 BYTE temp2;
 
@@ -111,16 +112,7 @@ char UCaseBuffer[INBUF_SIZE];
 
 DECBDrive drives[4];
 unsigned int numDrives=4;
- 
-typedef struct PREAMBLE
-{
-	BYTE type;
-	BYTE dataHi;
-	BYTE dataLo;
-	BYTE execHi;
-	BYTE execLo;
-}PREAMBLE;
-
+  
 typedef struct _WordEntry 
 {
 	BYTE id;
@@ -163,94 +155,9 @@ char *words[10];
 char NumWords=0;
 char *startPtr;
 
+#include "main.h"
 
-void init();
-void draw_status_bar();
-void strtok();
-BOOL parse_and_map();
-void clear_buffers();
-BYTE move_start();
-BOOL streq(char  *src, char *dest);
-void move_next();
-void get_verb();
-BYTE get_verb_id();
-BYTE get_word_id(char *wordPtr, const char *table[], int tableSize);
-void look_sub();
-void inventory_sub();
-BOOL is_article();
-BOOL is_prep(char *wrd);
-BOOL found_prep();
-void clear_scores();
-void score_word(BYTE wordId);
-BYTE get_prep_id(char *ptr);
-void get_max_score();
-BOOL is_noun_ambiguous();
-BOOL is_visible(BYTE objectId);
-BOOL can_see();
-BOOL is_door(unsigned char objectId);
-
-void examine_sub();
-void dump_matches();
-void set_object_prop(BYTE objNum, BYTE propNum, BYTE val);
-void set_object_attr(BYTE objNum, BYTE attrNum, BYTE  val);
-BYTE get_object_prop(BYTE obj, BYTE propNum);
-BYTE get_object_attr(BYTE obj, BYTE attrNum);
-void quit_sub();
-void get_sub();
-void close_sub();
-void wear_sub();
-void unwear_sub();
-void inventory_sub();
-void print_obj_contents(BYTE objectId);
-void list_any_contents(BYTE objectId);
-void print_table_entry(BYTE entryNum, const char *table[]);
-void execute();
-void try_default_sentence();
-void move_sub();
-void enter_sub();
-void enter_object(BYTE room, BYTE dir);
-void restore_sub();
-void save_sub();
-void run_events();
-void dump_dict();
-BYTE stricmp(const char * str1,const char * str);
-BYTE verb_to_dir(BYTE verbId);;
-BYTE is_supporter(BYTE objectId);
-BYTE is_container(BYTE objectId);
-BOOL is_open_container(BYTE objectId);
-BOOL is_open(BYTE objectId);
-BOOL is_closed_container(BYTE objectId);
-BOOL emitting_light(BYTE objId);
-BOOL check_not_self_or_child();
-BOOL check_dont_have_dobj();
-BOOL check_have_dobj();
-BOOL check_iobj_container();
-BOOL check_dobj_lockable();
-BOOL check_dobj_unlocked();
-BOOL check_prep_supplied();
-BOOL check_dobj_opnable();
-BOOL check_iobj_open();
-BOOL check_dobj_visible();
-BOOL check_dobj_supplied();
-BOOL check_iobj_supplied();
-BOOL check_light();
-BOOL is_ancestor(BYTE parent, BYTE child);
-BOOL is_visible_to(BYTE roomId, BYTE objectId);
-BOOL has_visible_children(BYTE objectId);
-BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards);
-BOOL is_closed(BYTE objectId);
-BOOL check_rules();
-
-void get_obj_name(BYTE objectId, char *buffer);
-void get_room_name(BYTE objectId, char *buffer);
-void dbg_goto();
-void purloin();
-void dump_flags();
-//void to_upper(char *s);
-void fix_endianess();
-BYTE rand8(BYTE divisor);
-char to_uchar(char ch);
-char *ucase_string(char *str);
+//char *ucase_string(char *str);
 const char *articles[] = {"A","AN","THE","OF"};
 const char* preps[] = {"IN","ON","UNDER","AT"};
 //
@@ -302,7 +209,6 @@ BYTE lowerCase=FALSE;
 
 /*group save data together*/
 
-PREAMBLE Preamble;
 #include "ObjectTable8086.c"
 /*built in vars*/
 BYTE score=0;
@@ -311,8 +217,6 @@ BYTE gameOver=FALSE;
 BYTE moves=0;
 BYTE health=100;
 #include "UserVars8086.c"
-PREAMBLE Postamble;
-BYTE EndData;
 
 #include "ObjectWordTable.c"
 #include "VerbTable8086.c"
@@ -344,23 +248,47 @@ const char * propNames[] = {
 "UNUSED"
 };
 
+interrupt asm void irqISR()
+{
+    asm
+    {
+        ldb     $FF03
+        bpl     @done           // do nothing if 63.5 us interrupt
+        ldb     $FF02           // 60 Hz interrupt. Reset PIA0, port B interrupt flag.
+		lbsr    dskcon_irqService      /* uncommented per pierre */
+@done
+    }
+}
+
+ 
+
 BYTE scores[255];
 
 int main()
 {
+	//
+	 
+	decb_shutdown();
+	
 	//loader disabled the interrupts
 	setISR(IRQ_VECTOR, irqISR);
-    setISR(NMI_VECTOR, nmiISR);
-
-//    timer = 0;
-	lastLine = 15*32 + 0x0400;
-	Buffer = Line;
+    
+	//do this before reenabling interrupts
+	
+	dskcon_init(dskcon_nmiService);
+	
+	
     enableInterrupts();
+
+ 
+	
+	lastLine = 15*32 + 0x0400;
+	Buffer = Line;	
 	clsfs();
 	unsigned int size = BufSize;
-	init();
+	init(); //setup tables
  
-	printstr("DO YOU A COCO-VGA? (Y/N)");
+	printstr("COCO-VGA INSTALLED? (Y/N)");
 	readlinenb();
 	
 	if (Buffer[0] == 'y' || Buffer[0]=='Y')
@@ -370,30 +298,21 @@ int main()
 	printstr("\n"); //make room for status bar
 	 
 	
-	Buffer[1]=0;
-	for (int i=0; i < 256; i++)
-	{
-		Buffer[0] = (char)i;
-		prinstr(Buffer);
-	}
-	
  	printstr( WelcomeStr );
 	printstr("\n");
-	printstr( AuthorStr);
-	printstr("\n");
+	printstr( AuthorStr );
+	printstr("\n\n");
  
 	look_sub();
 	dump_dict();
- 
-//	Buffer = KYBD_BUFFER;
-	
+ 	
 	while (!done)
 	{
 		/* read a line */
 		draw_status_bar();
 		
 		printstr(">");
-		/*gets(Buffer);*/
+		 
 		clear_buffers();
 				
 		readlinenb(); /* reads into global input buffer */
@@ -418,7 +337,7 @@ int main()
 		
 		if (strlen(Buffer)==0)
 		{
-			printstr("Pardon?");
+			printstr("Pardon?\n");
 			continue;
 		}
 		
@@ -446,7 +365,7 @@ int main()
 //			else
 //				printf("mapping failed.\n");
 		}
-//		exit(0);	
+ 	
 	}
 
 	return 0;
@@ -1239,7 +1158,7 @@ BOOL check_dobj_visible()
 
 BOOL check_dobj_supplied()
 {
-//	if (DobjSupplied == 255)
+ 
 	if (DobjId == INVALID)
 	{
 		printstr("Missing noun.\n");
@@ -1394,7 +1313,6 @@ BOOL is_ancestor(BYTE parent, BYTE child)
 	
 	while (child != 0)
 	{
-//		printstr("is ancestor..\n");
 		if (ObjectTable[child].attrs[HOLDER_ID] == parent)
 			return TRUE;
 		
@@ -1430,17 +1348,13 @@ void get_room_name(BYTE objectId, char *buffer)
 {
 	if (can_see()==0)
 	{
-		strcpy(buffer,"DARKNESS");
+		strcpy(buffer,"Darkness");
 	}
 	else
 	{
 		int i=0;
 		int len=0;
 		get_obj_name(objectId,buffer);
-	//	for (i=0;i<len;i++)
-	//	{
-	//		buffer[i] = toupper(buffer[i]);
-	//	}
 	}
 }
 
@@ -1476,15 +1390,14 @@ BOOL is_visible_to(BYTE roomId, BYTE objectId)
 		}	
 		
 		if (is_closed_container(parent))
-		{
-		//	printstr("parent is a closed container.\n");
+		{ 
 			return FALSE;
 		}	
 		
 		objectId = parent;
 		
 	}
-//	printstr("%d is visible to %d\n", roomId, objectId);
+ 
 	return TRUE;
 }
 
@@ -1517,7 +1430,6 @@ BOOL is_open_container(BYTE objectId)
 	if (get_object_prop(objectId,CONTAINER)==1 && get_object_prop(objectId,OPEN)==1)
 	{
 		get_obj_name(objectId,name);
-//		printstr("%s is an open container.\n",name);
 		return TRUE;
 	}	
 	return FALSE;
@@ -1530,19 +1442,7 @@ void print_table_entry(BYTE entryNum, const char *table[])
 //	printstr("%s",table[entryNum]);
 	char *str = (char*)table[entryNum];
 	printstr(str);
-	/*
-	while (*str != 0)
-	{
-		while (*str == ' ') str++; //move next word
-		char* start = str; //save the start
-		while (*str != ' ' && *str != 0) str++;
-		char* end = str;
-		char oldTerm = *end;
-		*end = 0; //null terminate word
-		printwrd(start);
-		*end = oldTerm; //replace term
-	}
-	*/
+	 
 }
 
 BOOL emitting_light(unsigned char objId)
@@ -2004,7 +1904,7 @@ void dump_matches()
 	}
 }
 
-
+/*
 char *ucase_string(char *str)
 {
 	if (LCase == FALSE)
@@ -2017,18 +1917,23 @@ char *ucase_string(char *str)
 	}
 	return str;
 }
- 
+ */
+/*draws the infocom style status bar*/
 void draw_status_bar()
 {
 	char *saveCursor = cursor;
+	char topLine = ' ';
+	if (lowerCase)
+		topLine = 176;
+		//topLine = 'A' + 64;
 	
-	memset(0x400, ' ', scrWidth);
+	memset(0x400, topLine, scrWidth);
 	
 	get_room_name(ObjectTable[PLAYER_ID].attrs[HOLDER_ID],UCaseBuffer);
 	cursor = 0x401;
 	printstr(UCaseBuffer);
 	
-	cursor = 0x400 + scrWidth - 15;
+	cursor = (char*)(0x400 + scrWidth - 15);
 	sprintf(UCaseBuffer,"SCORE:%d/100",score);
 	printstr(UCaseBuffer);
 	
@@ -2036,22 +1941,7 @@ void draw_status_bar()
 }
  // Invoked 60 times per second.
 //
-interrupt asm void irqISR()
-{
-    asm
-    {
-        ldb     $FF03
-        bpl     @done           // do nothing if 63.5 us interrupt
-        ldb     $FF02           // 60 Hz interrupt. Reset PIA0, port B interrupt flag.
-        ;lbsr    dskcon_irqService      
-@done
-    }
-}
 
-
-interrupt asm void nmiISR()
-{
-}
 
 
 #include "event_jumps_6809.c"

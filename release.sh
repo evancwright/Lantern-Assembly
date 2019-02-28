@@ -13,6 +13,7 @@ cp -r docs release
 cp -r 6502skel release
 cp -r 6809skel release
 cp -r z80skel release
+cp -r RPiSkel release
 cp -r trs80 release
 cp -r apple2 release
 cp -r spectrum release
@@ -28,3 +29,4 @@ cp ColdAndHungry.xml release
 cp MonsterDrop.xml release
 cp CompoundObject.xml release
 cp BlockingMonster.xml release
+cp "Heinlein Station2.xml" release

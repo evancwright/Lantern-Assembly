@@ -1,20 +1,22 @@
-#!/bin/sh
+#build the loader
 
-rm errs.txt
-rm game.bin
-echo "Assembling..."
-../bin/lwasm main.asm --6809 --list=game.list --output=game.bin 2> errs.txt
+cmoc -c -i loader.c
+cmoc -o loader.bin loader.o -L . -ldecbfile
 
-echo "files assembled"
-if [ -s errs.txt ]
-then
-   echo "Errors occured."
-else
-   echo "Attaching file to disk image"
-   ../bin/writecocofile advent.dsk game.bin 2>> errs.txt
-   if [ -s errs.txt ]
-   then
-        echo "Unable to attach .bin file to disk image.  Is it open?"
-   fi
-fi
-echo "done"
+
+
+
+writecocofile heinlein.dsk loader.bin
+
+
+#build main program
+
+cmoc -c -i  main.c
+cmoc -o main.bin --org=4400  main.o -L . -ldecbfile
+
+
+
+mv main.bin game.dat
+writecocofile heinlein.dsk game.dat
+
+echo "To run program mount heinlein.dsk, loadm \"loader\", exec"

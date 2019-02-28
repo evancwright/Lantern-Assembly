@@ -2,7 +2,7 @@
 <xml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <project>
     <projname>Heinlein_Station2</projname>
-    <welcome>Heinlein Station, Phobos, Mars.  It is 2049 and you've overslept.</welcome>
+    <welcome>Heinlein Station, Phobos, Mars.  It's 2049 and you've overslept.</welcome>
     <author>Evan Wright</author>
     <version>Version 1.0</version>
     <preps>
@@ -78,6 +78,7 @@
         <verb>read</verb>
         <verb>use</verb>
         <verb>ride</verb>
+        <verb>again</verb>
       </userverbs>
     </verbs>
     <objects>
@@ -100,7 +101,7 @@
         <backdrop />
       </object>
       <object id="2" holder="0" name="Corridor" printedname="Corridor">
-        <description>This a spartan corridor. To west is an airlock. A hallways leads east. Crew quarters are to the south.</description>
+        <description>This a spartan corridor. To west is an airlock. A hallway leads east. Crew quarters are to the south.</description>
         <initialdescription />
         <directions n="255" s="3" e="4" w="7" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags emittinglight="1" />
@@ -182,7 +183,7 @@
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="11" holder="0" name="Corridor" printedname="Corridor">
+      <object id="11" holder="0" name="Corridor11" printedname="Corridor">
         <description>There are exits to the north and south.  To the east is an airlock.</description>
         <initialdescription />
         <directions n="12" s="13" e="8" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
@@ -206,7 +207,7 @@
         <synonyms names="" />
         <nogo />
       </object>
-      <object id="14" holder="0" name="Corridor" printedname="Corridor">
+      <object id="14" holder="0" name="Corridor14" printedname="Corridor">
         <description>This is the south end of a corridor. To the north is a junction.</description>
         <initialdescription />
         <directions n="4" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
@@ -215,8 +216,8 @@
         <nogo />
       </object>
       <object id="15" holder="0" name="giant_space_slug" printedname="giant space slug">
-        <description>The large, highly toxic slug, must have snuck in as the airlock was closing behing you.</description>
-        <initialdescription>A giant space slug blocks the way east.</initialdescription>
+        <description>The large, highly toxic slug, must have snuck in as the airlock was closing behind you.</description>
+        <initialdescription>A giant space slug blocks the way east!</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags portable="0" wearable="0" emittinglight="0" />
         <synonyms names="" />
@@ -226,7 +227,7 @@
         <description>You notice nothing unexpected.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
-        <flags scenery="1" supporter="0" />
+        <flags scenery="1" supporter="0" emittinglight="0" />
         <synonyms names="BED,BUNKS" />
         <nogo />
       </object>
@@ -256,7 +257,7 @@
       </object>
       <object id="20" holder="7" name="placard20" printedname="placard">
         <description>The placard reads 'Press button to activate airlock.'</description>
-        <initialdescription />
+        <initialdescription>Above the button is a small placard.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags />
         <synonyms names="" />
@@ -272,17 +273,17 @@
       </object>
       <object id="22" holder="8" name="placard22" printedname="placard">
         <description>The placard reads 'Press button to activate airlock.'</description>
-        <initialdescription>There is a placard above the button.</initialdescription>
+        <initialdescription>Above the button is a small placard.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
         <flags container="0" openable="0" open="0" />
         <synonyms names="" />
         <nogo />
       </object>
       <object id="23" holder="10" name="panel" printedname="panel">
-        <description>You notice nothing unexpected.</description>
-        <initialdescription />
+        <description>The panel is labeled 'COMMUNICATIONS'.</description>
+        <initialdescription>Embedded in one of the consoles in an access panel.</initialdescription>
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
-        <flags container="1" openable="1" open="0" emittinglight="0" />
+        <flags portable="0" container="1" openable="1" open="0" emittinglight="0" />
         <synonyms names="" />
         <nogo />
       </object>
@@ -298,7 +299,7 @@
         <description>The subspace radio was manufactured by Radio Shack in the late 1980s.  To use the radio, try 'use radio'.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
-        <flags portable="0" container="0" openable="0" open="0" />
+        <flags portable="0" container="0" openable="0" open="0" emittinglight="0" />
         <synonyms names="" />
         <nogo />
       </object>
@@ -306,7 +307,7 @@
         <description>The jar is labeled NaCL.</description>
         <initialdescription />
         <directions n="255" s="255" e="255" w="255" ne="255" se="255" sw="255" nw="255" up="255" down="255" in="255" out="255" mass="0" />
-        <flags portable="1" container="1" openable="1" />
+        <flags scenery="0" portable="1" container="1" openable="1" />
         <synonyms names="" />
         <nogo />
       </object>
@@ -404,6 +405,8 @@
       <check verb="look in" check="check_see_dobj" />
       <check verb="wear" check="check_see_dobj" />
       <check verb="ride" check="check_see_dobj" />
+      <check verb="lock" check="check_dobj_lockable" />
+      <check verb="unlock" check="check_dobj_lockable" />
     </checks>
     <sentences>
       <sentence verb="examine" do="*" prep="" io="" type="before" sub="get_portable" />
@@ -436,13 +439,22 @@
       <sentence verb="read" do="note" prep="" io="" type="instead" sub="read_note" />
       <sentence verb="ride" do="giant_space_slug" prep="" io="" type="instead" sub="ride_slug" />
       <sentence verb="w" do="" prep="" io="" type="instead" sub="go_west" />
+      <sentence verb="read" do="placard20" prep="" io="" type="instead" sub="read_placard" />
+      <sentence verb="read" do="placard22" prep="" io="" type="instead" sub="read_placard" />
     </sentences>
     <routines>
       <routine name="not_possible">if (dobj == player)
 {
      println("Not physically possible.");
 } </routine>
-      <routine name="get_portable">if (dobj.portable == 1) { if (dobj.holder != player) { println("(Taken)"); dobj.holder = player;}  } </routine>
+      <routine name="get_portable">if (dobj.portable == 1)
+{
+     if (dobj.holder != player)
+     {
+          println("(Taken)");
+          dobj.holder = player;
+     }
+} </routine>
       <routine name="kill_self">println("If you are experiencing suicidal thoughts you should seek psychiatric help.");</routine>
       <routine name="default_kill">println("Perhaps you should count to 3 and calm down.");
 </routine>
@@ -453,13 +465,20 @@ player.holder=2;
 </routine>
       <routine name="default_talk">println("That fails to produce an exciting conversation.");
 </routine>
-      <routine name="listen">println("You hear nothing unexpected.");</routine>
-      <routine name="smell">println("You smell nothing unexpected.");</routine>
-      <routine name="wait">println("Time passes...");</routine>
-      <routine name="yell">println("AAAAAAAAAAAAARRRRGGGGGG!");</routine>
-      <routine name="jump">println("WHEEEEEE!");</routine>
-      <routine name="default_eat">println("That's not part of a healthy diet.");</routine>
-      <routine name="default_drink">println("That's not something you can drink.");</routine>
+      <routine name="listen">println("You hear nothing unexpected.");
+</routine>
+      <routine name="smell">println("You smell nothing unexpected.");
+</routine>
+      <routine name="wait">println("Time passes...");
+</routine>
+      <routine name="yell">println("AAAAAAAAAAAAARRRRGGGGGG!");
+</routine>
+      <routine name="jump">println("You waste time bouncing around in the low gravity for a while.");
+</routine>
+      <routine name="default_eat">println("That's not part of a healthy diet.");
+</routine>
+      <routine name="default_drink">println("That's not something you can drink.");
+</routine>
       <routine name="use_airlock1">if (airlock1Open == 0)
 {
      println("A computerized voice says, 'WARNING: DEPRESSSURIZING AIRLOCK'");
@@ -488,6 +507,7 @@ player.holder = turbo_lift_2;
 slugKilled = 1;
 score = score + 20;
 giant_space_slug.holder = offscreen;
+small_white_cube.holder = offscreen;
 </routine>
       <routine name="use_airlock2">if (airlock2Open == 0)
 {
@@ -507,7 +527,7 @@ else
 }</routine>
       <routine name="use_radio">if (radioWorks == 1)
 {
-     println("Using the radio you are able to contact Earth. Though a rescue mission will take some to mount, you will have plenty of space slug meat to keep you fed'.");
+     println("Using the radio you are able to contact Earth. Though a rescue mission will take some to mount, you will have plenty of space slug meat to keep you fed.");
      println("***CONGRATULATIONS***");
      score = 100;
 }
@@ -542,7 +562,7 @@ else
       <routine name="throw_any">println("It lands on the ground.");
 dobj.holder = player.holder;
 </routine>
-      <routine name="read_note">println("The note reads, 'Hey, bud. The mission to bring us back to Earth arrived, but there wasn't enough room for both you and the commander's huge collection of 5.25 floppy disks. You were asleep anyway and we didn't want to wake you. Sorry. - Neil'");
+      <routine name="read_note">println("The note reads, 'Hey, bud. The mission to bring us back to Earth arrived, but there wasn't enough room for both you and the commander's huge collection of 5.25'' floppy disks. You were asleep anyway and we didn't want to wake you. Sorry. - Neil'");
 </routine>
       <routine name="ride_slug">if (space_suit.beingworn == 0)
 {
@@ -568,6 +588,8 @@ else
 {
      move();
 }</routine>
+      <routine name="read_placard">println("The placard reads 'Press button to activate airlock.'");
+</routine>
     </routines>
     <events>
       <event name="no_air_death">if  (  (player.holder == airlock_1 &amp;&amp; airlock_1.w != 255) || (player.holder == airlock_2 &amp;&amp; airlock_1.e != 255))

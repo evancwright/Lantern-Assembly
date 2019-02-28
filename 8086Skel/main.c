@@ -29,6 +29,8 @@ typedef  unsigned char BOOL;
 #define WILDCARD 254
 #define INVALID 255
 
+#define KBBUF	$02dd	; keyboard buffer 
+
 #pragma pack(0)
 typedef struct ObjectEntry
 {
@@ -39,7 +41,7 @@ typedef struct ObjectEntry
 #pragma pack(0)
 typedef struct WordEntry 
 {
-	char id;
+	BYTE id;
 	char *word;
 } WordEntry;
 
@@ -179,6 +181,7 @@ BOOL check_iobj_supplied();
 BOOL check_dobj_portable();
 BOOL check_dobj_visible();
 BOOL check_dobj_closed();
+BOOL check_dobj_lockable();
 BOOL check_dobj_wearable();
 BOOL check_have_dobj();
 BOOL check_dont_have_dobj();
@@ -508,6 +511,11 @@ void execute()
 	
 	run_events();
 
+	if (PlayerCanSee())
+		turnsWithoutLight=0;
+	else
+		turnsWithoutLight++;
+	
 	draw_status_bar();
 }
 
@@ -531,6 +539,8 @@ void try_default_sentence()
 		wear_sub();
 	else if (VerbId == EXAMINE_VERB_ID)
 		examine_sub();
+	else if (VerbId == LOOK_IN_VERB_ID)
+		look_in_sub();
 	else if (VerbId == N_VERB_ID || VerbId == S_VERB_ID|| VerbId == E_VERB_ID ||VerbId == W_VERB_ID
 		|| VerbId == NE_VERB_ID || VerbId == NW_VERB_ID || VerbId == SE_VERB_ID 
 		|| VerbId == SW_VERB_ID || VerbId == UP_VERB_ID  || VerbId == DOWN_VERB_ID 
@@ -668,6 +678,11 @@ void examine_sub()
 	printf("\n");
 	list_any_contents(DobjId);
 }
+
+void look_in_sub()
+{
+	list_any_contents(DobjId);
+} 
 
 BOOL is_open_container(unsigned char objectId)
 {
@@ -999,7 +1014,7 @@ void set_obj_prop(unsigned short objNum, unsigned short propNum, unsigned short 
 	{//clear it
 		mask = PropMasks[propNum];
 		mask = 0xff - mask; /* flip it */
-		temp = ObjectTable[objNum].flags | mask;
+		temp = ObjectTable[objNum].flags & mask;
 		ObjectTable[objNum].flags = temp;
 	}
 	else
@@ -1233,6 +1248,22 @@ BOOL check_dobj_open()
 	}
 	return TRUE;
 }
+
+BOOL check_dobj_lockable()
+{
+	char name[80];
+	
+	short flags = ObjectTable[DobjId].flags;
+ 	flags = flags & LOCKABLE_MASK;
+ 	if ( flags == 0 )
+	{
+		get_obj_name(DobjId,name);
+		printf("You can't lock or unlock that.\n");
+		return FALSE;
+	}
+	return TRUE;
+}
+
 
 BOOL check_dobj_closed()
 {
@@ -1597,6 +1628,12 @@ void scroll()
 	
 }
 
+void print_cr()
+{
+	printf("\n");
+	Col=0;
+}
+
 void print_word(char* w)
 {
 	int len = 0;
@@ -1854,5 +1891,4 @@ BOOL score_object(int startIndex, int endIndex, unsigned char *objId)
 	*objId = max_score_object(maxScore);
 	return TRUE;
 }
-
 

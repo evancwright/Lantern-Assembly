@@ -29,7 +29,6 @@
     </preps>
     <verbs>
       <builtinverbs>
-        <verb>go</verb>
         <verb>n,go north,north</verb>
         <verb>s,go south,south</verb>
         <verb>e,go east,east</verb>
@@ -71,6 +70,7 @@
         <verb>wear</verb>
         <verb>save</verb>
         <verb>restore</verb>
+        <verb>go</verb>
       </builtinverbs>
       <userverbs>
         <verb>push,press</verb>
@@ -370,6 +370,8 @@
       <check verb="look in" check="check_dobj_supplied" />
       <check verb="look in" check="check_see_dobj" />
       <check verb="quit" check="quit" />
+      <check verb="lock" check="check_dobj_lockable" />
+      <check verb="unlock" check="check_dobj_lockable" />
     </checks>
     <sentences>
       <sentence verb="examine" do="*" prep="" io="" type="before" sub="get_portable" />

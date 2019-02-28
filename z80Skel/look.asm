@@ -168,7 +168,7 @@ count_visible_objects
 		ld a,0
 $lp?	cp 0ffh
 		jp z,$x?
-		jp $lp
+		jp $lp?
 $x?		pop ix
 		pop af
 		ret
