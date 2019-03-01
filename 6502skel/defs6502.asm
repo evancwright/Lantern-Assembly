@@ -12,11 +12,11 @@
 #define BACKDROP_MASK  2
 #define WEARABLE_MASK  4
 #define BEINGWORN_MASK  8
-#define LIGHTABLE_MASK  16
+#define USER1_MASK  16
 #define LIT_MASK  32	
 #define EMITTING_LIGHT_MASK  32
 #define DOOR_MASK  64
-#define UNUSED_MASK  128
+#define USER2_MASK  128
 
 #define PORTABLE_BIT  0
 #define EDIBLE_BIT  1
