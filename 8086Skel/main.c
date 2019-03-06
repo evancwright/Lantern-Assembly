@@ -2,11 +2,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "VerbDefs8086.h"
-#include "Strings8086.h"
-#include "PrepTable8086.h"
-#include "Dictionary8086.h"
-#include "NogoTable8086.h"
+#include "VerbDefs.h"
+#include "Strings.h"
+#include "PrepTable.h"
+#include "Dictionary.h"
+#include "NogoTable.h"
 #include "Events.h"
 
 unsigned short stackp;
@@ -18,18 +18,23 @@ extern char ObjectData[];
 extern unsigned char ObjectWordTableData[];
 char Scores[128]; /* object scores for word matching*/
 
-typedef  unsigned char BOOL;
+typedef unsigned char BOOL;
+typedef unsigned char BYTE;
 
 #include "Defs.h"
-#include "Welcome8086.c"
+#include "Welcome.c"
 
 
 #define TRUE 1
 #define FALSE 0
 #define WILDCARD 254
+#define WILDCARD 254
 #define INVALID 255
 
 #define KBBUF	$02dd	; keyboard buffer 
+
+#define MAX_INV_WEIGHT 10
+
 
 #pragma pack(0)
 typedef struct ObjectEntry
@@ -42,7 +47,7 @@ typedef struct ObjectEntry
 typedef struct WordEntry 
 {
 	BYTE id;
-	char *word;
+	char *wrd;
 } WordEntry;
 
 #pragma pack(0)
@@ -104,6 +109,7 @@ const int NumArticles = 4;
 char *ArticleTable[] = {"A","AN","THE","OF"};
 
 unsigned short PropMasks[] = {0,1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768};
+
 char * propNames[] = {
 "INVALID!",
 "SCENERY", 
@@ -115,13 +121,13 @@ char * propNames[] = {
 "LOCKABLE",
 "LOCKED",
 "PORTABLE",
-"BACKDROP",
+"USER3",
 "WEARABLE",
 "BEINGWORN",
-"LIGHTABLE",
+"USER1",
 "LIT",
 "DOOR",
-"UNUSED"
+"USER2"
 };
 
 
@@ -169,6 +175,7 @@ void __cdecl set_obj_prop(unsigned short objNum, unsigned short propNum, unsigne
 void __cdecl set_obj_attr(unsigned short objNum, unsigned short propNum, unsigned short val);
 void enter_object(unsigned char tgtRoom, int dir);
 void score_objects(unsigned char wordId);
+void look_in_sub();
 
 BOOL parse_and_map();
 BOOL can_see();
@@ -179,6 +186,7 @@ BOOL check_see_dobj();
 BOOL check_dobj_supplied();
 BOOL check_iobj_supplied();
 BOOL check_dobj_portable();
+BOOL check_weight();
 BOOL check_dobj_visible();
 BOOL check_dobj_closed();
 BOOL check_dobj_lockable();
@@ -221,18 +229,20 @@ void try_default_sentence();
 void __cdecl print_table_entry(unsigned short entryNum, const char **table);
 int max_score_matches(int score);
 
-#include "CheckTable8086.h"
+BYTE get_inv_weight(BYTE obj);
+
+#include "CheckTable.h"
 unsigned char done=FALSE;
 unsigned char score=0;
 unsigned char health=100;
 unsigned char gameOver=0;
 unsigned char turnsWithoutLight=0;
-#include "UserVars8086.c"
-#include "Events8086.h"
-#include "BeforeTable8086.c"
-#include "InsteadTable8086.c"
-#include "AfterTable8086.c"
-#include "event_jumps_8086.c"
+#include "UserVars.c"
+#include "Events.h"
+#include "BeforeTable.c"
+#include "InsteadTable.c"
+#include "AfterTable.c"
+#include "event_jumps.c"
 
 int main(int argv, char **argc)
 {
@@ -403,7 +413,7 @@ void get_room_name(unsigned char objectId, char *buffer)
 {
 	if (can_see()==0)
 	{
-		strcpy(buffer,"DARKNESS");
+		strcpy(buffer,"Darkness");
 	}
 	else
 	{
@@ -511,7 +521,7 @@ void execute()
 	
 	run_events();
 
-	if (PlayerCanSee())
+	if (can_see())
 		turnsWithoutLight=0;
 	else
 		turnsWithoutLight++;
@@ -712,25 +722,24 @@ void move_sub()
 	int room = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
 	dir = verb_to_dir(VerbId);
 	
-//	printf("current room is %d\n", room);
 	tgtRoom = ObjectTable[room].attrs[dir];
 	enter_object(tgtRoom, dir);
 }
 
 void enter_sub()
 {
-	enter_object(DobjId, ENTER);
+	if (get_obj_attr(DobjId,ENTER) == 255)
+		printf("You can't enter that.\n");
+	else
+		enter_object(DobjId, ENTER);
 }
 
 void enter_object(unsigned char tgtRoom, int dir)
-{
-	
-	//printf("target room = %d\n",tgtRoom);
-	
+{	
 	if (tgtRoom > 127)
 	{
 		int msgId = (255 - tgtRoom)+1;
-		//printf("printing nogo message %d\n", msgId);
+		//printf("printing nogo nmessage %d\n", msgId);
 		print_table_entry(msgId,NogoTable); 
 		printf("\n");
 	}
@@ -738,6 +747,8 @@ void enter_object(unsigned char tgtRoom, int dir)
 	{
 		if (is_door(tgtRoom)==TRUE)
 		{
+			printf("%d is a door\n", tgtRoom);
+				
 			if (is_closed(tgtRoom)==TRUE)
 			{
 				char name[80];
@@ -747,7 +758,7 @@ void enter_object(unsigned char tgtRoom, int dir)
 			}
 			else
 			{
-			//	printf("passing through a door\n");
+//				printf("passing through a door\n");
 				tgtRoom = ObjectTable[tgtRoom].attrs[dir];	/*move through door to room on other side*/
 			}
 		}
@@ -1009,24 +1020,30 @@ void set_obj_prop(unsigned short objNum, unsigned short propNum, unsigned short 
 	unsigned short mask;
 	unsigned short temp;
 //	printf("setting prop:  %d.%d(%s) to %d\n", objNum,propNum,propNames[propNum],val);
+//	printf("current flags=%u\n", ObjectTable[objNum].flags);
+	mask = PropMasks[propNum];
+	temp = ObjectTable[objNum].flags;
 	
+//	printf("mask=%u\n", mask);
 	if (val == 0)
 	{//clear it
-		mask = PropMasks[propNum];
-		mask = 0xff - mask; /* flip it */
-		temp = ObjectTable[objNum].flags & mask;
-		ObjectTable[objNum].flags = temp;
+		mask = 65535 - mask; /* flip it */
+///		printf("flipped mask=%u\n", mask);	
+		temp = temp & mask;
 	}
 	else
 	{//set it
-		ObjectTable[objNum].flags |= PropMasks[propNum];		
+		temp = temp | mask;
 	}
+	
+	ObjectTable[objNum].flags = temp;
+//	printf("flags are now =%u\n", ObjectTable[objNum].flags);
 }
 
 unsigned short get_obj_attr(unsigned short obj, unsigned short attrNum)
 {
-	char name[80];
-	get_obj_name(obj,name);
+	//char name[80];
+	//get_obj_name(obj,name);
 //printf("getting attr:  %d (%s).%d (%s)\n", obj,name,attrNum,attrNames[attrNum]);
 	return (unsigned short) ObjectTable[obj].attrs[attrNum];
 }
@@ -1035,9 +1052,9 @@ unsigned short get_obj_attr(unsigned short obj, unsigned short attrNum)
 
 unsigned short get_obj_prop(unsigned short obj, unsigned short propNum)
 {
-	char name[80];
+	//char name[80];
 	unsigned short temp  = ObjectTable[obj].flags & PropMasks[propNum];
-	get_obj_name(obj,name);
+	//get_obj_name(obj,name);
 	
 	//printf("getting prop:  %d(%s).%d(%s) \n", obj,name,propNum,propNames[propNum]);
 	
@@ -1091,7 +1108,7 @@ unsigned char get_verb_id(char *verb)
 	for (i=0; i < NumVerbs; i++)
 	{
 /*		printf("verb %d=%s\n",i,VerbTable[i].word); */
-		if (stricmp(verb,VerbTable[i].word)==0)
+		if (stricmp(verb,VerbTable[i].wrd)==0)
 		{
 			return VerbTable[i].id;
 		}
@@ -1494,9 +1511,9 @@ void __cdecl print_cr()
 	Col=0;
 }
 
-#include "ObjectTable8086.c"
+#include "ObjectTable.c"
 #include "ObjectWordTable.c"
-#include "VerbTable8086.c"
+#include "VerbTable.c"
 
 
 void dump_obj_table()
@@ -1571,7 +1588,7 @@ void dump_flags()
 	i = word_to_object_id(Buffer);
 	
 	printf("hflags: %x,%x\n", ObjectTable[i].flags/256, ObjectTable[i].flags%256);
-	printf("iflags: %d\n", ObjectTable[i].flags);
+	printf("iflags: %u\n", ObjectTable[i].flags);
 	if (get_obj_prop(i,SCENERY)==1) printf("scenery\n");
 	if (get_obj_prop(i,LIT)==1) printf("lit\n");
 	if (get_obj_prop(i,PORTABLE)==1) printf("portable\n");
@@ -1628,11 +1645,6 @@ void scroll()
 	
 }
 
-void print_cr()
-{
-	printf("\n");
-	Col=0;
-}
 
 void print_word(char* w)
 {
@@ -1710,7 +1722,7 @@ void collapse_verb()
     {
 	   if (is_prep(WordPtrs[1]))
 	   {
-	 	   printf("%s is a prep\n", WordPtrs[1]);
+//	 	   printf("%s is a prep\n", WordPtrs[1]);
 		   strcat(VerbBuffer," ");
 		   strcat(VerbBuffer,WordPtrs[1]);
 		   
@@ -1892,3 +1904,30 @@ BOOL score_object(int startIndex, int endIndex, unsigned char *objId)
 	return TRUE;
 }
 
+BOOL check_weight()
+{
+	BYTE w = ObjectTable[DobjId].attrs[MASS];
+	
+	if (get_inv_weight((BYTE)PLAYER_ID) + w > MAX_INV_WEIGHT)
+	{
+		printf("Your load is too heavy.\n");
+		return FALSE;
+	}
+	return TRUE;
+}
+
+BYTE get_inv_weight(BYTE obj)
+{
+	BYTE sum=0;
+	BYTE i=2;
+	for (; i < NumObjects; i++)
+	{
+		if (is_ancestor(obj,i))
+		{
+			sum += ObjectTable[i].attrs[MASS];
+		}
+	}		
+	return sum;
+}
+
+#include "Events.c"

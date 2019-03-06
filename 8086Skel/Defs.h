@@ -40,33 +40,14 @@
 #define LOCKABLE  7
 #define LOCKED  8
 #define PORTABLE  9
-#define BACKDROP  10
+#define USER3  10
 #define WEARABLE  11
 #define BEINGWORN  12
-#define LIGHTABLE  13
+#define USER1  13
 #define LIT  14
 #define EMITTING_LIGHT  14
 #define DOOR  15
-#define UNUSED  16
-/*
-#define SCENERY  0 
-#define SUPPORTER  1
-#define CONTAINER  2
-#define TRANSPARENT  3
-#define OPENABLE  4
-#define OPEN  5
-#define LOCKABLE  6
-#define LOCKED  7
-#define PORTABLE  8
-#define BACKDROP  9
-#define WEARABLE  10
-#define BEINGWORN  11
-#define LIGHTABLE  12
-#define LIT  13
-#define EMITTING_LIGHT  13
-#define DOOR  14
-#define UNUSED 15
-*/ 
+#define USER2  16
  
  
 #define SCENERY_MASK  1
@@ -79,14 +60,14 @@
 #define LOCKED_MASK  128
 #define OPEN_CONTAINER  OPEN_MASK+CONTAINER_MASK
 #define PORTABLE_MASK  256
-#define BACKDROP_MASK  512
+#define USER_3_MASK  512
 #define WEARABLE_MASK  1024
 #define BEINGWORN_MASK  2048
-#define LIGHTABLE_MASK  4096
+#define USER_2_MASK  4096
 #define LIT_MASK  8192	
 #define EMITTING_LIGHT_MASK  8192
-#define DOOR_MASK  16348
-#define USER_2 32768
+#define DOOR_MASK  16384
+#define USER_1_MASK 32768
  
 
 
