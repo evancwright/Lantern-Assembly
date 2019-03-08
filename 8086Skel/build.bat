@@ -1,4 +1,4 @@
-copy ..\8086Skel\main.c .
+copy ..\CCommon\*.* . 
 copy ..\8086Skel\defs.h .
 wcc -0 -l=main.list -bt=dos main.c
 wcl -bt=dos main
