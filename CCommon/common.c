@@ -1,31 +1,34 @@
-
-
 /* sets all the scores back to 0 */
+ 
 void clear_scores()
 {
+	unsigned char i=0;
 	MaxScore=0;
 	MaxScoreCount=0;
-	for (short i=0; i < 255; i++)
+
+	for (; i < 128; i++)
 		scores[i]=0;
 }
-
+ 
 /*copies the 1st word into the verb buffer
 if the 2nd word is a prep, it is appended to
 the verb buffer*/
 void get_verb()
 {
+	unsigned char i=1;
 	strcpy(VerbBuffer, words[0]);
 	//printstr("1st word is %s\n",VerbBuffer);
 	if (NumWords > 1)
 	{
-		if (is_prep(words[1]))
+		BYTE id = is_prep(words[1]);
+		if (id != 0)
 		{
 //			printstr("Appending preposition.");
 			strcat(VerbBuffer," ");	
 			strcat(VerbBuffer,words[1]);
 //			printstr("Verb is %s\n",VerbBuffer);
 			/* shift words down */
-			for (short i=1; i < NumWords; i++)
+			for (i=1; i < NumWords; i++)
 			{
 				words[i] = words[i+1];
 			}
@@ -43,9 +46,10 @@ void get_verb()
 */
 void score_word(BYTE wordId)
 {
+	char i=0;
 	char *tablePtr = (char*)ObjectWordTable;
 	
-	for (char i=0; i < ObjectWordTableSize; i++)
+	for (; i < ObjectWordTableSize; i++)
 	{
 		if (scores[i] != INVALID)
 		{
@@ -74,17 +78,21 @@ void score_word(BYTE wordId)
 BOOL found_prep()
 {
 //	printstr("Looking for prep\n");
+	int i=2;
 	PrepIndex=0;
-	for (int i=2; i < NumWords; i++)
+	
+	for (i=2; i < NumWords; i++)
 	{
-		if (is_prep(words[i]))
+		BYTE id = is_prep(words[i]);
+		if (id != 0)
 		{
-		//	printstr("Found prep in index %d\n",i);
+//			printstr("found prep\n");
 			PrepIndex = (BYTE)i;
+			PrepId = id;
 			return TRUE;
 		}
 	}
-//	printstr("no prep found.\n");
+ 
 	return FALSE;
 }
 
@@ -96,12 +104,13 @@ BOOL found_prep()
 */
 void get_max_score()
 {
+	BYTE i=0;
 	BYTE max = 0;
 	MaxScore = 0;
 	MaxScoreCount = 0; /*how many matches for max*/
 	MaxScoreObj = 0;
 	
-	for (BYTE i=0; i < ObjectWordTableSize; i++)
+	for (; i < ObjectWordTableSize; i++)
 	{
 		if (scores[i] == INVALID)
 			scores[i]=0;
@@ -120,7 +129,7 @@ void get_max_score()
 //	printstr("object %d is best match\n", MaxScoreObj);
 	
 	//count the number with the max score
-	for (char i=0; i < ObjectWordTableSize; i++)
+	for (i=0; i < ObjectWordTableSize; i++)
 	{
 		if (scores[i] == MaxScore) MaxScoreCount++;
 	}
@@ -132,8 +141,9 @@ void get_max_score()
 /*returns true if objectId is visible to the player*/
 BOOL is_visible(BYTE objectId)
 {
-	Object *objPtr = &ObjectTable[objectId];
 	BYTE parent;
+	Object *objPtr = &ObjectTable[objectId];
+	
 	
 	while (1)
 	{
@@ -150,8 +160,9 @@ BOOL is_visible(BYTE objectId)
 		}
 		
 		objectId = parent;
-	};
-		
+	}
+	
+	return FALSE;	
 }
 
 BOOL can_see()
@@ -506,7 +517,6 @@ BOOL emitting_light(unsigned char objId)
 /*prints the entryNumth string from the table*/
 void print_table_entry(BYTE entryNum, const char *table[])
 {
-//	printstr("%s",table[entryNum]);
 	char *str = (char*)table[entryNum];
 	printstr(str);
 	 
@@ -593,7 +603,8 @@ BYTE get_word_id(char *wordPtr, const char *table[], int tableSize)
 
 BYTE get_prep_id(char *wordPtr)
 {
-	for (char i=0; i < 4; i++)
+	BYTE i=0;
+	for (; i < 4; i++)
 	{
 		if (stricmp(wordPtr, (char*)PrepTable[i])==0)
 			return i;
@@ -605,13 +616,14 @@ BYTE get_prep_id(char *wordPtr)
 void execute()
 {
 	/*before*/
-
+	//printstr("executing before...");
 	if (try_sentence(BeforeTable,BeforeTableSize, FALSE)==FALSE)
 	{
 		try_sentence(BeforeTable,BeforeTableSize, TRUE);
 	}
 
 	/*instead or default */
+	//printstr("executing instead...");
 	if (try_sentence(InsteadTable,InsteadTableSize, FALSE) == FALSE)
 	{//exact matches
 		if (try_sentence(InsteadTable,InsteadTableSize, TRUE)==FALSE)
@@ -621,7 +633,7 @@ void execute()
 	}
 
 	/*after*/
-
+	//printstr("executing after...");
 	if (!try_sentence(AfterTable,AfterTableSize, FALSE))
 	{
 		try_sentence(AfterTable,AfterTableSize, TRUE);
@@ -634,6 +646,11 @@ void execute()
 	else
 	{
 		run_events();
+		
+		if (can_see())
+			turnsWithoutLight=0;
+		else
+			turnsWithoutLight++;
 	}
 	
 //	draw_status_bar();
@@ -687,6 +704,7 @@ BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards)
 		{
 			unsigned char tempdo = DobjId;
 			unsigned char tempio = IobjId;
+			
 			if (table[i].dobj == WILDCARD)
 				tempdo = WILDCARD;
 			if (table[i].iobj == WILDCARD)
@@ -712,7 +730,7 @@ BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards)
 				PrepId==table[i].prep &&
 				IobjId==table[i].iobj)
 				{
-		//			printstr("Executing a custom event. Addr=%x\n", table[i].handler);
+					printstr("Executing a custom event.\n");
 					(*table[i].handler)();
 			//		printstr("Done.\n");
 					Handled = TRUE;
@@ -742,9 +760,11 @@ void purloin()
 
 void try_default_sentence()
 {
+	
 	BOOL prevHandled = Handled;
 	BOOL defaultHandled = TRUE;
-//	printstr("looking for a default match. verb id=%d\n", VerbId);
+	//sprintf(Buffer,"looking for a default match. verb id=%d\n", VerbId);
+	//printstr(Buffer);
 	if (VerbId == GET_VERB_ID)
 		get_sub();
 	else if (VerbId == LOOK_VERB_ID)
@@ -752,7 +772,10 @@ void try_default_sentence()
 	else if (VerbId == DROP_VERB_ID)
 		drop_sub();
 	else if (VerbId == PUT_VERB_ID)
+	{	
+		//printstr("default_put\n");
 		put_sub();	
+	}
 	else if (VerbId == OPEN_VERB_ID)
 		open_sub();
 	else if (VerbId == CLOSE_VERB_ID)
@@ -781,7 +804,7 @@ void try_default_sentence()
 		restore_sub();
 	else if (VerbId == QUIT_VERB_ID)
 	{
-		printstr("Cold start machine to reboot.\n");
+		quit_sub();
 //		exit(0);
 	}
 	else
@@ -913,8 +936,10 @@ void inventory_sub()
 
 void dump_matches()
 {
+	BYTE i=0;
 	char buf[80];
-	for (BYTE i=0; i < NumObjects; i++)
+	
+	for (; i < NumObjects; i++)
 	{
 		if (scores[i]==MaxScore)
 		{
@@ -927,8 +952,9 @@ void dump_matches()
 
 BYTE get_inv_weight(BYTE obj)
 {
+	BYTE i=2;
 	BYTE sum=0;
-	for (BYTE i=2; i < NumObjects; i++)
+	for (; i < NumObjects; i++)
 	{
 		if (is_ancestor(obj,i))
 		{
@@ -947,9 +973,10 @@ BYTE get_verb_id()
 	int i=0;
 	for (i=0; i < NumVerbs; i++)
 	{
-//		printstr("verb %d=%s\n",i,VerbTable[i].word);
 		if (stricmp(VerbBuffer,VerbTable[i].wrd)==0)
 		{
+		//	sprintf(UCaseBuffer,"verb %d=%s\n",VerbTable[i].id,VerbTable[i].wrd);	
+		//	printstr(UCaseBuffer);
 			return VerbTable[i].id;
 		}
 	}
@@ -960,19 +987,21 @@ BYTE get_verb_id()
 /* returns true if the word at startPtr is in the article list */
 BOOL is_prep(char *wrd)
 {
-	for (short i=0; i < PrepTableSize; i++)
+	short i=0;
+	for (; i < PrepTableSize; i++)
 	{
 		if (stricmp(wrd,PrepTable[i])==0)
 		{
-			return TRUE;
+			return (BYTE)i;
 		}
 	}
-	return FALSE;
+	return 0;
 }
 
 
 BOOL parse_and_map()
 {
+	short i=0;
 	BYTE wordId;
 	PrepId = INVALID;
 	clear_scores();
@@ -994,13 +1023,13 @@ BOOL parse_and_map()
 	if (NumWords > 1)
 	{
 		/* is there a prep */
-		BOOL prep = found_prep();
+		BOOL prep = found_prep(); //sets prepIndex and id
 		if (prep == TRUE)
 		{/* score do and io */
 			
-			PrepId  = get_prep_id(words[PrepIndex]);
+			//PrepId  = get_prep_id(words[PrepIndex]);
 			
-			for (short i = 1; i < PrepIndex; i++)
+			for (i = 1; i < PrepIndex; i++)
 			{
 				wordId = get_word_id(words[i],Dictionary,DictionarySize);
 				
@@ -1019,7 +1048,19 @@ BOOL parse_and_map()
 			//printstr("Scoring dobj\n");
 			get_max_score();					
 			if (MaxScoreCount > 1)
-			{
+			{	
+				if (max_score_matches(MaxScore) > 1)
+				{
+					if (any_visible())
+					{
+						printf("I don't know which one you mean.\n");
+					}
+					else
+					{
+						printf("You don't see that.\n");
+					}
+					return FALSE;
+				}
 				printstr("I don't know which one you mean.\n");
 				//dump_matches();
 				return FALSE;
@@ -1032,7 +1073,7 @@ BOOL parse_and_map()
 			/*now score io*/
 			//printstr("Scoring noun2\n");
 			clear_scores();
-			for (short i = PrepIndex+1; i < NumWords; i++)
+			for (i = PrepIndex+1; i < NumWords; i++)
 			{
 			//	sprintf(UCaseBuffer,"Examining word %s\n", words[i]);
 			//	printstr(UCaseBuffer);
@@ -1051,13 +1092,18 @@ BOOL parse_and_map()
 			
 			/*find best match*/
 			get_max_score();					
-			if (MaxScoreCount > 1)
+			if (max_score_matches(MaxScore) > 1)
 			{
-				printstr("I don't know which one you mean.\n");
-				dump_matches();
+				if (any_visible())
+				{
+					printstr("I don't know which one you mean.\n");
+				}
+				else
+				{
+					printstr("You don't see that.\n");
+				}
 				return FALSE;
-			}
-			
+			}			
 			IobjId = MaxScoreObj;
 			//sprintf(UCaseBuffer,"Noun 2: %d\n",IobjId);
 			//printstr(UCaseBuffer);
@@ -1066,7 +1112,7 @@ BOOL parse_and_map()
 		}
 		else
 		{ /* just score dobj */
-			for (short i = 1; i < NumWords; i++)
+			for (i = 1; i < NumWords; i++)
 			{
 				//sprintf(UCaseBuffer,"scoring word: %s.\n", words[i]);
 				//printstr(UCaseBuffer);
@@ -1114,7 +1160,8 @@ void dump_dict()
 //returns whether or not any of the mapped objects were visible
 BOOL any_visible()
 {
-	for (int i =0; i < NumObjects; i++)
+	BYTE i =0;
+	for (; i < NumObjects; i++)
 	{
 		if (scores[i] > 0)
 		{
@@ -1130,7 +1177,8 @@ BOOL any_visible()
 /* returns true if the word at startPtr is in the article list */
 BOOL is_article(char *wordPtr)
 {
-	for (short i=0; i < 3; i++)
+	short i=0;
+	for (; i < 3; i++)
 	{
 		if (stricmp(wordPtr, (char*)articles[i]) == 0)
 		{
@@ -1138,4 +1186,24 @@ BOOL is_article(char *wordPtr)
 		}
 	}
 	return FALSE;
+}
+
+/*returns number of objects matching the max score*/
+int max_score_matches(int max)
+{
+	int i=0;
+	int count=0;
+	for (i=0; i < NumObjects; i++)
+	{
+		if (scores[i] == max)
+			count++;
+	}
+//	printf("After parsing, there are %d matches.\n", count);
+	return count;
+}
+
+void print_obj_name(BYTE id)
+{
+	get_obj_name(id, Buffer);
+	printstr(Buffer);
 }

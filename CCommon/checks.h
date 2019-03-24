@@ -1,3 +1,4 @@
+BOOL check_see_iobj();
 BOOL check_see_dobj();
 BOOL check_dobj_portable();
 BOOL check_weight();

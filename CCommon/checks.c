@@ -11,6 +11,17 @@ BOOL check_see_dobj()
 	return TRUE;
 }
 
+BOOL check_see_iobj()
+{
+	BYTE playerRoom = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
+	if (is_visible_to(playerRoom, IobjId)==0)
+	{
+		printstr("You don't see that.\n");
+		return FALSE;
+	}
+	return TRUE;
+}
+
 BOOL check_dobj_portable()
 {
 	short flags = ObjectTable[DobjId].flags;
@@ -156,7 +167,12 @@ BOOL check_dobj_opnable()
 
 BOOL check_prep_supplied()
 {
-	return (PrepId != INVALID);
+	if (PrepId == INVALID)
+	{
+		printstr("Missing preposition.\n");
+		return FALSE;
+	}
+	return TRUE;
 }
 
 BOOL check_dobj_unlocked()
@@ -222,10 +238,10 @@ BOOL check_not_self_or_child()
 
 BOOL check_light()
 {
-	if(can_see() == 1)
+	if(can_see() == 0)
 	{
 		printstr("It's too dark.\n");
-		return 1;
+		return FALSE;
 	}	
-	return 0;
+	return TRUE;
 }
