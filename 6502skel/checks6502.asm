@@ -4,6 +4,7 @@
 
 ;this is just a legacy thing.  visibility is now
 ;checked by the in the sentence handling
+	.module check_see_dobj
 check_see_dobj
 	lda $tableAddr
 	pha
@@ -28,6 +29,32 @@ _x	pla
 	sta $tableAddr
 	rts
 
+;this is just a legacy thing.  visibility is now
+;checked by the in the sentence handling
+	.module check_see_iobj
+check_see_iobj
+	lda $tableAddr
+	pha
+	lda $tableAddr+1
+	pha
+	jsr get_player_room
+	sta parent
+	lda $sentence+3
+	sta child
+	ldy #0
+	jsr get_obj_attr
+	jsr visible_ancestor
+	lda visibleAncestorFlag
+	cmp #0
+	bne _x
+	jsr dont_see
+	lda #1
+	sta checkFailed
+_x	pla	
+	sta $tableAddr+1
+	pla 
+	sta $tableAddr
+	rts
 	
 
 	.module check_dobj_supplied
@@ -411,7 +438,11 @@ dobj_already_closed
 		
 		rts		
 
-	
+;need to implement this!!! 
+check_weight
+		lda #0
+		sta checkFailed
+		rts
 	
 	
 	
