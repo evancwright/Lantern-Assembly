@@ -313,10 +313,10 @@ $notc? 	ld hl,cantlook
 $x?	
 		ret
 
-the DB "THE ",0h
-cantlook DB "YOU CAN'T SEE INSIDE THAT.",0h
-nothing DB "YOU FIND NOTHING.",0h		
+the DB "The ",0h
+cantlook DB "You can't see inside that.",0h
+nothing DB "You find nothing.",0h		
 visobjs DB 0		
-thereisa DB  "THERE IS A ",0h
-here DB "HERE.",0h		
+thereisa DB  "There is a ",0h
+here DB "here.",0h		
 	

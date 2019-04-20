@@ -13,16 +13,16 @@ rmod
 		push bc
 		call rand
 		ld a,(urand)
-		call mod ; now mod it by 'b' (leave result in 'a')
+		call modulus ; now mod it by 'b' (leave result in 'a')
 		pop bc
 		ret	
 
 ;mods a by b		
 *MOD	
-mod 		cp b
-			jp m,$x?
+modulus 	cp b
+			jp c,$x?
 			sub b
-			jp mod
+			jp modulus
 $x?			ret
 
 ;div a by b		
@@ -31,7 +31,7 @@ div
 			push de
 			ld d,0
 $dvlp?		cp b
-			jp m,$x?
+			jp c,$x?
 			sub b
 			inc d
 			jp $dvlp?

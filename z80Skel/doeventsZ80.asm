@@ -1,5 +1,6 @@
 ;doeventsZ80.asm
 
+*MOD
 do_events
 *INCLUDE event_jumps_Z80.asm
 	call player_has_light

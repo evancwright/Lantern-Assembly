@@ -218,6 +218,7 @@ $x?		pop hl
 indent
 		push af
 		push bc
+		push de
 		ld a,(indentAmt)
 		ld b,a
 		cp 0
@@ -225,7 +226,8 @@ indent
 		ld a,32 ; space
 $lp?	call CRTBYTE
 		djnz $lp?
-$x?		pop bc
+$x?		pop de
+		pop bc
 		pop af
 		ret
 

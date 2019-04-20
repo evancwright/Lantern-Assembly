@@ -7,29 +7,37 @@ OBJ_SIZE equ 19
 
 ;returns 1 or 0 in register a
 ;not sure we need this check anympre
+*MOD
 check_see_dobj
-;	push af
-;	push bc
-;	push hl
-;   call get_player_room
-;	ld b,a
-;	ld a,(sentence+1)
-;	ld c,a
-;	call b_ancestor_of_c
-;	cp 1
-;	jp z,$y?;
-;	ld hl,nosee
-;	call OUTLIN
-;	call printcr
-;	jp $x?
-;$y?	pop hl
-;	pop bc
-;	pop af
-	ret
+    call get_player_room
+	ld b,a
+	ld a,(sentence+1)
+	ld c,a
+	call b_ancestor_of_c
+	cp 1
+	jp z,$y?;
+	ld hl,nosee
+	call OUTLINCR
+	inc sp
+	inc sp
+$y?	ret
 
 
 ;returns 1 or 0 in register a
+*MOD
 check_see_iobj
+    call get_player_room
+	ld b,a
+	ld a,(sentence+1)
+	ld c,a
+	call b_ancestor_of_c
+	cp 1
+	jr z,$y? 
+	ld hl,nosee
+	call OUTLINCR
+	inc sp
+	inc sp
+$y?	
 	ret
 
 *MOD
@@ -54,10 +62,9 @@ check_dobj_portable
 	ld c,PORTABLE
 	call get_obj_prop
 	cp 1
-	jp z,$x?
+	jr z,$x?
 	ld hl,notportable
-	call OUTLIN
-	call printcr
+	call OUTLINCR
 	inc sp
 	inc sp
 $x?	ret
@@ -69,10 +76,9 @@ check_have_dobj
 	ld c,a
 	call b_ancestor_of_c
 	cp 1
-	jp z,$x?
+	jr z,$x?
 	ld hl,donthave
-	call OUTLIN
-	call printcr
+	call OUTLINCR
 	inc sp
 	inc sp
 $x?	ret
@@ -84,10 +90,9 @@ check_dont_have_dobj
 	ld c,a
 	call b_ancestor_of_c
 	cp 0
-	jp z,$x?
+	jr z,$x?
 	ld hl,alreadyhave
-	call OUTLIN
-	call printcr
+	call OUTLINCR
 	inc sp
 	inc sp
 $x?	ret
@@ -99,10 +104,9 @@ check_dobj_opnable
 	ld c,OPENABLE
 	call get_obj_prop
 	cp 1
-	jp z,$x?
+	jr z,$x?
 	ld hl,notopenable
-	call OUTLIN
-	call printcr
+	call OUTLINCR
 	inc sp
 	inc sp
 $x?	ret
@@ -114,10 +118,9 @@ check_dobj_open
 	ld c,OPEN
 	call get_obj_prop
 	cp 1
-	jp z,$x?
+	jr z,$x?
 	ld hl,closed
-	call OUTLIN
-	call printcr
+	call OUTLINCR
 	inc sp
 	inc sp
 $x?	ret
@@ -130,10 +133,9 @@ check_dobj_unlocked
 	ld c,LOCKED
 	call get_obj_prop
 	cp 0
-	jp z,$x?
+	jr z,$x?
 	ld hl,itslocked
-	call OUTLIN
-	call printcr
+	call OUTLINCR
 	inc sp
 	inc sp
 $x?	ret
@@ -145,10 +147,9 @@ check_dobj_locked
 	ld c,LOCKED
 	call get_obj_prop
 	cp 1
-	jp z,$x?
+	jr z,$x?
 	ld hl,notlocked
-	call OUTLIN
-	call printcr
+	call OUTLINCR
 	inc sp
 	inc sp
 $x?	ret
@@ -160,10 +161,9 @@ check_dobj_closed
 		ld c,OPEN
 		call get_obj_prop
 		cp 0
-		jp z,$x?
+		jr z,$x?
 		ld hl,alreadyopen
-		call OUTLIN
-		call printcr
+		call OUTLINCR
 		inc sp
 		inc sp
 $x?		ret
@@ -185,16 +185,15 @@ check_nested_containership
 	ld b,a
 	ld a,(sentence+3)
 	cp b
-	jp z,$n?
+	jr z,$n?
 	nop ; check contains
 	call b_ancestor_of_c
 	cp 1
-	jp z,$n?; 
+	jr z,$n?; 
 	ld a,0
-	jp $x?
+	jr $x?
 $n? ld hl,impossible
-	call OUTLIN
-	call printcr
+	call OUTLINCR
 	ld a,0
 $x?	pop bc
 	ret
@@ -207,10 +206,9 @@ check_prep_supplied
 check_light
 	call player_has_light
 	cp 1
-	jp $x?
+	jr $x?
 	ld hl,pitchdark
-	call OUTLIN
-	call printcr
+	call OUTLINCR
 	inc sp
 	inc sp
 $x?	ret
@@ -223,10 +221,9 @@ check_iobj_container
 		ld c,PROPERTY_BYTE_1
 		call get_obj_attr
 		and CONTAINER_MASK + SUPPORTER_MASK
-		jp nz,$x?
+		jr nz,$x?
 		ld hl,notcontainer
-		call OUTLIN
-		call printcr
+		call OUTLINCR
 		inc sp
 		inc sp
 $x?		ret
@@ -239,16 +236,15 @@ check_dobj_wearable
 		call get_obj_attr
 		and WEARABLE_MASK
 		cp 0
-		jp nz,$x?
+		jr nz,$x?
 		ld hl,notwearable
-		call OUTLIN
-		call printcr
+		call OUTLINCR
 		inc sp
 		inc sp
 $x?		ret
 
-missingnoun	DB "IT LOOKS LIKE YOU'RE MISSING A NOUN.",0h
-notlocked DB "YOU DON'T SEE THAT.",0h	
-nosee DB "YOU DON'T SEE THAT.",0h
-notwearable DB "THAT'S NOT WEARABLE.",0h	
+missingnoun	DB "Missing noun.",0h
+notlocked DB "It's not locked.",0h	
+nosee DB "You don't see that.",0h
+notwearable DB "That's not wearable.",0h	
 	
