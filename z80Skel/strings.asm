@@ -45,7 +45,8 @@ $_x?	pop iy
 	pop af
 	ret	
 
-;compares string in ix and iy
+;Performs a case-insensitive compare
+;of string in ix and iy 
 ;returns 1 or 0 in a
 *MOD
 streq
@@ -53,8 +54,11 @@ streq
 	push ix
 	push iy
 $lp? ld a,(ix)	; get a byte
+	call atoupper
+	ld b,a
 	inc ix
-	ld b,(iy) ; compare it
+	ld a,(iy) ; compare it
+	call atoupper
 	inc iy
 	cp b
  	jp nz,$n?

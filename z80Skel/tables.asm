@@ -87,13 +87,15 @@ print_space
 
 
 ;get table index
-;returns the table index in the word in b (or ff if not found)
+;returns the table index of the word in b (or ff if not found)
 ;ix contains the address of the word to find
 ;iy contains the address of the table to search
 ;c is clobbered
 *MOD
 get_table_index
 		push de
+		push ix
+		push iy
 		ld b,0
 $_lp?	ld a,(iy)
 		cp 255 ; hit end
@@ -112,7 +114,9 @@ $_lp?	ld a,(iy)
 		jp $_lp?	;repeat
 		jp $_x?
 $_nf?   ld b,255		
-$_x?	pop de
+$_x?	pop iy
+		pop ix
+		pop de
 		ret
 
 ;returns the object id for the object whose
@@ -145,11 +149,7 @@ $lp?	ld a,(ix)	; hit end of table?
 		jp $c?	; words don't match
 		;possible match...
 		;is it a visible backdrop?
-$cv?	ld a,(ix)
-		call is_vis_bckdrp
-		cp 1
-		jp z,$y?
-		;is it a visible ancestor of player's room
+$cv?	;is it a visible ancestor of player's room
 		ld a,(player_room)
 		ld c,a
 		ld b,(ix); the current object
@@ -177,6 +177,7 @@ $_x?	pop ix
 ;get_verb_id
 ;the verb is assumed to be in word1
 ;returns the id # of the verb in a
+;and sets VerbId
 *MOD
 get_verbs_id
 		push bc
@@ -184,7 +185,13 @@ get_verbs_id
 		push hl
 		push ix
 		push iy
- 		ld iy,word1
+		ld iy,WordPtrs
+		ld a,(iy+1)
+		ld h,a
+		ld a,(iy)
+		ld l,a
+		push hl ; word ptr to iy
+		pop iy 
 		ld ix,verb_table
 $lp?	ld a,(ix)       ;save the id byte
 		ld b,a
@@ -204,7 +211,8 @@ $lp?	ld a,(ix)       ;save the id byte
 		push hl		;transfer back to 2
 		pop ix 	; ix is always 2 bytes past hl
 		jp $lp?
-$x?		ld a,b
+$x?		ld a,b  ; put verb id back in a
+		ld (VerbId),a
 		pop iy
 		pop ix
 		pop hl

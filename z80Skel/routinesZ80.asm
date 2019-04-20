@@ -170,63 +170,6 @@ $x?		pop de
 		pop bc
 		ret
 
-;sets a to 1 if object 
-;in reg 'a'
-;is a visible backdrop 
-*MOD
-is_vis_bckdrp
-		push bc
-		push de
-		push hl
-		push ix
-
-;		ld a,(HL+PROPERTY_BYTE_1)
-		ld b,a 
-;		and BACKDROP_MASK
-;		cmp 0
-;		beq $n?
-;		nop ;loop through bckdrp tbl
-		ld ix,backdrop_table		
-$lp?	ld a,(ix) ; get obj id
-		cp 255
-		jp z,$n?
-		cp b ; is this the correct obj?
-		jp nz,$c?
-		inc ix
-		ld a,(player_room)
-		ld b,a
-		ld a,(ix) ; get times to loop
-		inc ix
-$lp2?   cp 0	  ; done looping	
-		jp z,$n?
-		ld d,a ; save a
-		ld a,(ix)		
-		cp b  ;in player room?
-		jp z,$y?		
-		ld a,d ; restore a
-		dec a	
-		inc ix
-		jp $lp2?		
-		jp $n?  ; safety check (shouldn't happen)
-$c?		inc ix  ; move to l
-		ld d,0
-		ld e, (ix) ; get bytes to skip
-		push ix	; ix->hl
-		pop hl
-		add hl,de ; skip ahead
-		inc hl ; skip len byte
-		push hl
-		pop ix ; restore ix
-		jp $lp?
-$n?		ld a,0
-		jp $x?
-$y?		ld a,1
-$x?		pop ix
-		pop hl
-		pop de
-		pop bc
-		ret
-		
 
 ;multiple b x c and puts result in bc
 ;registers are preserved
