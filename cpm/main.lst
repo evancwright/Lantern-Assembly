@@ -1,0 +1,255 @@
+                00001 ;main file for trs-80 shell
+                00002  
+                00003 *INCLUDE objdefsZ80.asm ; equs
+main.asm(3): unable to include file
+                00004  
+                00005 ;QINPUT equ 1bb3h               ; ROM ROUTINES
+                00006 ;CRTBYTE equ  0033H
+                00007 ;INBUF equ 41e8h
+                00008 ;CLS equ 01c9h
+                00009 ;OUTLIN equ 28a7h               ; src str in HL/
+                00010 
+                00011         ORG 100H  ; CP/M ORIGIN
+                00012 START
+0100  CD0000    00013                 call CLS
+main.asm(13): undefined symbol
+0103  210000    00014                 ld hl,welcome ; print welcome,author,version
+main.asm(14): undefined symbol
+0106  CD5301    00015                 call OUTLINCR
+0109  210000    00016                 ld hl,author
+main.asm(16): undefined symbol
+010C  CD5301    00017                 call OUTLINCR
+010F  210000    00018                 ld hl,version
+main.asm(18): undefined symbol
+0112  CD5301    00019                 call OUTLINCR
+0115  CD6201    00020                 call printcr
+0118  CD0000    00021                 call look_sub
+main.asm(21): undefined symbol
+011B  CD2201    00022 $inp?   call getcommand
+011E  C31B01    00023                 jp $inp?
+0121  C9        00024                 ret
+                00025                 
+                00026 getcommand
+                00027                 ;call QINPUT
+0122  CD0000    00028                 call getlin
+main.asm(28): undefined symbol
+0125  CD0000    00029                 call parse                              ; get the words
+main.asm(29): undefined symbol
+0128  3A0000    00030                 ld a,(sentence)
+main.asm(30): undefined symbol
+012B  FE00      00031                 cp 0
+012D  CA1B01    00032                 jp z,$inp?
+0130  CD0000    00033                 call validate_words             ; make sure verb,io,do are in tables
+main.asm(33): undefined symbol
+0133  CD0000    00034                 call encode                             ; try to map words to objects
+main.asm(34): undefined symbol
+0136  CD0000    00035                 call validate_encode    ; make sure it worked
+main.asm(35): undefined symbol
+0139  CD0000    00036                 call run_sentence
+main.asm(36): undefined symbol
+013C  CD0000    00037                 call do_events
+main.asm(37): undefined symbol
+013F  C9        00038                 ret
+                00039 
+                00040 *INCLUDE doeventsZ80.asm                
+main.asm(40): unable to include file
+                00041 *INCLUDE cpm.asm        
+                00042 ;cpm.asm
+    = 0005      00043 BDOS EQU 5
+    = 0001      00044 RCONF EQU 1
+    = 0003      00045 A_READ EQU 3
+    = 000B      00046 C_STAT EQU 11
+    = 0006      00047 C_RAWIO EQU 6
+    = 0002      00048 WCONF EQU 2  ; "write to console function"
+    = 000A      00049 C_READSTR EQU 0Ah
+    = 001B      00050 ESC EQU 1Bh
+                00051 
+                00052 ;assumes string is loaded into hl
+                00053 *MOD
+                00054 OUTLIN
+0140  7E        00055 $lpA ld a,(hl)
+0141  FE00      00056         cp 0
+0143  CA5201    00057         jp z,$xA
+0146  5F        00058         ld e,a
+0147  0E02      00059         ld c,WCONF
+0149  E5        00060         push hl
+014A  CD0500    00061         call BDOS
+014D  E1        00062         pop hl
+014E  23        00063         inc hl
+014F  C34001    00064         jp $lpA
+0152  C9        00065 $xA     ret
+                00066 
+                00067 ; hl contains string
+                00068 OUTLINCR
+0153  F5        00069         push af
+0154  C5        00070         push bc
+0155  D5        00071         push de
+0156  E5        00072         push hl
+0157  CD0000    00073         call printstr
+cpm.asm(32): undefined symbol
+015A  CD6201    00074         call PRINTCR
+015D  E1        00075         pop hl
+015E  D1        00076         pop de
+015F  C1        00077         pop bc
+0160  F1        00078         pop af
+0161  C9        00079         ret
+                00080 
+                00081 PRINTCR
+0162  1E00      00082         ld e,CR
+cpm.asm(41): undefined symbol
+0164  0E02      00083         ld c,WCONF
+0166  CD0500    00084         call BDOS
+0169  1E00      00085         ld e,LF
+cpm.asm(44): undefined symbol
+016B  0E02      00086         ld c,WCONF
+016D  CD0500    00087         call BDOS
+0170  C9        00088         ret
+                00089 
+                00090 *MOD
+                00091 get_char
+                00092         ;loop until char is ready
+                00093 $lpB 
+0171  3A0000    00094          ld a,(randlo)
+cpm.asm(53): undefined symbol
+0174  3C        00095          inc a
+0175  320000    00096          ld (randlo),a
+cpm.asm(55): undefined symbol
+                00097          
+0178  0E06      00098          ld c,C_RAWIO
+017A  1EFF      00099          ld e,0FFh;
+017C  CD0500    00100          call BDOS
+017F  FE00      00101          cp 0
+0181  CA7101    00102          jp z,$lpB       
+0184  C9        00103          ret
+                00104         
+                00105 *MOD    
+                00106 readline
+0185  11BF01    00107         ld de,inbuf
+0188  0E0A      00108         ld c,C_READSTR
+018A  CD0500    00109         call BDOS
+018D  CD6201    00110         call PRINTCR
+0190  CD6201    00111         call PRINTCR
+0193  C9        00112         ret
+                00113 
+                00114 
+                00115 ;char in e      
+                00116 *MOD
+                00117 print_char
+0194  F5        00118         push af
+0195  C5        00119         push bc
+0196  D5        00120         push de
+0197  E5        00121         push hl
+0198  0E02      00122         ld c,WCONF
+019A  CD0500    00123         call BDOS       
+019D  E1        00124         pop hl
+019E  D1        00125         pop de
+019F  C1        00126         pop bc
+01A0  F1        00127         pop af
+01A1  C9        00128         ret
+                00129 
+01A2  1B5B3F32  00130 showcrsr DB ESC,'[?25h',0
+      35 68 00               
+01A9  1B5B3F32  00131 hidecrsr DB ESC,'[?25l',0
+      35 6C 00               
+01B0  1B5B324A  00132 cpmcls  DB ESC,'[2J',0
+      00                     
+01B5  1B5B3B48  00133 cpmhome DB ESC,'[;H',0
+      00                     
+01BA  1B5B3D30  00134 set40col DB ESC, '[=0',0
+      00                     
+                00135 
+                00136 inputbuffer ; cpm populates this struct
+01BF  28        00137 inbuf   DB 40  ; len of buffer
+01C0  00        00138 bytesrd DB 0            
+01C1            00139 chars   DS 40  ; space
+                00140         
+                00141 *INCLUDE parser.asm
+main.asm(42): unable to include file
+                00142 *INCLUDE look.asm
+main.asm(43): unable to include file
+                00143 *INCLUDE tables.asm
+main.asm(44): unable to include file
+                00144 *INCLUDE strings.asm
+main.asm(45): unable to include file
+                00145 *INCLUDE checksZ80.asm
+main.asm(46): unable to include file
+                00146 *INCLUDE sentencesZ80.asm
+main.asm(47): unable to include file
+                00147 *INCLUDE movementZ80.asm
+main.asm(48): unable to include file
+                00148 *INCLUDE containersZ80.asm
+main.asm(49): unable to include file
+                00149 *INCLUDE routinesZ80.asm
+main.asm(50): unable to include file
+                00150 *INCLUDE inventoryZ80.asm
+main.asm(51): unable to include file
+                00151 *INCLUDE open_close.asm
+main.asm(52): unable to include file
+                00152 *INCLUDE put.asm
+main.asm(53): unable to include file
+                00153 *INCLUDE miscZ80.asm
+main.asm(54): unable to include file
+                00154 *INCLUDE wear_sub.asm
+main.asm(55): unable to include file
+                00155 *INCLUDE print_rets.asm
+main.asm(56): unable to include file
+                00156 *INCLUDE EventsZ80.asm
+main.asm(57): unable to include file
+                00157 *INCLUDE articlesZ80.asm
+main.asm(58): unable to include file
+                00158 *INCLUDE PrepTableZ80.asm
+main.asm(59): unable to include file
+                00159 *INCLUDE StringTableZ80.asm
+main.asm(60): unable to include file
+                00160 *INCLUDE DictionaryZ80.asm
+main.asm(61): unable to include file
+                00161 *INCLUDE VerbTableZ80.asm
+main.asm(62): unable to include file
+                00162 *INCLUDE ObjectTableZ80.asm
+main.asm(63): unable to include file
+                00163 *INCLUDE BuiltInVarsZ80.asm
+main.asm(64): unable to include file
+                00164 *INCLUDE UserVarsZ80.asm
+main.asm(65): unable to include file
+                00165 *INCLUDE ObjectWordTableZ80.asm
+main.asm(66): unable to include file
+                00166 *INCLUDE NogoTableZ80.asm
+main.asm(67): unable to include file
+                00167 *INCLUDE BackDropTableZ80.asm
+main.asm(68): unable to include file
+                00168 *INCLUDE before_table_Z80.asm
+main.asm(69): unable to include file
+                00169 *INCLUDE instead_table_Z80.asm
+main.asm(70): unable to include file
+                00170 *INCLUDE after_table_Z80.asm
+main.asm(71): unable to include file
+                00171 *INCLUDE CheckRulesZ80.asm
+main.asm(72): unable to include file
+                00172 *INCLUDE sentence_tableZ80.asm
+main.asm(73): unable to include file
+                00173 *INCLUDE WelcomeZ80.asm
+main.asm(74): unable to include file
+                00174 *INCLUDE save.asm
+main.asm(75): unable to include file
+                00175 
+01E9  0000      00176 stacksav DW 0
+                00177 
+                00178         END START
+
+
+$INP?           011B  $LPA            0140  $LPB            0171  
+$XA             0152  AUTHOR          0000  A_READ          0003  
+BDOS            0005  BYTESRD         01C0  CHARS           01C1  
+CLS             0000  CPMCLS          01B0  CPMHOME         01B5  
+CR              0000  C_RAWIO         0006  C_READSTR       000A  
+C_STAT          000B  DO_EVENTS       0000  ENCODE          0000  
+ESC             001B  GETCOMMAND      0122  GETLIN          0000  
+GET_CHAR        0171  HIDECRSR        01A9  INBUF           01BF  
+INPUTBUFFER     01BF  LF              0000  LOOK_SUB        0000  
+OUTLIN          0140  OUTLINCR        0153  PARSE           0000  
+PRINTCR         0162  PRINTSTR        0000  PRINT_CHAR      0194  
+RANDLO          0000  RCONF           0001  READLINE        0185  
+RUN_SENTENCE    0000  SENTENCE        0000  SET40COL        01BA  
+SHOWCRSR        01A2  STACKSAV        01E9  START           0100  
+VALIDATE_ENCODE 0000  VALIDATE_WORDS  0000  VERSION         0000  
+WCONF           0002  WELCOME         0000  
