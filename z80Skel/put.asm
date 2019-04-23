@@ -1,5 +1,9 @@
 ;put.asm
-
+;this needs to be redone! (put in vs. put on)
+;before this runs the following checks have passed
+;iobject supplied
+;iobject container
+;not self or child
 *MOD
 put_sub
 		push bc
@@ -34,8 +38,8 @@ $po?	nop ; is do a supporter?
 		bit SUPPORTER_BIT,(ix)
 		jp z,$ns?
 		jp $mv?
-		nop ; check nested containership
-		call check_nested_containership
+		;this is done up front
+		;call check_nested_containership
 		cp 1  ; 1 = invalid (message was printed)
 		jp z,$x?
 $mv?    ld a,(sentence+1)
@@ -76,4 +80,3 @@ closed DB "It's closed.",0h
 badput DB "TRY: PUT SOMETHING IN/ON SOMETHING ELSE.",0h	
 notcontainer DB "You can't put things in that.",0h
 notsupporter DB "You find no suitable surface.",0h
-impossible DB "That's impossible.",0h

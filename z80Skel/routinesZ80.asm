@@ -58,7 +58,8 @@ get_obj_prop
 		ld a,c ; get the correct byte
 		ld e,c ; save the prop to get (we need it later) 
 		cp 8
-		jp m,$s? ;jump on minus
+		jp z,$s?
+		jp c,$s? ; jump on <=
 		inc d	; property is in the next byte
 $s?		ld c,d  ; move byte to get to c
 		call get_obj_attr ; put attr byte 'c' in 'a'
@@ -88,10 +89,10 @@ set_obj_prop
 		add hl,bc
 		ld bc,PROPERTY_BYTE_1
 		add hl,bc ; get offset of prop byte 1
-		
 		ld a,e ; check prop #
 		cp 8
-		jp m,$s? ;jump on minus
+		jp z,$s?
+		jp c,$s? ;jump on minus
 		inc hl	; property is in the next byte
 $s?		
 		ld b,e

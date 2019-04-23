@@ -1,4 +1,6 @@
 ;check rules for z80 shell
+;If a check fails, the check function unwinds the stack
+;so the caller doesn't need to check the return status
 
 ID equ 0
 HOLDER equ 1
@@ -22,6 +24,53 @@ check_see_dobj
 	inc sp
 $y?	ret
 
+
+;if the prep is in,
+;the iobj must be an open container
+;if the prep is on,
+;the obj must be a supporter
+;capacity is not checked, but should be!
+*MOD
+check_put
+		ld ix,obj_table
+		ld de,PROPERTY_BYTE_1
+		ld a,(sentence+3)
+		ld b,a
+		ld c,OBJ_ENTRY_SIZE
+		call bmulc
+		add ix,bc
+		add ix,de  ; ix now has container supporter byte
+		ld a,(sentence+2)
+		cp 0  ; 0=in
+		jp z,$pi?
+		cp 6  ; 6=on
+		jp z,$po?
+		jp $y? ; not in or on - must be ok
+$pi?	nop ; is do a container?		
+		bit CONTAINER_BIT,(ix)
+		jp z,$nc?
+		nop ; ? is it closed
+		bit OPEN_BIT,(ix)
+		jp z,$clsd?
+		jp $y?
+$po?	nop ; is do a supporter?
+		bit SUPPORTER_BIT,(ix)
+		jp z,$ns?
+		jp $y?
+$clsd?  ld hl,closed
+		call OUTLINCR
+		jp $n?
+$nc?	ld hl,notcontainer
+		call OUTLINCR	
+		jp $n?
+$np?    ld hl,impossible
+		call OUTLINCR		
+		jp $n?		
+$ns?	ld hl,notsupporter
+		call OUTLINCR
+$n?		inc sp ; unwind stack
+		inc sp
+$y?		ret
 
 ;returns 1 or 0 in register a
 *MOD
@@ -171,7 +220,13 @@ $x?		ret
 ;checks if the do is a child of the io	
 *MOD
 check_not_self_or_child
-
+	call check_nested_containership
+	cp 1
+	jr z,$x?
+	ld hl,impossible
+	call OUTLINCR
+	inc sp;
+	inc sp;
 $x?	ret
 
 ;checks if the do is a child of the io	
@@ -192,15 +247,20 @@ check_nested_containership
 	jr z,$n?; 
 	ld a,0
 	jr $x?
-$n? ld hl,impossible
-	call OUTLINCR
-	ld a,0
+$n? ld a,0
 $x?	pop bc
 	ret
 
 *MOD
 check_prep_supplied
-	ret
+	ld a,(sentence+1)
+	cp INVALID
+	jr nz,$x?
+	ld hl,missingprep
+	call OUTLINCR 
+	inc sp
+	inc sp
+$x?	ret
 
 *MOD
 check_light
@@ -244,7 +304,8 @@ check_dobj_wearable
 $x?		ret
 
 missingnoun	DB "Missing noun.",0h
+missingprep	DB "Missing preposition.",0h
 notlocked DB "It's not locked.",0h	
 nosee DB "You don't see that.",0h
 notwearable DB "That's not wearable.",0h	
-	
+impossible DB "That's impossible.",0h	

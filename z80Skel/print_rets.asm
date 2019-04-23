@@ -24,25 +24,25 @@ print_ret_bad_verb
 	call printcr
 	ret
 
-print_ret_bad_do
-	ld hl,badnoun
-	call OUTLIN
-	ld hl,word2
-	call OUTLIN
-	ld hl,period
-	call OUTLIN	
-	call printcr
-	ret
+;print_ret_bad_do
+;	ld hl,badnoun
+;	call OUTLIN
+;	ld hl,word2
+;	call OUTLIN
+;	ld hl,period
+;	call OUTLIN	
+;	call printcr
+;	ret
 
-print_ret_bad_io
-	ld hl,badnoun
-	call OUTLIN
-	ld hl,word4
-	call OUTLIN
-	ld hl,period
-	call OUTLIN	
-	call printcr
-	ret
+;print_ret_bad_io
+;	ld hl,badnoun
+;	call OUTLIN
+;	ld hl,word4
+;	call OUTLIN
+;	ld hl,period
+;	call OUTLIN	
+;	call printcr
+;	ret
 
 print_ret_dont_see
 	ld hl,dontsee
