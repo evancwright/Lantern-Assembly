@@ -89,7 +89,7 @@ quit	ret
 *INCLUDE open_close.asm
 *INCLUDE wear_sub.asm
 *INCLUDE put.asm
-*INCLUDE miscZ80.asm
+*INCLUDE quitZ80.asm
 *INCLUDE print_rets.asm
 *INCLUDE EventsZ80.asm
 *INCLUDE articlesZ80.asm
