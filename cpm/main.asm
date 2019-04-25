@@ -54,7 +54,7 @@ $x?		ret
 *INCLUDE inventoryZ80.asm
 *INCLUDE open_close.asm
 *INCLUDE put.asm
-*INCLUDE miscZ80.asm
+*INCLUDE quitZ80.asm
 *INCLUDE wear_sub.asm
 *INCLUDE print_rets.asm
 *INCLUDE EventsZ80.asm
@@ -66,6 +66,7 @@ $x?		ret
 *INCLUDE ObjectTableZ80.asm
 *INCLUDE BuiltInVarsZ80.asm
 *INCLUDE UserVarsZ80.asm
+DATAEND
 *INCLUDE ObjectWordTableZ80.asm
 *INCLUDE NogoTableZ80.asm
 *INCLUDE before_table_Z80.asm
