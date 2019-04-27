@@ -18,15 +18,14 @@ $lp?	ld a,(ix)
 		ld a,(sentence)
 		cp (ix) ; compare to verb
 		jp nz,$c?
-		inc ix
-		ld hl,$nxt?
-		ld a,1			;flag handled
+		ld a,1			;flag handled 
 		ld (handled),a
+		ld hl,$nxt? ; put return address for "call"
 		push hl  ; "call" to check rountine
-		ld l,(ix)
-		ld h,(ix+1)
+		ld l,(ix+1)
+		ld h,(ix+2)
 		jp (hl)
-$nxt?	dec ix
+$nxt?
 $c?		inc ix	; skip to next entry
 		inc ix
 		inc ix

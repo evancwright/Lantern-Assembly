@@ -32,6 +32,7 @@ $y?	ret
 ;capacity is not checked, but should be!
 *MOD
 check_put
+		push ix
 		ld ix,obj_table
 		ld de,PROPERTY_BYTE_1
 		ld a,(sentence+3)
@@ -70,14 +71,15 @@ $ns?	ld hl,notsupporter
 		call OUTLINCR
 $n?		inc sp ; unwind stack
 		inc sp
-$y?		ret
+$y?		pop ix
+		ret
 
 ;returns 1 or 0 in register a
 *MOD
 check_see_iobj
     call get_player_room
 	ld b,a
-	ld a,(sentence+1)
+	ld a,(sentence+3)
 	ld c,a
 	call b_ancestor_of_c
 	cp 1
@@ -100,8 +102,16 @@ check_dobj_supplied
 	inc sp
 $x?	ret
 
+*MOD
 check_iobj_supplied
-	ret
+		ld a,(sentence+3)
+		cp 255
+		jp nz,$x?
+		ld hl,missingnoun
+		call OUTLINCR
+		inc sp
+		inc sp
+$x?		ret
 
 
 *MOD
@@ -223,7 +233,7 @@ check_not_self_or_child
 	call check_nested_containership
 	cp 1
 	jr z,$x?
-	ld hl,impossible
+	ld hl,badput
 	call OUTLINCR
 	inc sp;
 	inc sp;
@@ -245,7 +255,7 @@ check_nested_containership
 	call b_ancestor_of_c
 	cp 1
 	jr z,$n?; 
-	ld a,0
+	ld a,1
 	jr $x?
 $n? ld a,0
 $x?	pop bc
@@ -308,4 +318,8 @@ missingprep	DB "Missing preposition.",0h
 notlocked DB "It's not locked.",0h	
 nosee DB "You don't see that.",0h
 notwearable DB "That's not wearable.",0h	
+badput DB "That would violate the laws of physics.",0h	
 impossible DB "That's impossible.",0h	
+closed DB "It's closed.",0h	
+notcontainer DB "You can't put things in that.",0h
+notsupporter DB "You find no suitable surface.",0h
