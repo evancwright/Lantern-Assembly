@@ -289,11 +289,11 @@ beingWorn DB "(BEING WORN)",0h
 		
 indentAmt DB 0		
 leadinga DB "A ",0h
-taken DB "TAKEN.",0h		
-dropped DB "DROPPED.",0h
-noitems DB "YOU ARE EMPTY HANDED.",0h
-carrying DB "YOU ARE CARRYING:",0h
-onitis DB "ON IT IS...",0h;
-initis DB "IN IT IS...",0h;
-notportable DB "YOU CAN'T PICK THAT UP.",0h
-alreadyhave DB "YOU ALREADY HAVE THAT.",0h
+taken DB "Taken.",0h		
+dropped DB "Dropped.",0h
+noitems DB "You are empty handed.",0h
+carrying DB "You are carrying:",0h
+onitis DB "On it is...",0h;
+initis DB "It contains...",0h;
+notportable DB "You can't take that.",0h
+alreadyhave DB "You already have that.",0h
