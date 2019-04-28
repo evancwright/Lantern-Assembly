@@ -512,6 +512,9 @@ $x?		ret
 ;returns the status of the parse in a
 *MOD 
 check_parse_fail
+		ld a,(verbId)
+		cp INVALID
+		jr z,$f?
 		ld a,(wordIdFail)
 		cp 1
 		jr z,$f?
@@ -519,7 +522,9 @@ check_parse_fail
 		cp 1
 		jr z,$f?
 		ld a,0 ; OK
-$f?		ret
+		jr $x?		
+$f?		ld a,1
+$x?		ret
 	
 save_noun1
 		ld a,(MaxScoreObj) ; save the id that was mapped
