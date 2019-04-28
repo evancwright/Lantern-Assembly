@@ -310,10 +310,15 @@ $lp?	push af
 		pop bc  ; restore parent id
 		cp 0
 		jr z,$c?
-$w?		ld b,d ;get mass of 'd'
+$w?		ld a,d ; DEBUG
+		call print_obj_name ; DEBUG
+		call PRINTCR ; DEBUG
+		push bc ; save parent
+		ld b,d ;get mass of 'd'
 		ld a,MASS
 		ld c,a
 		call get_obj_attr
+		pop bc ; restore parent
 		add a,e
 		ld e,a ; put total back in e
 $c?		pop af
@@ -339,3 +344,4 @@ onitis DB "On it is...",0h;
 initis DB "It contains...",0h;
 notportable DB "You can't take that.",0h
 alreadyhave DB "You already have that.",0h
+
