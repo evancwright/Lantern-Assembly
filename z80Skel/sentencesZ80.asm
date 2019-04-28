@@ -274,6 +274,6 @@ $x?		pop iy
 		pop af
 		ret
 
-confused DB "I DON'T QUITE FOLLOW YOU.",0h
+confused DB "I don't understand.",0h
 wildcards DB 0,0,0,0
 handled DB 0  ; whether default or user sentence was run

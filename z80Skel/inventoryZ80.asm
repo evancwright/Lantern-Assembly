@@ -1,3 +1,5 @@
+MAX_INV_WEIGHT EQU 10
+
 ;inventory_sub
 *MOD
 inventory_sub
@@ -284,8 +286,48 @@ $x?		pop ix
 		pop bc
 		ret
 
-providingLight DB "(PROVIDING LIGHT)",0h
-beingWorn DB "(BEING WORN)",0h
+		
+;returns weight of obj in 'a' + its contents
+*MOD
+get_inv_weight
+		push bc
+		push de
+		push hl
+		ld d,a  ; 
+		ld hl,NumObjects
+		ld c,a  ; c stores parent
+		ld a,0
+		ld e,a  ; e will store total weight
+		ld a,2  
+$lp?	push af
+		ld d,a   ; save a in d
+		cp c
+		jp z,$w?
+		push bc ; save parent id
+		ld b,c
+		ld c,a 
+	    call b_ancestor_of_c
+		pop bc  ; restore parent id
+		cp 0
+		jr z,$c?
+$w?		ld b,d ;get mass of 'd'
+		ld a,MASS
+		ld c,a
+		call get_obj_attr
+		add a,e
+		ld e,a ; put total back in e
+$c?		pop af
+		inc a
+		cp (hl)
+		jr nz,$lp?
+		ld a,e   ; put total in a
+		pop hl
+		pop de
+		pop bc
+		ret
+		
+providingLight DB "(providing light)",0h
+beingWorn DB "(being worn)",0h
 		
 indentAmt DB 0		
 leadinga DB "A ",0h

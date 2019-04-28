@@ -160,8 +160,8 @@ unlock_sub
 	nop ; TBD
 	ret
 
-notlockable DB "THAT'S NOT LOCKABLE.",0h	
-alreadylocked DB "IT'S ALREADY LOCKED.",0h
-openingThe DB "OPENING THE ", 0h
-reveals DB "REVEALS:", 0h
+notlockable DB "That's not lockable.",0h	
+alreadylocked DB "It's already locked.",0h
+openingThe DB "Opening the ", 0h
+reveals DB "reveals:", 0h
 ;alreadyopen DB "IT'S ALREADY OPEN.",0h

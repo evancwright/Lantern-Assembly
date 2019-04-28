@@ -50,4 +50,4 @@ $c? add hl,de
 	jp $lp?
 $x?	ret
 		
-alreadyworn DB "YOU'RE ALREADY WEARING THAT.",0h	
+alreadyworn DB "You're already wearing that.",0h	

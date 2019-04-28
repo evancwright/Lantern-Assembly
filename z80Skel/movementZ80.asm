@@ -109,5 +109,5 @@ direction_map
 	DB 15 ;OUT 
 	DB 0ffh
 	
-doorclosed DB "THE DOOR IS CLOSED.",0h	
-noenter DB "YOU CAN'T ENTER THAT.",0h
+doorclosed DB "The door is closed.",0h	
+noenter DB "You can't enter that.",0h

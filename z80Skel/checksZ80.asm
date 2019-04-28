@@ -313,6 +313,25 @@ check_dobj_wearable
 		inc sp
 $x?		ret
 
+;see if the weight of the dobj + inv weight is greater than player's capacity
+*MOD
+check_weight
+		ld a,(DobjId)
+		call get_inv_weight ; result -> a
+		ld d,a  ; save in d
+		ld a,PLAYER_ID
+		call get_inv_weight ; result -> a 
+		add a,d
+		cp MAX_INV_WEIGHT
+		jr z,$x?
+		jr c,$x?
+		ld hl,tooheavystr
+		call OUTLINCR
+		inc sp
+		inc sp
+$x?		ret
+
+
 missingnoun	DB "Missing noun.",0h
 missingprep	DB "Missing preposition.",0h
 notlocked DB "It's not locked.",0h	
@@ -323,3 +342,4 @@ impossible DB "That's impossible.",0h
 closed DB "It's closed.",0h	
 notcontainer DB "You can't put things in that.",0h
 notsupporter DB "You find no suitable surface.",0h
+tooheavystr DB "Your load is too heavy.",0h
