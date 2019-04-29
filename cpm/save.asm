@@ -143,7 +143,6 @@ notfound DB "File not found.",0
 notopen DB "Unable to open.",0
 saved DB "Game saved.",0
 numrecsstr DB "num recs:",0
-NumRecs DB 3; HACK FOR TESTING (((DATAEND-obj_table)/128)+1)
 
 ;FYI there is a default FCB at 5CH which is 36 bytes long
 FCB  ; file control block   33 bytes
