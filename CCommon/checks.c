@@ -251,7 +251,7 @@ BOOL check_put()
 {
 	if (PrepId == 0) //in
 	{
-			short flags = ObjectTable[DobjId].flags;
+			short flags = ObjectTable[IobjId].flags;
 			flags = flags & CONTAINER_MASK;
 			if (flags == 0)
 			{
@@ -267,7 +267,7 @@ BOOL check_put()
 	}
 	else if (PrepId == 6)//on
 	{
-			short flags = ObjectTable[DobjId].flags;
+			short flags = ObjectTable[IobjId].flags;
 			flags = flags & SUPPORTER_MASK;
 			if (flags == 0)
 			{
