@@ -21,7 +21,7 @@ void get_verb()
 	if (NumWords > 1)
 	{
 		BYTE id = is_prep(words[1]);
-		if (id != 0)
+		if (id != INVALID)
 		{
 //			printstr("Appending preposition.");
 			strcat(VerbBuffer," ");	
@@ -84,7 +84,7 @@ BOOL found_prep()
 	for (i=2; i < NumWords; i++)
 	{
 		BYTE id = is_prep(words[i]);
-		if (id != 0)
+		if (id != INVALID)
 		{
 //			printstr("found prep\n");
 			PrepIndex = (BYTE)i;
@@ -600,18 +600,18 @@ BYTE get_word_id(char *wordPtr, const char *table[], int tableSize)
 //	printstr("Word not found.\n");
 	return INVALID;
 }
-
+/*
 BYTE get_prep_id(char *wordPtr)
 {
 	BYTE i=0;
-	for (; i < 4; i++)
+	for (; i < PrepTableSize; i++) 
 	{
 		if (stricmp(wordPtr, (char*)PrepTable[i])==0)
 			return i;
 	}
 	return INVALID;
 }
-
+*/
 /*assume checks have been passed*/
 void execute()
 {
@@ -730,7 +730,7 @@ BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards)
 				PrepId==table[i].prep &&
 				IobjId==table[i].iobj)
 				{
-					printstr("Executing a custom event.\n");
+				//	printstr("Executing a custom event.\n");
 					(*table[i].handler)();
 			//		printstr("Done.\n");
 					Handled = TRUE;
@@ -995,7 +995,8 @@ BOOL is_prep(char *wrd)
 			return (BYTE)i;
 		}
 	}
-	return 0;
+	
+	return INVALID;
 }
 
 

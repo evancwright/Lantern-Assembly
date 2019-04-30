@@ -245,3 +245,36 @@ BOOL check_light()
 	}	
 	return TRUE;
 }
+
+
+BOOL check_put()
+{
+	if (PrepId == 0) //in
+	{
+			short flags = ObjectTable[DobjId].flags;
+			flags = flags & CONTAINER_MASK;
+			if (flags == 0)
+			{
+				printstr("You can't put things in that.\n");
+				return FALSE;
+			}
+			
+			if (!is_open(IobjId))
+			{
+				printstr("It's closed.\n");
+				return FALSE;
+			}
+	}
+	else if (PrepId == 6)//on
+	{
+			short flags = ObjectTable[DobjId].flags;
+			flags = flags & SUPPORTER_MASK;
+			if (flags == 0)
+			{
+				printstr("You find no suitable surface.\n");
+				return FALSE;
+			}
+	}
+	return TRUE;
+}
+
