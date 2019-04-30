@@ -11,7 +11,6 @@ BYTE get_verb_id();
 BYTE get_word_id(char *wordPtr, const char *table[], int tableSize);
 void look_sub();
 void inventory_sub();
-BOOL is_article();
 BOOL is_prep(char *wrd);
 BOOL found_prep();
 void clear_scores();
@@ -85,4 +84,6 @@ void fix_endianess();
 BYTE rand8(BYTE divisor);
 char to_uchar(char ch);
 char to_lchar(char ch);
-
+BYTE get_inv_weight(BYTE obj);
+BOOL is_article_np();
+void print_obj_name(BYTE id);

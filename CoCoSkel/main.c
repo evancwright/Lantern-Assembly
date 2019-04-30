@@ -319,7 +319,7 @@ int main()
 	printstr("\n\n");
  
 	look_sub();
-	dump_dict();
+	
  	
 	while (!done)
 	{
@@ -366,22 +366,20 @@ int main()
 		
 		
 		/* parse a line */
-	//	if (parse()==TRUE)
+		printstr("\n");
+		if (parse_and_map()==TRUE)
 		{
-			printstr("\n");
-			if (parse_and_map()==TRUE)
+			if (check_rules()==TRUE)
 			{
-				if (check_rules()==TRUE)
-				{
-					execute();
-				}
+				execute();
 			}
-//			else
-//				printf("mapping failed.\n");
+		//	else printstr("checks failed.\n");
 		}
+//		else printstr("mapping failed.\n");
+		
  	
 	}
-
+	
 	return 0;
 }
 
