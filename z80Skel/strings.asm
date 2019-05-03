@@ -1,4 +1,6 @@
 ;z80 parser
+
+ 
 ;returns len of str in hl in bc
 *MOD
 strlen
@@ -14,6 +16,60 @@ $lp?  	ld a,(hl)
 $x?		pop hl
 		pop af
 		ret
+ 
+;returns len of str in hl in b
+;up to a space or null
+*MOD
+wrdlen
+		push af
+		push hl
+		ld a,0
+		ld b,a
+$lp?  	ld a,(hl)
+		cp 0
+		jr z,$x?
+		cp 20h
+		jr z,$x?
+		inc b  ; inc char to copy
+		inc hl  ; inc index
+ 		jr $lp?
+$x?		cp a,20h  ; space?
+		jr nz,$c?
+		inc b   ; add one more to print the space  
+$c?		pop hl
+		pop af
+		ret
+ 		
+
+;prints the number of chars in b from hl;
+;hl is updated		
+*MOD
+printwrd
+		push bc
+$lp?	ld a,(hl)
+		inc hl
+		call CRTBYTE
+		ld a,(hcur) ; hcur++
+		inc a
+		ld (hcur),a
+		djnz $lp?
+		pop bc
+		ret
+		
+;skipspace
+;advances hl until a non-space is hit
+*MOD
+skipspaces
+$lp?	push af
+		ld a,(hl)
+		cp 20h  ; space
+		jp nz,$x?
+		inc hl
+		djnz $lp?
+$x?		pop af
+		ret
+		
+
  
 ;moves the string from hl to de
 *MOD
