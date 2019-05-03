@@ -27,36 +27,23 @@ OUTLIN
 		push bc
 		push de
 		push hl
-		push ix
-		push iy
 $lp?	ld a,(hl)
 		cp 0
-		jp z,$x?
-		cp 32 ; space;
-		jp nz,$c?
-		call word_len ;len->b
+		jr z,$x?
+		call wrdlen ;len->b
 		;is there room left on line
 		ld a,(hcur)
 		ld c,a
 		ld a,SCR_WIDTH
-		sub c ; a has remaining len
-		cp b
-		jp p,$sp?
+		sub c ; a = SCR_WIDTH - hcur a has remaining len
+		cp b  ; chars left >= wrd_len ?
+		jr nc,$c?
 		call printcr
-		inc hl
-		jp $lp?
-$sp?	ld a,32 ; reload space
-$c?		inc hl
-		call CRTBYTE
-		push hl
-		ld hl,(hcur)
-		inc hl
-		ld (hcur),hl
-		pop hl
+		call skipspaces			
+		jr $lp?
+$c?		call printwrd  ; b is still valid
 		jp $lp?	
-$x?		pop iy
-		pop ix
-		pop hl
+$x?		pop hl
 		pop de
 		pop bc
 		pop af
@@ -118,4 +105,4 @@ printcr
 	ret
 
 hcur dw 0
-	
+spacestr DB " ",0	
