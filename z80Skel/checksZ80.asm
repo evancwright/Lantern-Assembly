@@ -11,11 +11,11 @@ OBJ_SIZE equ 19
 ;not sure we need this check anympre
 *MOD
 check_see_dobj
-    call get_player_room
-	ld b,a
-	ld a,(sentence+1)
+	call get_player_room
 	ld c,a
-	call b_ancestor_of_c
+	ld a,(sentence+1)
+	ld b,a
+	call c_sees_b
 	cp 1
 	jp z,$y?;
 	ld hl,nosee
@@ -77,11 +77,11 @@ $y?		pop ix
 ;returns 1 or 0 in register a
 *MOD
 check_see_iobj
-    call get_player_room
-	ld b,a
-	ld a,(sentence+3)
+	call get_player_room
 	ld c,a
-	call b_ancestor_of_c
+	ld a,(sentence+3)
+	ld b,a
+	call c_sees_b
 	cp 1
 	jr z,$y? 
 	ld hl,nosee
