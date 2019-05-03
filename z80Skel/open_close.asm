@@ -1,5 +1,5 @@
 
-; machine generate Z80 routine from XML file
+;assumes check_dobj_opnable has been called.
 *MOD
 open_sub
 	push af
@@ -7,46 +7,13 @@ open_sub
 	push de
 	push ix
 	ld a,(sentence+1)
-	ld b,a
-	ld c, 19
-	call bmulc
-	ld ix,obj_table
-	add ix,bc ; jump to object
-	ld bc,PROPERTY_BYTE_1 ; get prop byte
-	add ix,bc ; jump to the object's byte we need
- 	bit OPENABLE_BIT,(ix) ; test openable prop bit
-	jp z,$a?
-	bit OPEN_BIT,(ix) ; test open prop bit
-	jp nz,$b?
-	bit LOCKED_BIT,(ix) ; test locked prop bit
-	jp nz,$c?
-	ld a,(ix)
-	set OPEN_BIT,(ix)
-	ld hl,done
-	call OUTLIN
-	call printcr ; newline
+	ld b,a ; obj byte
+	ld c,OPEN ; property byte
+	ld a,1
+	call set_obj_prop
+ 	ld hl,done
+	call OUTLINCR
 	call reveal_items
-	jp $d? ; skip else 
-$c?	nop ; close ($dobj.locked == 0)
-	nop ; println("IT'S LOCKED.")
-	ld hl,itslocked
-	call OUTLIN
-	call printcr ; newline
-$d?	nop ; end else
-	jp $e? ; skip else 
-$b?	nop ; close ($dobj.open == 0)
-	nop ; {  println("IT'S ALREADY OPEN.")
-	ld hl,alreadyopen
-	call OUTLIN
-	call printcr ; newline
-$e?	nop ; end else
-	jp $f? ; skip else 
-$a?	nop ; close ($dobj.openable==1)
-	nop ; println("THAT'S NOT OPENABLE.")
-	ld hl,notopenable
-	call OUTLIN
-	call printcr ; newline
-$f?	nop ; end else
 	pop ix
 	pop de
 	pop bc

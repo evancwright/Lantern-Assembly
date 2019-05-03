@@ -158,15 +158,40 @@ $x?	ret
 
 *MOD	
 check_dobj_opnable
+	;openable?
 	ld a,(sentence+1)
 	ld b,a	
 	ld c,OPENABLE
 	call get_obj_prop
+	cp 0
+	jr z,$no?
+	;already open?
+	ld a,(sentence+1)
+	ld b,a	
+	ld c,OPEN
+	call get_obj_prop
 	cp 1
-	jr z,$x?
+	jr z,$ao?
+	;locked
+	ld a,(sentence+1)
+	ld b,a	
+	ld c,LOCKED
+	call get_obj_prop
+	cp 1
+	jr z,$lk?
+	jp $x?
+$ao?
+	ld hl,alreadyopen
+	call OUTLINCR	
+	jp $f?	
+$lk? 
+	ld hl,itslocked
+	call OUTLINCR	
+	jp $f?
+$no?
 	ld hl,notopenable
 	call OUTLINCR
-	inc sp
+$f?	inc sp
 	inc sp
 $x?	ret
 
