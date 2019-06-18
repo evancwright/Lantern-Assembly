@@ -3,6 +3,9 @@
  *2018-2019
  */
 
+
+
+#define printstr printf 
 #pragma pack(0)
 
 #include <stdio.h>
@@ -13,7 +16,6 @@
 
 #include "VerbDefs.h"
 
-
 #define EOL 1 
 #define TRUE 1
 #define FALSE 0
@@ -22,6 +24,7 @@
 #define OBJ_ENTRY_SIZE 19 /*each object is 19 bytes*/
 #define OFFSCREEN 0
 #define PLAYER_ID 1
+#define MAX_INV_WEIGHT 10
  
 /*prop numbers*/
 #define NO_OBJECT  255
@@ -61,15 +64,15 @@
 #define LOCKABLE  7
 #define LOCKED  8
 #define PORTABLE  9
-#define BACKDROP  10
+#define USER_3  10
 #define WEARABLE  11
 #define BEING_WORN   12
 #define BEINGWORN   12
-#define LIGHTABLE  13
+#define USER_1  13
 #define LIT  14
 #define EMITTING_LIGHT  14
 #define DOOR  15
-#define UNUSED  16
+#define USER_2  16
 
 #define SCENERY_MASK  1
 #define SUPPORTER_MASK  2
@@ -81,14 +84,14 @@
 #define LOCKED_MASK  128
 #define OPEN_CONTAINER  OPEN_MASK+CONTAINER_MASK
 #define PORTABLE_MASK  256
-#define BACKDROP_MASK  512
+#define USER_3_MASK  512
 #define WEARABLE_MASK  1024
 #define BEINGWORN_MASK  2048
-#define LIGHTABLE_MASK  4096
+#define USER_1_MASK  4096
 #define LIT_MASK  8192	
 #define EMITTING_LIGHT_MASK  8192
 #define DOOR_MASK  16348
-#define USER_2 32768
+#define USER_2_MASK 32768
    
 BYTE temp;
 BYTE temp2;
@@ -223,6 +226,9 @@ BOOL check_dobj_supplied();
 BOOL check_iobj_supplied();
 BOOL check_light();
 BOOL check_see_dobj();
+BOOL check_see_iobj();
+BOOL check_weight();
+BOOL check_put();
 BOOL is_ancestor(BYTE parent, BYTE child);
 BOOL is_visible_to(BYTE roomId, BYTE objectId);
 BOOL has_visible_children(BYTE objectId);
@@ -230,6 +236,7 @@ BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards);
 BOOL score_object(int startIndex, int endIndex, unsigned char *objId);
 BOOL is_closed(BYTE objectId);
 BOOL check_rules();
+
 
 
 void print_cr();
@@ -240,6 +247,7 @@ void get_room_name(BYTE objectId, char *buffer);
 void dbg_goto();
 void purloin();
 void dump_flags();
+BYTE get_inv_weight(BYTE obj);
 //void to_upper(char *s);
 //void fix_endianess();
 BYTE rand8(BYTE divisor);
@@ -338,10 +346,10 @@ const char * propNames[] = {
 "BACKDROP",
 "WEARABLE",
 "BEINGWORN",
-"LIGHTABLE",
+"USER1",
 "LIT",
 "DOOR",
-"UNUSED"
+"USER2"
 };
 
 BYTE Scores[255];
@@ -711,7 +719,7 @@ void print_cr()
 void print_string(BYTE entryNum)
 {
 	char *token=0;
-	char *delim  = " ";
+	const char *delim  = " ";
 	char buf[256];
 	
 	if (entryNum < StringTableSize)
@@ -1036,7 +1044,7 @@ void print_obj_contents(BYTE objectId)
 	}
 }
 
-
+/*
 BOOL check_see_dobj()
 {
 	BYTE playerRoom = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
@@ -1047,6 +1055,7 @@ BOOL check_see_dobj()
 	}
 	return TRUE;
 }
+/*
 
 BOOL check_dobj_portable()
 {
@@ -1109,6 +1118,18 @@ BOOL check_dobj_closed()
 	{
 		get_obj_name(DobjId,name);
 		printf("The %s already is open.\n",name);
+		return FALSE;
+	}
+	return TRUE;
+}
+
+BOOL check_weight()
+{
+	BYTE w = ObjectTable[DobjId].attrs[MASS];
+	
+	if (get_inv_weight((BYTE)PLAYER_ID) + w > MAX_INV_WEIGHT)
+	{
+		printf("Your load is too heavy.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -1242,6 +1263,10 @@ BOOL check_not_self_or_child()
 		
 	return TRUE;
 }
+*/
+
+
+#include "checks.c" 
 
 BOOL check_rules()
 {
@@ -2104,6 +2129,20 @@ void dump_obj_table()
 		printf("\n");
 	}
 }
+
+BYTE get_inv_weight(BYTE obj)
+{
+	BYTE sum=0;
+	for (int i=2; i < NumObjects; i++)
+	{
+		if (is_ancestor(obj,i))
+		{
+			sum += ObjectTable[i].attrs[MASS];
+		}
+	}		
+	return sum;
+}
+
 
 
 #include "Events.c"
