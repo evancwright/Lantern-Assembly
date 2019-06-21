@@ -318,6 +318,7 @@ BYTE turnsWithoutLight=0;
 BYTE gameOver=FALSE;
 BYTE moves=0;
 BYTE health=100;
+BYTE answer=0;
 
 #include "UserVars.c"
 #include "Events.h"
@@ -2144,5 +2145,10 @@ BYTE get_inv_weight(BYTE obj)
 }
 
 
-
+/*used to read input from player*/
+void ask()
+{
+	getline(&line, &len,stdin); /* reads into global input buffer */
+	answer = get_word_id(line);
+}
 #include "Events.c"
