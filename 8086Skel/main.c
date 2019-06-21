@@ -30,12 +30,10 @@ char scores[255]; /* object scores for word matching*/
 #define TRUE 1
 #define FALSE 0
 #define WILDCARD 254
-#define WILDCARD 254
 #define INVALID 255
 #define KBBUF	$02dd	; keyboard buffer 
 
 #define MAX_INV_WEIGHT 10
-
 
 #pragma pack(0)
 typedef struct Object
@@ -180,6 +178,7 @@ void enter_object(unsigned char tgtRoom, BYTE dir);
 void score_objects(unsigned char wordId);
 void look_in_sub();
 void printstr(char *str);
+
 BYTE get_object_prop(BYTE o, BYTE p);
 BYTE get_object_attr(BYTE o, BYTE p);
 
@@ -243,6 +242,7 @@ unsigned char score=0;
 unsigned char health=100;
 unsigned char gameOver=0;
 unsigned char turnsWithoutLight=0;
+BYTE answer=0;
 
 BYTE MaxScore=0;
 BYTE MaxScoreObj=0;
@@ -270,20 +270,21 @@ int main(int argv, char **argc)
 	init();
 	printf("\x1b[2J"); //cls
 	printf("\x1b[2;0H"); //position cursor
-	draw_status_bar();
+	
  	printf("%s\n",WelcomeStr);
 	printf("%s\n",AuthorStr);
 	printf("\n");
 //	dump_obj_table();			
 	//dump_obj_word_table();		
 	//	dump_instead_table();
-
+	
 	look_sub();
 	
 	while (!done)
 	{
 		/* read a line */
-		
+		draw_status_bar();
+	
 		printf(">");
 		gets(Buffer);
 	
@@ -315,9 +316,10 @@ int main(int argv, char **argc)
 	//	if (parse()==TRUE)
 		{
 			printf("\n");
+			Col=0;
 			if (parse_and_map()==TRUE)
 			{
-				Col=0;
+				
 				if (check_rules()==TRUE)
 				{
 					execute();
@@ -438,10 +440,9 @@ unsigned short get_obj_prop(unsigned short obj, unsigned short propNum)
 
 void print_string(unsigned short entryNum)
 {
-//	printf("entryNum=%d\n",entryNum);
+	char buf[256];
 	char *token=0;
 	char *delim  = " ";
-	char buf[256];
 	
 	if (entryNum < StringTableSize)
 	{
@@ -526,20 +527,31 @@ void print_word(char* w)
 	int rem = 0;
 	len = strlen(w);
 	rem = 80-Col;
-	
-	if ((len+1) < rem)
-	{
-		printf("%s ",w);
-		Col = Col+len+1;
+  
+	if (*w == '\n' || *w == '\r')
+	{//cr
+		printf("\n");
+		Col=0;
+	}
+	else if ((len+1) < rem)
+	{//enough room for word + space
+		printf("%s",w);
+		Col = Col+len;
+		
+		if (w[len-1] != '\n')
+		{
+			printf(" ");
+			Col++;
+		}
+		
 	}	
 	else if (len==rem)
-	{
+	{//just enough room for word
 		printf("%s",w);
 		Col=0;
 	}
 	else
-	{ //not enough room left
-		Col=0;
+	{ //not enough room left (print nl + word + space);
 		printf("\n%s ",w);
 		Col=len+1;
 	}
@@ -565,7 +577,7 @@ void tokenize_input()
    /* walk through other tokens */
    while( token != NULL ) 
    {
-	  printf("%s\n",token);
+//	  printf("%s\n",token);
 	  if (!is_article(token))
 	  {
 		  words[NumWords] = token;
@@ -580,7 +592,7 @@ void printstr(char *str)
 	char *token=0;
 	char *delim  = " ";
 	char buf[256];
-	
+	//printf("printing: %s\n", str);
 	//print_table_entry(entryNum, StringTable);
 	strcpy(buf,str);
 	token = strtok(buf, delim);
@@ -612,11 +624,18 @@ void set_object_prop(BYTE o, BYTE p, BYTE v)
 	set_object_prop(o,p,v);
 }
 
+ 
 
 void fix_endianess()
 {
 }	
 
+void ask()
+{
+	gets(Buffer);
+	answer=get_word_id(Buffer);
+
+}
 #include "checks.c"
 #include "Events.c"
 #include "common.c"
