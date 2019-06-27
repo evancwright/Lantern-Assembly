@@ -1,5 +1,7 @@
 /* sets all the scores back to 0 */
 
+//#define DEBUG_MAPPING
+
 #define __cplusplus__strings__ 
 #include "defs.h"
 #include <string.h>
@@ -10,8 +12,8 @@
 #include "ObjectWordTable.c"
 extern unsigned char ObjectData[];
 extern int scores[];
-extern int MaxScore;
-extern int MaxScoreCount;
+extern BYTE MaxScore;
+extern BYTE MaxScoreCount;
 extern char Buffer[256];
 extern char VerbBuffer[55];
 extern char UCaseBuffer[256];
@@ -27,8 +29,8 @@ extern int PrepIndex;
 extern char *PrepTable[];
 extern const int PrepTableSize;
 extern char *words[];
-extern int MaxScoreCount;
-extern int MaxScoreObj;
+extern BYTE MaxScoreCount;
+extern BYTE MaxScoreObj;
 extern const char *Dictionary[];
 extern const int NumVerbs;
 extern Object *ObjectTable;
@@ -114,12 +116,17 @@ void score_word(BYTE wordId)
 			{
 			
 				scores[id]++;				
-//				printstr("Object %d,%d is a match\n", i, ObjectWordTable[i].id);
-				
+#ifdef DEBUG_MAPPING
+				printf("Object %d,%d is a match\n", i, ObjectWordTable[i].id);
+#endif
 				/*if it's visible, add another point!*/
 				if (is_visible_to(ObjectTable[PLAYER_ID].attrs[HOLDER_ID],(BYTE)id))
+				{
+#ifdef DEBUG_MAPPING
+				printf("Object %d is visible\n", i);
+#endif
 					scores[id]++;
-				
+				}	
 			}
 	 
 			tablePtr += 4;  /* id plus up to three words */
@@ -167,27 +174,39 @@ void get_max_score()
 	{
 		if (scores[i] == INVALID)
 			scores[i]=0;
-		
-//		if (scores[i] != 0)
-//			printstr("Object %d is possible match %d\n", i,scores[i]);
-		
+	
+#ifdef DEBUG_MAPPING
+		if (scores[i] != 0)	
+			printf("Object %d is possible match %d\n", i,scores[i]);
+#endif
+
 		if (scores[i] > MaxScore)
 		{ /* new best match */
 			MaxScore = scores[i];
+#ifdef DEBUG_MAPPING
+			printf("New max score is %d\n", MaxScore);
+#endif			
 			MaxScoreObj = ObjectWordTable[i].id;
 		}
+				
 	}
-	
-//	printstr("%d is max score\n", MaxScore);
-//	printstr("object %d is best match\n", MaxScoreObj);
-	
+
+#ifdef DEBUG_MAPPING	
+	printf("%d is max score\n", MaxScore);
+	printf("object %d is best match\n", MaxScoreObj);
+#endif
 	//count the number with the max score
 	for (i=0; i < ObjectWordTableSize; i++)
 	{
-		if (scores[i] == MaxScore) MaxScoreCount++;
+		if (scores[i] == MaxScore) 
+			MaxScoreCount++;
 	}
+
+#ifdef DEBUG_MAPPING		
+	printf("%d is max score object\n", MaxScoreObj);
+	printf("Max score count = %d.\n", MaxScoreCount);
+#endif
 	
-//	printstr("%d is max count\n", MaxScoreObj);
 }
 
 
@@ -1124,7 +1143,9 @@ BOOL parse_and_map()
 			//sprintf(UCaseBuffer,"Noun 1: %d\n",DobjId);
 			//printstr(UCaseBuffer);
 			/*now score io*/
-			//printstr("Scoring noun2\n");
+#ifdef DEBUG_MAPPING
+			printf("Scoring noun2\n");
+#endif
 			clear_scores();
 			for (i = PrepIndex+1; i < NumWords; i++)
 			{
