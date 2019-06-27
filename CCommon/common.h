@@ -1,3 +1,5 @@
+#ifndef COMMON_H
+#define COMMON_H
 void get_verb();
 void clear_scores();
 void score_word(BYTE wordId);
@@ -21,7 +23,13 @@ void list_any_contents(BYTE objectId);
 void print_obj_contents(BYTE objectId);
 BOOL check_rules();
 void init();
+void init_verb_table();
+void init_before_functions();
+void init_after_functions();
+void init_instead_functions();
+void init_verb_checks();
 void get_obj_name(unsigned char objectId, char *buffer);
+void get_room_name(unsigned char objectId, char *buffer);
 void get_room_name(BYTE objectId, char *buffer);
 BOOL is_open(BYTE objectId);
 BOOL is_visible_to(BYTE roomId, BYTE objectId);
@@ -57,3 +65,16 @@ BOOL parse_and_map();
 void dump_dict();
 BOOL any_visible();
 void fix_endianess();
+void printstr(const char *);
+void tokenize_input();
+void set_object_prop(BYTE objNum, BYTE propNum, BYTE val);
+void set_object_attr(BYTE objNum, BYTE attrNum, BYTE  val);
+BYTE get_object_prop(BYTE obj, BYTE propNum);
+BYTE get_object_attr(BYTE obj, BYTE attrNum);
+void restore_sub();
+void save_sub();
+void run_events();
+void quit_sub();
+void save_sub();
+void print_string(BYTE id); /* print string table entry */
+#endif
