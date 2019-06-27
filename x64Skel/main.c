@@ -1,11 +1,11 @@
 /*text adventure shell
  *Evan Wright
  *2018-2019
+ * Shell for x64 windows 
  */
 
 
 
-#define printstr printf 
 #pragma pack(0)
 
 #include <stdio.h>
@@ -13,133 +13,20 @@
 #include <string.h>
 #include <math.h>
 #include <stack>
-
+#include "defs.h"
+#include "common.h"
 #include "VerbDefs.h"
-
-#define EOL 1 
-#define TRUE 1
-#define FALSE 0
-#define BOOL unsigned char
-#define BYTE unsigned char
-#define OBJ_ENTRY_SIZE 19 /*each object is 19 bytes*/
-#define OFFSCREEN 0
-#define PLAYER_ID 1
-#define MAX_INV_WEIGHT 10
-
- 
-/*prop numbers*/
-#define NO_OBJECT  255
-#define INVALID 255
-#define ANY_OBJECT  254
-#define WILDCARD 254
-
-#define OBJ_ID  0
-#define HOLDER_ID  1
-#define INITIAL_DESC_ID   2
-#define DESC_ID  3
-#define NORTH  4
-#define SOUTH  5
-#define EAST  6
-#define WEST  7
-#define NORTHEAST  8
-#define SOUTHEAST  9
-#define SOUTHWEST  10
-#define NORTHWEST  11
-#define UP  12
-#define DOWN  13
-#define ENTER  14
-#define OUT  15
-#define MASS  16
-
-#define OBJ_ENTRY_SIZE  19
-#define PROPERTY_BYTE_1  17
-#define PROPERTY_BYTE_2  18
-/*byte 1 */
-
-#define SCENERY  1 
-#define SUPPORTER  2
-#define CONTAINER  3
-#define TRANSPARENT  4
-#define OPENABLE  5
-#define OPEN  6
-#define LOCKABLE  7
-#define LOCKED  8
-#define PORTABLE  9
-#define USER_3  10
-#define WEARABLE  11
-#define BEING_WORN   12
-#define BEINGWORN   12
-#define USER_1  13
-#define LIT  14
-#define EMITTING_LIGHT  14
-#define DOOR  15
-#define USER_2  16
-
-#define SCENERY_MASK  1
-#define SUPPORTER_MASK  2
-#define CONTAINER_MASK  4
-#define TRANSPARENT_MASK  8
-#define OPENABLE_MASK  16
-#define OPEN_MASK  32
-#define LOCKABLE_MASK  64
-#define LOCKED_MASK  128
-#define OPEN_CONTAINER  OPEN_MASK+CONTAINER_MASK
-#define PORTABLE_MASK  256
-#define USER_3_MASK  512
-#define WEARABLE_MASK  1024
-#define BEINGWORN_MASK  2048
-#define USER_1_MASK  4096
-#define LIT_MASK  8192	
-#define EMITTING_LIGHT_MASK  8192
-#define DOOR_MASK  16348
-#define USER_2_MASK 32768
    
 BYTE temp;
 BYTE temp2;
 int scrWidth = 80;
-
   
-#pragma pack(0)
-struct  __attribute__((__packed__)) WordEntry 
-{
-	BYTE id;
-	char *wrd;
-} _WordEntry; 
-
- 
-#pragma pack(0)
-struct __attribute__((__packed__)) Object 
-{
-	BYTE attrs[17];
-	unsigned short flags;
-} _Object;
-
-#pragma pack(0)
-struct  Sentence
-{
-	BYTE verb;
-	BYTE dobj;
-	BYTE prep;
-	BYTE iobj;
-	void (*handler)();
-} _Sentence;
-
-struct __attribute__((__packed__)) ObjectWordEntry
-{
-	BYTE id; 
-	BYTE word1;
-	BYTE word2;
-	BYTE word3;
-} _ObjectWordEntry;
-
-struct __attribute__((__packed__)) VerbCheck
-{
-	BYTE verbId;
-	BOOL (*check)();
-} _VerbCheck;
 
 #include "common.h"
 #include "checks.h"
+
+extern const int DictionarySize;
+extern const char *Dictionary[];
 
 char Buffer[256]; 
 char UCaseBuffer[256];
@@ -155,9 +42,6 @@ void draw_status_bar();
 void clear_buffers();
 
 BYTE get_verb_id(char *verb);
-
-
-
 BOOL word_matches_object(int wordId, int objectId);
 unsigned char max_score_object(int max);
 
@@ -165,18 +49,11 @@ void dump_obj_table();
 void sethpos();
 void setvpos();
 void dump_matches();
-void set_object_prop(BYTE objNum, BYTE propNum, BYTE val);
-void set_object_attr(BYTE objNum, BYTE attrNum, BYTE  val);
-BYTE get_object_prop(BYTE obj, BYTE propNum);
-BYTE get_object_attr(BYTE obj, BYTE attrNum);
 
 void collapse_verb();
 void quit_sub();
-
+void printstr(const char*);
 void try_default_sentence();
-void restore_sub();
-void save_sub();
-void run_events();
 
 void print_word(char *wrd);
 void score_objects(unsigned char wordId);
@@ -186,12 +63,14 @@ BYTE verb_to_dir(BYTE verbId);
 BOOL score_object(int startIndex, int endIndex, unsigned char *objId);
 BOOL check_rules();
 
-
-
 void print_cr();
-void print_string(BYTE id);
 void print_string_formatted(char *);
 
+BYTE get_object_attr(BYTE obj, BYTE attrNum);
+BYTE get_object_prop(BYTE obj, BYTE propNum);
+void set_object_attr(BYTE objNum, BYTE attrNum, BYTE  val);
+void set_object_prop(BYTE objNum, BYTE propNum, BYTE val);
+void purloin();
 
 //void to_upper(char *s);
 void fix_endianess();
@@ -254,9 +133,13 @@ short param1,param2,param3;
 #include "NogoTable.h"
 #include "Welcome.c"
 
+
+extern const int NumObjects;
+extern const int ObjectWordTableSize;
+
 /*group save data together*/
 
-#include "ObjectTable.c"
+
 /*built in vars*/
 BYTE score=0;
 BYTE turnsWithoutLight=0;
@@ -267,16 +150,14 @@ BYTE answer=0;
 
 #include "UserVars.c"
 #include "Events.h"
-#include "ObjectWordTable.c"
 #include "VerbTable.c"
 #include "CheckTable.h"
-#include "PrepTable.h"
-#include "Dictionary.h"
 #include "Strings.h"
 
 #include "BeforeTable.c"
 #include "InsteadTable.c"
 #include "AfterTable.c"
+
 
 const char * propNames[] = {
 "INVALID!",
@@ -301,9 +182,6 @@ const char * propNames[] = {
 BYTE scores[128];
 
 
-
-
-
 int main()
 {
 	printf("\x1b[2J"); //cls
@@ -316,8 +194,7 @@ int main()
  	printf("%s\n", WelcomeStr);
 	printf("%s\n", AuthorStr);
 	printf("\n");
-	 
- 
+ 	//printf("sizeof(Sentence)=%d\n",sizeof(Sentence));
 	look_sub();
 	
 	while (!done)
@@ -330,10 +207,9 @@ int main()
 		printf(">");
 		/*gets(Buffer);*/
 		clear_buffers();
-				
+
 		getline(&line, &len,stdin); /* reads into global input buffer */
 		line[strlen(line)-1]=0;
-		printf("Line=%s\n",Buffer);
 //		strncpy(Buffer,line,255);  copying buffer onto itself!
 		
 		
@@ -401,7 +277,6 @@ void tokenize_input()
 	/* walk through other tokens */
 	while (token != NULL)
 	{
-		printf("tok=%s\n", token);
 		if (!is_article(token))
 		{
 			words[NumWords] = token;
@@ -580,54 +455,11 @@ BYTE get_verb_id(char *verb)
 }
 
 
-
-BYTE get_object_attr(BYTE obj, BYTE attrNum)
-{
-	return ObjectTable[obj].attrs[attrNum];
-}
-
-/*propNum is 1-15 */
-
-BYTE get_object_prop(BYTE obj, BYTE propNum)
-{
-	char name[80];
-	unsigned short temp  = ObjectTable[obj].flags & PropMasks[propNum];
-	get_obj_name(obj,name);
-	
-	if (temp !=0) temp = 1;
-	
-	return (BYTE)temp;
-}
-
-void set_object_attr(BYTE objNum, BYTE attrNum, BYTE  val)
-{
-	ObjectTable[objNum].attrs[attrNum] = (BYTE)val;
-}
-
-void set_object_prop(BYTE objNum, BYTE propNum, BYTE val)
-{
-	unsigned short mask;
-	unsigned short temp; 
-	
-	if (val == 0)
-	{//clear it
-		mask = PropMasks[propNum];
-		mask = 65535 - mask; /* flip it */
-		temp = ObjectTable[objNum].flags & mask;
-		ObjectTable[objNum].flags = temp;
-	}
-	else
-	{//set it
-		ObjectTable[objNum].flags |= PropMasks[propNum];		
-	}
-}
-
-
-
 void quit_sub()
 {
 	printf("Goodbye.\n");
 	done = TRUE;
+	exit(0); //don't process events
 }
 
 
@@ -854,7 +686,7 @@ BOOL check_not_self_or_child()
 */
 
 
-#include "checks.c" 
+//#include "checks.c" 
 
  
 void draw_status_bar()
@@ -1112,9 +944,14 @@ void ask()
 	size_t len=80;
 	getline(&line, &len,stdin); /* reads into global input buffer */
 	line[strlen(line)-1]=0;  /* remove newline */
-	printf("answer=%s\n",line);
 	answer = get_word_id(line,StringTable,StringTableSize);
-	printf("answer=%d",answer);
 }
+
+void printstr(const char *s)
+{
+	printf("%s",s);
+}
+
+#include "PrepTable.h"
 #include "Events.c"
-#include "common.c"
+//#include "common.c"
