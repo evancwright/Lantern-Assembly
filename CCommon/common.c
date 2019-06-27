@@ -1,4 +1,57 @@
 /* sets all the scores back to 0 */
+
+#define __cplusplus__strings__ 
+#include "defs.h"
+#include <string.h>
+#include <stdio.h>
+#include "common.h"
+#include "VerbDefs.h"
+
+#include "ObjectWordTable.c"
+extern unsigned char ObjectData[];
+extern int scores[];
+extern int MaxScore;
+extern int MaxScoreCount;
+extern char Buffer[256];
+extern char VerbBuffer[55];
+extern char UCaseBuffer[256];
+extern BYTE VerbId;
+extern BYTE DobjId;
+extern BYTE IobjId;
+extern char *articles[];
+extern const int NumObjects;
+extern int NumWords;
+extern const int DictionarySize;
+extern BYTE PrepId;
+extern int PrepIndex;
+extern char *PrepTable[];
+extern const int PrepTableSize;
+extern char *words[];
+extern int MaxScoreCount;
+extern int MaxScoreObj;
+extern const char *Dictionary[];
+extern const int NumVerbs;
+extern Object *ObjectTable;
+extern WordEntry *VerbTable;
+extern Sentence *BeforeTable;
+extern Sentence *InsteadTable;
+extern Sentence *AfterTable;
+extern int AfterTableSize;
+extern int BeforeTableSize;
+extern int InsteadTableSize;
+extern BOOL Handled;
+extern BYTE turnsWithoutLight;
+extern unsigned short PropMasks[];
+extern const int NumVerbChecks;
+extern ObjectWordEntry *ObjectWordTable;
+extern VerbCheck* VerbCheckTable;
+extern const char *StringTable[];
+extern const char *NogoTable[];
+extern unsigned char VerbCheckTableData[];
+
+extern int stricmp(const char *, const char *);
+void printstr(const char *);
+void dump_owt();
  
 void clear_scores()
 {
@@ -17,16 +70,16 @@ void get_verb()
 {
 	unsigned char i=1;
 	strcpy(VerbBuffer, words[0]);
-	//printstr("1st word is %s\n",VerbBuffer);
+
 	if (NumWords > 1)
 	{
 		BYTE id = is_prep(words[1]);
 		if (id != INVALID)
 		{
-//			printstr("Appending preposition.");
+			printstr("Appending preposition.");
 			strcat(VerbBuffer," ");	
 			strcat(VerbBuffer,words[1]);
-//			printstr("Verb is %s\n",VerbBuffer);
+			printf("Verb is %s\n",VerbBuffer);
 			/* shift words down */
 			for (i=1; i < NumWords; i++)
 			{
@@ -228,7 +281,7 @@ void put_sub()
 		printstr("You can't do that.\n");
 		return;
 	}
-	printstr("Done.\n");
+//	printstr("Done.\n");
 	ObjectTable[DobjId].attrs[HOLDER_ID] = IobjId;
 }
 
@@ -367,6 +420,7 @@ BOOL check_rules()
 */
 void init()
 {
+char buf[40];
 	ObjectTable = (Object*)ObjectData;
 	ObjectWordTable = (ObjectWordEntry*)ObjectWordTableData;
 	VerbCheckTable = (VerbCheck*)VerbCheckTableData;
@@ -376,6 +430,7 @@ void init()
 	init_before_functions();
 	init_instead_functions();
 	init_after_functions();
+
 }
 
 /*concatenates all the words in a object's name into a single buffer*/
@@ -533,10 +588,10 @@ void look_sub()
 	char roomName[40];
 	
 	get_room_name(ObjectTable[PLAYER_ID].attrs[HOLDER_ID],roomName);
-	
+
 	sprintf(Buffer,"%s\n", roomName);
 	printstr(Buffer);
-	
+
 	if (can_see()==0)
 	{	
 		printstr("It is pitch dark.\n");
@@ -593,11 +648,9 @@ BYTE get_word_id(char *wordPtr, const char *table[], int tableSize)
 		if (stricmp(wordPtr,table[i])==0 ||
 			strcmp(wordPtr,table[i])==0)
 		{
-//			printstr("FOUND MATCH. %d\n",i);
 			return (BYTE)i;
 		}
 	}
-//	printstr("Word not found.\n");
 	return INVALID;
 }
 /*
@@ -696,10 +749,13 @@ void dbg_goto()
 
 BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards)
 {
+	//printf("setence:%d,%d,%d,%d\n",VerbId,DobjId,PrepId,IobjId);
 	int i=0;
 	BOOL result = FALSE;
 	for (i=0; i < tableSize; i++)
 	{
+
+//	printf("table:%d,%d,%d,%d\n",table[i].verb,table[i].dobj,table[i].prep,table[i].iobj);
 		if (matchWildcards)
 		{
 			unsigned char tempdo = DobjId;
@@ -732,7 +788,7 @@ BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards)
 				{
 				//	printstr("Executing a custom event.\n");
 					(*table[i].handler)();
-			//		printstr("Done.\n");
+				//	printstr("Done.\n");
 					Handled = TRUE;
 					result=TRUE;
 					break;
@@ -975,8 +1031,6 @@ BYTE get_verb_id()
 	{
 		if (stricmp(VerbBuffer,VerbTable[i].wrd)==0)
 		{
-		//	sprintf(UCaseBuffer,"verb %d=%s\n",VerbTable[i].id,VerbTable[i].wrd);	
-		//	printstr(UCaseBuffer);
 			return VerbTable[i].id;
 		}
 	}
@@ -1006,9 +1060,7 @@ BOOL parse_and_map()
 	BYTE wordId;
 	PrepId = INVALID;
 	clear_scores();
-	
 	tokenize_input();
-	
 	get_verb(); /*get 1st word and prep if supplied */
 	
 	VerbId = get_verb_id();
@@ -1208,3 +1260,59 @@ void print_obj_name(BYTE id)
 	get_obj_name(id, Buffer);
 	printstr(Buffer);
 }
+
+BYTE get_object_attr(BYTE obj, BYTE attrNum)
+{
+	return ObjectTable[obj].attrs[attrNum];
+}
+
+/*propNum is 1-15 */
+
+BYTE get_object_prop(BYTE obj, BYTE propNum)
+{
+	char name[80];
+	unsigned short temp  = ObjectTable[obj].flags & PropMasks[propNum];
+	get_obj_name(obj,name);
+	
+	if (temp !=0) temp = 1;
+	
+	return (BYTE)temp;
+}
+
+void set_object_attr(BYTE objNum, BYTE attrNum, BYTE  val)
+{
+	ObjectTable[objNum].attrs[attrNum] = (BYTE)val;
+}
+
+void set_object_prop(BYTE objNum, BYTE propNum, BYTE val)
+{
+	unsigned short mask;
+	unsigned short temp; 
+	
+	if (val == 0)
+	{//clear it
+		mask = PropMasks[propNum];
+		mask = 65535 - mask; /* flip it */
+		temp = ObjectTable[objNum].flags & mask;
+		ObjectTable[objNum].flags = temp;
+	}
+	else
+	{//set it
+		ObjectTable[objNum].flags |= PropMasks[propNum];		
+	}
+}
+
+
+void dump_owt()
+{
+	printf("duping OWT\n");
+	for(int i=0; i < ObjectWordTableSize;i++)
+	{
+		printf("%d,%d,%d,%d\n",ObjectWordTable[i].id,
+	ObjectWordTable[i].word1,
+	ObjectWordTable[i].word2,
+	ObjectWordTable[i].word3);
+
+	}	
+}
+
