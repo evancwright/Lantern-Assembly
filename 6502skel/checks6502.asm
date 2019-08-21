@@ -444,8 +444,11 @@ check_weight
 		sta checkFailed
 		rts
 	
-	
-	
+;need to implement this!!! 	
+check_put
+		lda #0
+		sta checkFailed
+		rts
 		
 		
 		
