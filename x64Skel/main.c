@@ -7,7 +7,7 @@
 
 
 #pragma pack(0)
-
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,11 +53,17 @@ void dump_matches();
 void collapse_verb();
 void quit_sub();
 void printstr(const char*);
+void print_obj_name(BYTE id);
 void try_default_sentence();
-
+void getline(char **buf, size_t *len, FILE *stream);
 void print_word(char *wrd);
 void score_objects(unsigned char wordId);
+void (*f)();
+
+#ifndef X64
 BYTE stricmp(const char * str1,const char * str);
+#endif
+
 BYTE verb_to_dir(BYTE verbId);
 
 BOOL score_object(int startIndex, int endIndex, unsigned char *objId);
@@ -71,6 +77,7 @@ BYTE get_object_prop(BYTE obj, BYTE propNum);
 void set_object_attr(BYTE objNum, BYTE attrNum, BYTE  val);
 void set_object_prop(BYTE objNum, BYTE propNum, BYTE val);
 void purloin();
+void getline(char **buf, size_t *len, FILE *str);
 
 //void to_upper(char *s);
 void fix_endianess();
@@ -184,23 +191,26 @@ BYTE scores[128];
 
 int main()
 {
+#ifndef X64
 	printf("\x1b[2J"); //cls
 	printf("\x1b[2;0H"); //position cursor583
-	
-	
+#endif
+//	printf("ptr size is %d\n", sizeof(f));
 	init();
 
 	printf("\n");
  	printf("%s\n", WelcomeStr);
 	printf("%s\n", AuthorStr);
 	printf("\n");
- 	//printf("sizeof(Sentence)=%d\n",sizeof(Sentence));
+ //	printf("sizeof(Sentence)=%d\n",sizeof(Sentence));
+//	printf("addr of take mac = %x\n", take_mac_sub);
 	look_sub();
 	
 	while (!done)
 	{
+#ifndef X64
 		draw_status_bar();
-
+#endif
 		/* read a line */
 		size_t len=255;
 		char *line=Buffer;
@@ -209,7 +219,14 @@ int main()
 		clear_buffers();
 
 		getline(&line, &len,stdin); /* reads into global input buffer */
+				
 		line[strlen(line)-1]=0;
+		
+		if (strlen(line) == 0 || line[0] == ' ')
+		{
+			printf("Pardon?\n");
+			continue;
+		}
 //		strncpy(Buffer,line,255);  copying buffer onto itself!
 		
 		
@@ -434,7 +451,6 @@ void print_word(char* w)
 
 
 
-
 /*looks at the verb buffer and attempts to find a match in the verb table*/
 /*verb has an id, a length, and is null terminated.
  *the last verb has an id of 255
@@ -445,7 +461,7 @@ BYTE get_verb_id(char *verb)
 	int i = 0;
 	for (i = 0; i < NumVerbs; i++)
 	{
-		/*		printf("verb %d=%s\n",i,VerbTable[i].word); */
+		printf("verb %d=%s\n",i,VerbTable[i].wrd); 
 		if (stricmp(verb, VerbTable[i].wrd) == 0)
 		{
 			return VerbTable[i].id;
@@ -740,7 +756,7 @@ char to_uchar(char ch)
 	
 	return ch;
 }
-
+/*
 BYTE stricmp(const char * str1, const char * str2)
 {
 	int index=0;
@@ -749,7 +765,7 @@ BYTE stricmp(const char * str1, const char * str2)
 		char ch1 = to_uchar(str1[index]);
 		char ch2 = to_uchar(str2[index]);
 		
-		/*equal*/
+	 	//
 		if  (ch1 == ch2 && ch1 == 0)
 		{
 			return 0;  
@@ -762,7 +778,7 @@ BYTE stricmp(const char * str1, const char * str2)
 		index++;
 	}
 }
-
+*/
 
 BYTE rand8(BYTE divisor)
 {
@@ -950,6 +966,13 @@ void ask()
 void printstr(const char *s)
 {
 	printf("%s",s);
+}
+
+void getline(char **buf, size_t *len, FILE *stream)
+{
+	gets(*buf);
+	strcat(*buf, "a\0"); //tack on a non null char
+//	printf("Buffer=%s\n",*buf);
 }
 
 #include "PrepTable.h"
