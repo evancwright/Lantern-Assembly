@@ -1,5 +1,26 @@
 
 
+
+#include "defs.h"
+
+#ifndef COCO
+#include <stdio.h>
+#include <string.h>
+#endif
+
+#include "checks.h"
+#include "common.h"
+
+
+extern BYTE VerbId;
+extern BYTE DobjId;
+extern BYTE IobjId;
+extern BYTE PrepId;
+extern Object *ObjectTable;
+extern char Buffer[256];
+extern const char *NogoTable[];
+void printstr(const char*);
+
 BOOL check_see_dobj()
 {
 	BYTE playerRoom = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
@@ -69,7 +90,7 @@ BOOL check_dobj_wearable()
 
 	if (flags == 0)
 	{
-		printstr("You can't that.\n");
+		printstr("You can't wear that.\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -278,3 +299,40 @@ BOOL check_put()
 	return TRUE;
 }
 
+BOOL check_move()
+{
+	BYTE dir=0;
+	BYTE tgtRoom = INVALID;
+	BYTE room = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
+	dir = verb_to_dir(VerbId);
+
+	tgtRoom = ObjectTable[room].attrs[dir];
+
+	if (tgtRoom > 127)
+	{ //can't go that way
+		BYTE msgId = (255 - tgtRoom)+1;
+//		printstr("printing nogo message %d\n", msgId);
+		print_table_entry(msgId, NogoTable); 
+		printstr("\n");
+		return false;
+	}
+	else
+	{
+		if (is_door(tgtRoom)==TRUE)
+		{
+			if (is_closed(tgtRoom)==TRUE)
+			{
+				char name[80];
+				get_obj_name(tgtRoom,name);
+				sprintf(Buffer,"The %s is closed.\n",name);
+				printstr(Buffer);
+				return false;
+			}
+			else
+			{
+ 				tgtRoom = ObjectTable[tgtRoom].attrs[dir];	/*move through door to room on other side*/
+			}
+		}
+	}
+	return true;
+}

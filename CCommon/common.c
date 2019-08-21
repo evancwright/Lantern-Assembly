@@ -2,16 +2,20 @@
 
 //#define DEBUG_MAPPING
 
+#include "platform.h"
+
+#ifndef COCO
 #define __cplusplus__strings__ 
-#include "defs.h"
 #include <string.h>
 #include <stdio.h>
+#endif
+
 #include "common.h"
 #include "VerbDefs.h"
 
 #include "ObjectWordTable.c"
 extern unsigned char ObjectData[];
-extern int scores[];
+extern BYTE scores[128];
 extern BYTE MaxScore;
 extern BYTE MaxScoreCount;
 extern char Buffer[256];
@@ -71,14 +75,15 @@ the verb buffer*/
 void get_verb()
 {
 	unsigned char i=1;
+	 
 	strcpy(VerbBuffer, words[0]);
-
+ 	
 	if (NumWords > 1)
 	{
 		BYTE id = is_prep(words[1]);
 		if (id != INVALID)
 		{
-			printstr("Appending preposition.");
+			printf("Appending preposition.");
 			strcat(VerbBuffer," ");	
 			strcat(VerbBuffer,words[1]);
 			printf("Verb is %s\n",VerbBuffer);
@@ -182,7 +187,7 @@ void get_max_score()
 
 		if (scores[i] > MaxScore)
 		{ /* new best match */
-			MaxScore = scores[i];
+			MaxScore = (BYTE)scores[i];
 #ifdef DEBUG_MAPPING
 			printf("New max score is %d\n", MaxScore);
 #endif			
@@ -316,7 +321,7 @@ void open_sub()
 		printstr(Buffer);
 		print_obj_contents(DobjId);
 	}
-	
+ 	
 }
 
 void close_sub()
@@ -371,21 +376,39 @@ void list_any_contents(BYTE objectId)
 {
 	char name[80];
 
-	if (is_open_container(objectId)==TRUE && has_visible_children(objectId) == TRUE)
+	if (is_open_container(objectId)==TRUE)
 	{
-		memset(name,0,80);
-		get_obj_name(objectId,name);
-		sprintf(Buffer,"The %s contains:\n", name);
-		printstr(Buffer);
-		print_obj_contents(objectId);
+		if ( has_visible_children(objectId) == TRUE)
+		{
+			memset(name,0,80);
+			get_obj_name(objectId,name);
+			sprintf(Buffer,"The %s contains:\n", name);
+			printstr(Buffer);
+			print_obj_contents(objectId);
+		}
+/*		else
+		{
+			sprintf(Buffer,"You find nothing.\n");
+			printstr(Buffer);
+		}*/
 	}
-	else if (is_supporter(objectId)==TRUE && has_visible_children(objectId) == TRUE)
+	else if (is_supporter(objectId)==TRUE)
 	{
-		memset(name,0,80);
-		get_obj_name(objectId,name);
-		sprintf(Buffer,"On the %s is:\n", name);
-		printstr(Buffer);
-		print_obj_contents(objectId);
+		if (has_visible_children(objectId) == TRUE)
+		{
+			memset(name,0,80);
+			get_obj_name(objectId,name);
+			sprintf(Buffer,"On the %s is:\n", name);
+			printstr(Buffer);
+			print_obj_contents(objectId);
+		}
+		else
+		{
+			memset(name,0,80);
+			get_obj_name(objectId,name);
+			sprintf(Buffer,"There is nothing on the %s.\n", name);
+			printstr(Buffer);
+		}
 	}		
 }
 
@@ -648,7 +671,13 @@ void look_sub()
 				}
 			}
 			
-			list_any_contents(i);
+			if (get_object_prop(i,SCENERY)==0)
+			{
+				if (has_visible_children(i))
+				{
+					list_any_contents(i);
+				}
+			}
 		}
 	}
 }
@@ -687,25 +716,27 @@ BYTE get_prep_id(char *wordPtr)
 /*assume checks have been passed*/
 void execute()
 {
+	Handled = FALSE;
 	/*before*/
-	//printstr("executing before...");
+//	printstr("executing before...\n");
 	if (try_sentence(BeforeTable,BeforeTableSize, FALSE)==FALSE)
 	{
 		try_sentence(BeforeTable,BeforeTableSize, TRUE);
 	}
 
 	/*instead or default */
-	//printstr("executing instead...");
+	//printstr("trying instead...\n");
 	if (try_sentence(InsteadTable,InsteadTableSize, FALSE) == FALSE)
 	{//exact matches
 		if (try_sentence(InsteadTable,InsteadTableSize, TRUE)==FALSE)
 		{//wildcards
+			//printstr("trying default...\n");			
 			try_default_sentence();				//default handling
 		}		
 	}
 
 	/*after*/
-	//printstr("executing after...");
+	//printstr("trying after...\n");
 	if (!try_sentence(AfterTable,AfterTableSize, FALSE))
 	{
 		try_sentence(AfterTable,AfterTableSize, TRUE);
@@ -768,7 +799,7 @@ void dbg_goto()
 
 BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards)
 {
-	//printf("setence:%d,%d,%d,%d\n",VerbId,DobjId,PrepId,IobjId);
+//	printf("setence:%d,%d,%d,%d\n",VerbId,DobjId,PrepId,IobjId);
 	int i=0;
 	BOOL result = FALSE;
 	for (i=0; i < tableSize; i++)
@@ -805,9 +836,10 @@ BOOL try_sentence(Sentence *table, int tableSize,  BOOL matchWildcards)
 				PrepId==table[i].prep &&
 				IobjId==table[i].iobj)
 				{
-				//	printstr("Executing a custom event.\n");
+//					printstr("Executing a custom event.\n");
+//					printf("addr %x\n", (*table[i].handler) );
 					(*table[i].handler)();
-				//	printstr("Done.\n");
+//					printstr("Done.\n");
 					Handled = TRUE;
 					result=TRUE;
 					break;
@@ -905,6 +937,12 @@ void move_sub()
 	
 //	printstr("current room is %d\n", room);
 	tgtRoom = ObjectTable[room].attrs[dir];
+	
+	if (is_door(tgtRoom) == TRUE)
+	{
+		tgtRoom = ObjectTable[tgtRoom].attrs[dir];
+	}
+	
 	enter_object(tgtRoom, dir);
 }
 
@@ -921,31 +959,6 @@ void enter_object(BYTE tgtRoom, BYTE dir)
 {
 	//printstr("target room = %d\n",tgtRoom);
 	
-	if (tgtRoom > 127)
-	{
-		BYTE msgId = (255 - tgtRoom)+1;
-//		printstr("printing nogo message %d\n", msgId);
-		print_table_entry(msgId, NogoTable); 
-		printstr("\n");
-	}
-	else
-	{
-		if (is_door(tgtRoom)==TRUE)
-		{
-			if (is_closed(tgtRoom)==TRUE)
-			{
-				char name[80];
-				get_obj_name(tgtRoom,name);
-				sprintf(Buffer,"The %s is closed.\n",name);
-				printstr(Buffer);
-				return;
-			}
-			else
-			{
-			//	printstr("passing through a door\n");
-				tgtRoom = ObjectTable[tgtRoom].attrs[dir];	/*move through door to room on other side*/
-			}
-		}
 //		else
 //		{
 //			printstr("%d is not a door\n", tgtRoom);
@@ -960,7 +973,7 @@ void enter_object(BYTE tgtRoom, BYTE dir)
 		
 		ObjectTable[PLAYER_ID].attrs[HOLDER_ID]=tgtRoom;
 		look_sub();		
-	}
+	
 	
 }
 
@@ -1079,11 +1092,23 @@ BOOL parse_and_map()
 	BYTE wordId;
 	PrepId = INVALID;
 	clear_scores();
+ 
 	tokenize_input();
+	
+	if (NumWords == 0)
+	{
+		printstr("Pardon?\n");
+		return FALSE;
+	}
+	
 	get_verb(); /*get 1st word and prep if supplied */
 	
 	VerbId = get_verb_id();
-	//printf("Verb Id=%d\n",VerbId);
+
+#ifdef DEBUG_MAPPING	
+	printf("Verb Id=%d\n",VerbId);
+#endif
+	
 	if (VerbId == INVALID)
 	{
 		sprintf(Buffer,"I don't know the verb: %s\n",VerbBuffer);
@@ -1215,6 +1240,8 @@ BOOL parse_and_map()
 			//printstr("dobj is %d\n",MaxScoreObj);
 		}
 	}
+	
+//	printf("Sentence: %d,%d,%d,%d\n", VerbId, DobjId, PrepId, IobjId);
 	return TRUE;
 }
 
