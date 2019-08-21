@@ -17,3 +17,5 @@ BOOL check_iobj_container();
 BOOL check_have_dobj();
 BOOL check_dont_have_dobj();
 BOOL check_not_self_or_child();
+BOOL check_put();
+BOOL check_move();

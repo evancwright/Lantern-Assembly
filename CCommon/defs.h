@@ -83,22 +83,64 @@
 #define DOOR_MASK  16348
 #define USER_2_MASK 32768
 
+//defines which set of definitions to use
+#include "platform.h"
+
+#ifdef DOS
+
 #pragma pack(0)
-typedef struct  __attribute__((__packed__))
+typedef struct WordEntry
 {
 	BYTE id;
 	char *wrd;
-} WordEntry; 
+} _WordEntry; 
 
  
 #pragma pack(0)
-typedef struct __attribute__((__packed__)) Object 
+typedef struct Object 
 {
 	BYTE attrs[17];
 	unsigned short flags;
 } _Object;
 
 #pragma pack(0)
+typedef struct  Sentence
+{
+	BYTE verb;
+	BYTE dobj;
+	BYTE prep;
+	BYTE iobj;
+	void (*handler)();
+} _Sentence;
+
+typedef struct ObjectWordEntry
+{
+	BYTE id; 
+	BYTE word1;
+	BYTE word2;
+	BYTE word3;
+} _ObjectWordEntry;
+
+typedef struct VerbCheck
+{
+	BYTE verbId;
+	BOOL (*check)();
+} _VerbCheck;
+
+#elif defined(RASPBERRY_PI) || defined(WINDOWS)
+
+typedef struct  __attribute__((__packed__))
+{
+	BYTE id;
+	char *wrd;
+} WordEntry; 
+ 
+typedef struct __attribute__((__packed__)) Object 
+{
+	BYTE attrs[17];
+	unsigned short flags;
+} _Object;
+
 typedef struct __attribute__((__packed__)) Sentence
 {
 	BYTE verb;
@@ -122,5 +164,46 @@ typedef struct __attribute__((__packed__)) VerbCheck
 	BOOL (*check)();
 } _VerbCheck;
 
+#elif defined(COCO)
 
+typedef struct  _WordEntry
+{
+	BYTE id;
+	char *wrd;
+} WordEntry; 
+
+ 
+typedef struct Object 
+{
+	BYTE attrs[17];
+	unsigned short flags;
+} _Object;
+
+ 
+typedef struct  Sentence
+{
+	BYTE verb;
+	BYTE dobj;
+	BYTE prep;
+	BYTE iobj;
+	void (*handler)();
+} _Sentence;
+
+typedef struct ObjectWordEntry
+{
+	BYTE id; 
+	BYTE word1;
+	BYTE word2;
+	BYTE word3;
+} _ObjectWordEntry;
+
+typedef struct VerbCheck
+{
+	BYTE verbId;
+	BOOL (*check)();
+} _VerbCheck;
+#else
+	#warning "No platform defined!"
 #endif
+#endif 
+

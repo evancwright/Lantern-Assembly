@@ -1,5 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
+
+#include "platform.h"
+
 void get_verb();
 void clear_scores();
 void score_word(BYTE wordId);
