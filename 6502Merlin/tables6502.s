@@ -172,13 +172,23 @@ next_string
 		tya ; save y
 		pha
 		ldy #0
+		;add length to table ptr
 		clc 
 		lda (tableAddr),y ; get len referenced by 0 page addr
-		adc #2 ; add 1 to skip length byte and null
-		adc tableAddr ; add to lo byte
+		adc tableAddr
 		sta tableAddr ; store in lo byte
+		;add carry to hi byte
 		lda #0
 		adc tableAddr+1 ; add carry to hi byte
+		sta tableAddr+1 ; store hi byte 
+		;now add two to account for the len and null bytes
+		clc 
+		lda tableAddr
+		adc #2
+		sta tableAddr ; add to lo byte
+		;add carry to the hi byte
+		lda tableAddr+1
+		adc #0
 		sta tableAddr+1 ; store hi byte 
 		pla 	;restor y
 		tay
