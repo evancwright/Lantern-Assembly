@@ -113,4 +113,4 @@ to_upper
 srcIx DB 0
 dstIx DB 0
 streqRes DB 0
-cmpLen DB 6  ; how many bytes to compare comparing strings
+cmpLen DB 8  ; how many bytes to compare comparing strings

@@ -209,6 +209,9 @@ compact_verb
 	lda #>verbBuffer
 	sta strDest+1
 	jsr strcpy  	;copy word[0] to buffer
+	lda numWords ; are we done?
+	cmp #1
+	beq :d	
 	ldy wordIndexes+1
  	jsr is_prep2
 	lda strIndex
@@ -231,13 +234,14 @@ compact_verb
 	;shift all the pointer (indexes) down
 	ldy #2
 :s	cpy numWords
-	beq :d
+	beq :o
 	lda wordIndexes,y
 	dey 
 	sta wordIndexes,y
 	iny
 	iny
 	jmp :s
+:o	dec numWords
 :d  rts
 
 	

@@ -1,27 +1,19 @@
 ;movement routines
 
- 
+;moves player (possibly through a door)
+;assumes check_move has been called so the move is valid 
 move_player
 		jsr verb_to_direction ; puts dir in y
 		jsr get_player_room 
 		jsr get_obj_attr ; obj=a attr=y  (get room's property)
 		sta newRoom
-		cmp #127 
-		bcs :ng
-		ldx #DOOR
+ 		ldx #DOOR
 		jsr get_obj_prop   ; door?
 		cmp #0
-		beq :go
-		lda newRoom	; it's a door get the direction the door leads
+		beq :go ; not a door, just go
+		lda newRoom	; it's a door, get the direction the door leads
 		ldy direction
 		jsr get_obj_attr
-		sta doorDirection
-		lda newRoom	; now see if the door is open/closed_door
-		ldx #OPEN
-		jsr get_obj_prop
-		cmp #1
-	    bne :cd	
-		lda doorDirection
 		sta newRoom		; fall through to go
 :go		lda #PLAYER_ID
 		ldx newRoom	; new room
@@ -29,11 +21,7 @@ move_player
 		jsr set_obj_attr
 		;jsr player_can_see (done in main)
 		jsr look_sub
-		jmp :x
-:ng		jsr print_nogo_msg
-	    jmp :x		
-:cd		jsr closed_door
-:x		rts
+		rts
 		
 		
 		

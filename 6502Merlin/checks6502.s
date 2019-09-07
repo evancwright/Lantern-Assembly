@@ -237,6 +237,55 @@ check_prep_supplied
 check_light
 		rts		
 
+		
+check_move
+		;save table
+		lda tableAddr	;save old tableAddr (lo)
+		pha
+		lda tableAddr+1	;save old tableAddr (hi)
+		pha
+		;
+		lda #1
+		sta checkFailed
+		jsr verb_to_direction ; puts dir in y
+		;if the verb is enter then the new room is what the player is trying to enter
+		lda verbId
+		cmp #enter_verb_id
+		bne :s
+		lda dobjId
+		jmp :d
+:s		jsr get_player_room 
+:d		jsr get_obj_attr ; obj=a attr=y  (get room's property)
+		sta newRoom
+		cmp #127 
+		bcs :ng
+		ldx #DOOR
+		jsr get_obj_prop   ; door?
+		cmp #0
+		beq :go
+		lda newRoom	; it's a door get the direction the door leads
+		ldy direction
+		jsr get_obj_attr
+		sta doorDirection
+		lda newRoom	; now see if the door is open/closed_door
+		ldx #OPEN
+		jsr get_obj_prop
+		cmp #1
+	    bne :cd	
+		lda doorDirection
+		sta newRoom		; fall through to go
+:go		lda #0
+		sta checkFailed 
+		jmp :x
+:ng		jsr print_nogo_msg
+	    jmp :x		
+:cd		jsr closed_door
+:x		;restore table
+		pla
+		sta tableAddr+1		
+		pla
+		sta tableAddr		
+		rts
  
 check_not_self_or_child
 		lda tableAddr
