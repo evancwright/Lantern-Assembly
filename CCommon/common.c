@@ -83,10 +83,14 @@ void get_verb()
 		BYTE id = is_prep(words[1]);
 		if (id != INVALID)
 		{
+#ifdef DEBUG_MAPPING			
 			printf("Appending preposition.");
+#endif
 			strcat(VerbBuffer," ");	
 			strcat(VerbBuffer,words[1]);
+#ifdef DEBUG_MAPPING
 			printf("Verb is %s\n",VerbBuffer);
+#endif
 			/* shift words down */
 			for (i=1; i < NumWords; i++)
 			{
@@ -126,6 +130,8 @@ void score_word(BYTE wordId)
 #endif
 				/*if it's visible, add another point!*/
 				if (is_visible_to(ObjectTable[PLAYER_ID].attrs[HOLDER_ID],(BYTE)id))
+				//if (is_visible_to(PLAYER_ID,(BYTE)id))
+				//if (is_visible((BYTE)id))
 				{
 #ifdef DEBUG_MAPPING
 				printf("Object %d is visible\n", i);
@@ -246,9 +252,17 @@ BOOL can_see()
 {
 	BYTE i=2;
 	BYTE roomId = INVALID;
+#ifdef DEBUG_MAPPING
+	printf("Player is in room %d", ObjectTable[PLAYER_ID].attrs[HOLDER_ID]);
+#endif
 	
 	if (emitting_light(ObjectTable[PLAYER_ID].attrs[HOLDER_ID]))
+	{
+#ifdef DEBUG_MAPPING
+	printf("Player's room is emitting light");
+#endif
 		return TRUE;
+	}
 	
 	/*are there any objects in open containers or on supports that have the same 
 	parent as the player?*/
@@ -518,6 +532,9 @@ BOOL is_open(BYTE objectId)
 
 BOOL is_visible_to(BYTE roomId, BYTE objectId)
 {
+	if (roomId == objectId)
+		return false;
+	
 	while (1)
 	{
 		unsigned char parent = ObjectTable[objectId].attrs[HOLDER_ID];		
@@ -534,6 +551,9 @@ BOOL is_visible_to(BYTE roomId, BYTE objectId)
 //			printstr("hit offscreen\n");
 			return FALSE;
 		}
+		
+		
+		
 		
 		if (parent == roomId)
 		{
@@ -927,6 +947,10 @@ void try_default_sentence()
 		Handled = TRUE;
 }
 
+/*
+ * For this function to be called
+ * check move must have passed
+ */
 void move_sub()
 {
 //	printstr("moving");
@@ -934,44 +958,73 @@ void move_sub()
 	BYTE dir=0;
 	BYTE room = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
 	dir = verb_to_dir(VerbId);
-	
-//	printstr("current room is %d\n", room);
+
+#ifdef DEBUG_MAPPING	
+	printf("current room is %d\n", room);
+	printf("dir =  %d\n", dir);
+#endif
 	tgtRoom = ObjectTable[room].attrs[dir];
+
+#ifdef DEBUG_MAPPING	
+	printf("Target room = %d\n", tgtRoom);
+#endif
 	
 	if (is_door(tgtRoom) == TRUE)
 	{
+#ifdef DEBUG_MAPPING	
+	printf("Target room %d is a door\n", tgtRoom);
+#endif
 		tgtRoom = ObjectTable[tgtRoom].attrs[dir];
 	}
 	
-	enter_object(tgtRoom, dir);
+#ifdef DEBUG_MAPPING
+		printf("Player moved to room %d\n", tgtRoom);
+#endif
+		ObjectTable[PLAYER_ID].attrs[HOLDER_ID]=tgtRoom;
+		look_sub();		
+	
 }
+
+/*
+ *Check_move will have been called prior to this function
+ *being called.
+ */
 
 void enter_sub()
 {
-	if (get_object_attr(DobjId,ENTER) == 255)
-		printstr("You can't enter that.");
-	else
-		enter_object(DobjId, ENTER);
+		ObjectTable[PLAYER_ID].attrs[HOLDER_ID]=DobjId;
+#ifdef DEBUG_MAPPING
+		printf("Player moved to room %d\n", tgtRoom);
+#endif
+		look_sub();		
 }
 
 
 void enter_object(BYTE tgtRoom, BYTE dir)
 {
-	//printstr("target room = %d\n",tgtRoom);
+#ifdef DEBUG_MAPPING
+	printf("enter target room = %d\n",tgtRoom);
+#endif
 	
 //		else
 //		{
 //			printstr("%d is not a door\n", tgtRoom);
 //		}
-		
+		/*
 		//if the object has an 'enter' treat the object l
-		if (ObjectTable[tgtRoom].attrs[ENTER] != INVALID)
+		if (ObjectTable[tgtRoom].attrs[ENTER] > 127)
 		{
-//			printstr("entering inside %d\n", tgtRoom);
+#ifdef DEBUG_MAPPING
+			printf("entering inside %d\n", tgtRoom);
+#endif
 			tgtRoom = ObjectTable[tgtRoom].attrs[ENTER];
 		}
+		*/
 		
 		ObjectTable[PLAYER_ID].attrs[HOLDER_ID]=tgtRoom;
+#ifdef DEBUG_MAPPING
+		printf("Player moved to room %d\n", tgtRoom);
+#endif
 		look_sub();		
 	
 	

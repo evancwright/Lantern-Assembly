@@ -2,6 +2,7 @@
 
 
 #include "defs.h"
+#include "VerbDefs.h"
 
 #ifndef COCO
 #include <stdio.h>
@@ -306,8 +307,15 @@ BOOL check_move()
 	BYTE room = ObjectTable[PLAYER_ID].attrs[HOLDER_ID];
 	dir = verb_to_dir(VerbId);
 
-	tgtRoom = ObjectTable[room].attrs[dir];
-
+	if (VerbId == ENTER_VERB_ID)
+	{
+		tgtRoom = ObjectTable[DobjId].attrs[dir];
+	}
+	else
+	{
+		tgtRoom = ObjectTable[room].attrs[dir];
+	}
+	
 	if (tgtRoom > 127)
 	{ //can't go that way
 		BYTE msgId = (255 - tgtRoom)+1;
