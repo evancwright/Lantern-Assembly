@@ -12,9 +12,11 @@ fi
 rm -f main.cmd
 ../bin/z80asm.exe -nh -com main.asm
 
-if [ -e "main.com" ]
+mv main.com __DISK_NAME__.com
+
+if [ -e "__DISK_NAME__.com" ]
 then
-echo "main.com has been built"
+echo "__DISK_NAME__.com has been built"
 echo ""
 echo "You can copy this into the B\0 folder under RunCPM"
 echo ""

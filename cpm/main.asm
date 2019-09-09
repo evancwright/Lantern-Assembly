@@ -77,7 +77,7 @@ DATAEND
 *INCLUDE WelcomeZ80.asm
 *INCLUDE save.asm
 *INCLUDE math.asm
-
+hcur DW 0
 stacksav DW 0
 
 	END START
