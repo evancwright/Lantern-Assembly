@@ -15,7 +15,7 @@
 
 #include "ObjectWordTable.c"
 extern unsigned char ObjectData[];
-extern BYTE scores[128];
+extern BYTE scores[256];
 extern BYTE MaxScore;
 extern BYTE MaxScoreCount;
 extern char Buffer[256];
@@ -110,7 +110,7 @@ void get_verb()
 */
 void score_word(BYTE wordId)
 {
-	char i=0;
+	unsigned char i=0;
 	char *tablePtr = (char*)ObjectWordTable;
 	
 	for (; i < ObjectWordTableSize; i++)
@@ -992,11 +992,11 @@ void move_sub()
 
 void enter_sub()
 {
-		ObjectTable[PLAYER_ID].attrs[HOLDER_ID]=DobjId;
+	ObjectTable[PLAYER_ID].attrs[HOLDER_ID]=DobjId;
 #ifdef DEBUG_MAPPING
-		printf("Player moved to room %d\n", tgtRoom);
+	printf("Player moved to room %d\n", DobjId);
 #endif
-		look_sub();		
+	look_sub();		
 }
 
 
