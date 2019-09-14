@@ -9,7 +9,7 @@ C_READSTR EQU 0Ah
 ESC EQU 1Bh
 CR EQU 0Dh
 LF EQU 0Ah
-
+SCR_WIDTH EQU 40
 *MOD
 CLS
 	push hl
@@ -19,26 +19,56 @@ CLS
 	ret
 ;assumes string is loaded into hl
 *MOD
+;OUTLIN
+;	push af
+;	push bc
+;	push de
+;	push hl
+;$lp? ld a,(hl)
+;	cp 0  ; hit end?
+;	jp z,$x?
+;	ld e,a
+;	ld c,WCONF
+;	push hl
+;	call BDOS
+;	pop hl
+;	inc hl
+;	jp $lp?
+;$x?	pop hl	
+;	pop de
+;	pop bc
+;	pop af
+;	ret
+
+*MOD
 OUTLIN
-	push af
-	push bc
-	push de
-	push hl
-$lp? ld a,(hl)
-	cp 0
-	jp z,$x?
-	ld e,a
-	ld c,WCONF
-	push hl
-	call BDOS
-	pop hl
-	inc hl
-	jp $lp?
-$x?	pop hl	
-	pop de
-	pop bc
-	pop af
-	ret
+		push af
+		push bc
+		push de
+		push hl
+$lp?	ld a,(hl)
+		cp 0
+		jr z,$x?
+		call wrdlen ;len->b
+		;is there room left on line
+		ld a,(hcur)
+		ld c,a
+		ld a,SCR_WIDTH
+		sub c ; a = SCR_WIDTH - hcur a has remaining len
+		cp b  ; chars left >= wrd_len ?
+		jr nc,$c?
+		call printcr
+		call skipspaces			
+		jr $lp?
+$c?		call printwrd  ; b is still valid
+		jp $lp?	
+$x?		pop hl
+		pop de
+		pop bc
+		pop af
+		ret
+
+
 
 ; hl contains string
 *MOD
@@ -58,9 +88,11 @@ OUTLINCR
 CRTBYTE
 	push bc
 	push de
+	push hl
 	ld e,a
 	ld c,WCONF
 	call BDOS
+	pop hl
 	pop de
 	pop bc
 	ret
@@ -69,12 +101,16 @@ PRINTCR
 	push af
 	push bc
 	push de
+	push hl
 	ld e,CR
 	ld c,WCONF
 	call BDOS
 	ld e,LF
 	ld c,WCONF
 	call BDOS
+	ld a,0
+	ld (hcur),a
+	pop hl
 	pop de
 	pop bc
 	pop af
