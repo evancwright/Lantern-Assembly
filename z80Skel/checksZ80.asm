@@ -7,6 +7,62 @@ HOLDER equ 1
 OBJ_ATTRS_SIZE equ 17
 OBJ_SIZE equ 19
 
+;check_move
+*MOD
+check_move
+		;convert the verb to a direction
+		call get_player_room
+		ld b,a ; save room
+		call get_move_dir
+		ld c,a	;direction code
+		cp ENTER
+		jp nz,$ne?
+		ld a,(DobjId)
+		ld b,a
+$ne?	call get_obj_attr ; dir in 'a'->
+		ld d,a  ; save 'door' for later
+		cp 128	; ? is it positive or negative
+		jp c,$go?
+		neg		; flip accumulator (2's complement)
+		ld b,a
+		ld ix,nogo_table
+		call print_table_entry
+		call printcr
+		jp $x?
+$go?	nop ; is 'a' a door?
+		ld e,a
+		ld b,a
+		ld c,DOOR
+		call get_obj_prop
+		cp 1 
+		ld a,e	
+		jp nz,$go2?   ; not a door- just go
+		nop ; is it closed?
+		ld c,OPEN ; b still contains obj id
+		call get_obj_prop
+		cp 1	 		
+		jp nz,$dc?	; not closed
+		nop ; load the door's  direction attr into 'a'
+		call get_move_dir ; dir in 'a'->
+		ld c,a  ; direction
+		call get_obj_attr ; dir in 'a'->
+		ld b,d   ; door
+		call get_obj_attr  ; get dir a leave in 'a'
+		jp $go2?
+$dc?	ld hl,doorclosed
+		call OUTLIN
+		call printcr
+		jp $x?	
+$go2?	;ld b,PLAYER_ID		; move player to location
+		;ld c,HOLDER_ID
+		;call set_obj_attr	
+		;call look_sub
+		ret
+$x?		; pop stack to return to main loop 
+		inc sp
+		inc sp
+		ret
+
 ;returns 1 or 0 in register a
 ;not sure we need this check anympre
 *MOD
