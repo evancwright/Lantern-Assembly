@@ -41,6 +41,9 @@ strDest	EQU $FD ; (fd-de)
 start
 	tsx			 ;save stack
 	stx stack
+
+	lda #23
+	sta $D018
 	
 	lda #scrWdth
 	sta charsLeft

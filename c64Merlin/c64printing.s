@@ -29,10 +29,11 @@ print_title_bar
 		ldy #0
 		clc
 		jsr PLOT
+		lda #94
 :lp 	;draw line of spaces
-		sta SCREEN,y
+		sta #1024,y ; test
 	 	iny 
-		cpy SCREEN_WIDTH ; SCREEN_WIDTH; screen width
+		cpy #SCREEN_WIDTH ; SCREEN_WIDTH; screen width
 		beq :out
 		jmp :lp
 :out	clc 
@@ -138,7 +139,27 @@ cls
 	jsr PLOT
 	rts
 
+	
+	
+fix64case
+	cmp #65
+	bcc :x  ; < 65 'a' (it's a number)
+	cmp #91 ; < 91 'z' (if < 91, it's upper - subtract 32)
+	bcc :a
+	cmp #97
+	bcc :x
+	cmp #123
+	bcc :m  ; < 123 - add 32
+	jmp :x ; not a letter
+:a  clc
+	adc #32	
+	jmp :x
+:m	sec
+	sbc #32
+:x	rts
+	
 charout1
+	jsr fix64case
 	jsr cout1
 	rts
 	
