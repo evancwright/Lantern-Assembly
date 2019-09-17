@@ -130,13 +130,13 @@ reveal_items
 		jsr list_items
 :x		rts
 			
-done ASC "Done."
+done ASC 'Done.'
 	DB 0
-isLocked ASC "is locked."
+isLocked ASC 'is locked.'
 	DB 0	
-openningThe ASC "Opening the "
+openningThe ASC 'Opening the '
 	DB 0	
-reveals ASC "reveals:"
+reveals ASC 'reveals:'
 	DB 0	
 	
 showContents DB 0 ; supporter or open container	

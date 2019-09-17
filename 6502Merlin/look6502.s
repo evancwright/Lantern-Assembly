@@ -164,15 +164,15 @@ list_object
 playerRoom DB 0	
 ambientLight DB 1 ;	
 
-thereisa ASC "There is a "
+thereisa ASC 'There is a '
 	DB 0
-here ASC "here."
+here ASC 'here.'
 	DB 0
-noLight ASC "It is pitch dark."
+noLight ASC 'It is pitch dark.'
 	DB 0
-noPeek ASC "You can't see inside that."
+noPeek ASC 'You can',27,'t see inside that.'
 	DB 0
-itsClosed ASC "It's closed."
+itsClosed ASC 'It',27,'s closed.'
 	DB 0
-itsEmpty ASC "It's empty."
+itsEmpty ASC 'It',27,'s empty.'
 	DB 0

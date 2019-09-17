@@ -315,19 +315,19 @@ get_wrd_len
 
 
  		
-contains ASC "contains..."	
+contains ASC 'contains...'	
 	DFB 0
-onthe ASC "On the "	
+onthe ASC 'On the '	
 	DFB 0
-is ASC "is..."	
+is ASC 'is...'
 	DFB 0
-providingLight ASC " (providing light)"	
+providingLight ASC ' (providing light)'
 	DFB 0
-beingWorn ASC " (being worn)"	
+beingWorn ASC ' (being worn)'
 	DFB 0
-scoreText ASC "score "
+scoreText ASC 'score '
 	DFB 0
-hundred ASC "/100"
+hundred ASC '/100'
 	DFB 0
 objId DFB 0		
 srchIndex DFB  0

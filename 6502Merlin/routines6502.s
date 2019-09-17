@@ -13,26 +13,17 @@ get_player_room
 	lda playerRoom
 	rts
 	
-
+;assumes check_move has passed
 enter_sub
-	nop ; is the object enterable?
-	lda sentence+1
+	lda sentence+1 ; 1st noun
 	ldy #ENTER
-	jsr get_obj_attr
-	cmp #255
-	beq :n
+	jsr get_obj_attr ; obj=a attr=y  (get room's property)
 	tax ; put new room in x and go there
 	lda #PLAYER_ID
 	ldy #HOLDER_ID
 	jsr set_obj_attr
 	jsr look_sub
-	jmp :x		
-:n	lda #<cantDoThat
-	sta strAddr
-	lda #>cantDoThat
-	sta strAddr+1
-	jsr printstrcr
-:x	rts
+	rts
 
 
 ;sets the variable ancestorFlag		
@@ -128,7 +119,7 @@ in_player_room
 		pha
 		tay
 		pha
-		ldy #0
+		ldy #0  ; load id
 		lda (tableAddr),y
 		sta child
 		jsr get_player_room

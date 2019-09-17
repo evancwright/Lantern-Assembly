@@ -177,13 +177,21 @@ check_dobj_opnable
 		rts
 
 check_dobj_lockable
+		lda tableAddr	;save table
+		pha
+		lda tableAddr+1
+		pha
 		lda sentence+1
 		ldx #LOCKABLE
 		jsr get_obj_prop
 		cmp #1
 		beq :x
 		jsr thats_not_something
-:x		rts
+:x		pla		
+		sta tableAddr+1	;restore table
+		pla
+		sta tableAddr
+		rts
 
 
 ;called by 'close'
@@ -462,7 +470,7 @@ check_see_iobj
 	lda sentence+3
 	sta child
 	ldy #0
-	jsr get_obj_attr
+	jsr get_obj_attr ; set table to child
 	jsr visible_ancestor
 	lda visibleAncestorFlag
 	cmp #0
@@ -493,31 +501,31 @@ check_weight
 		
 		
 checkFailed DFB 0		
-missingDobj ASC "Missing noun."
+missingDobj ASC 'Missing noun.'
 	DB	0	
-thatsNotSomething ASC "That's not something you can "
+thatsNotSomething ASC 'That',27,' not something you can '
 	DB	0	
-notContainer ASC "That's not a container."
+notContainer ASC 'That',27,'s not a container.'
 	DB 0
-alreadyLocked	ASC "is already locked."
+alreadyLocked	ASC 'is already locked.'
 	DB 0
-alreadyUnlocked	ASC "is already unlocked."
+alreadyUnlocked	ASC 'is already unlocked.'
 	DB 0
-alreadyOpen	ASC "is already open."
+alreadyOpen	ASC 'is already open.'
 	DB 0
-dontHave	ASC "You don't have that."
+dontHave	ASC 'You don',27,'t have that.'
 	DB 0
-alreadyHave	ASC "You already have it."
+alreadyHave	ASC 'You already have it.'
 	DB 0
-alreadyClosed	ASC "is already closed."
+alreadyClosed	ASC 'is already closed.'
 	DB 0
-isntLockable	ASC "isn't lockable."
+isntLockable	ASC 'isn',27,'t lockable.'
 	DB 0
-impossible	ASC "That's not possible."
+impossible	ASC 'That',27,'s not possible.'
 	DB 0
-notwearable	ASC "That's not wearable."
+notwearable	ASC 'That',27,'s not wearable.'
 	DB 0
 period ASC "."
 	DB 0
-nosurface ASC "You find no suitable surface."
+nosurface ASC 'You find no suitable surface.'
 	DB 0		

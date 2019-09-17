@@ -344,19 +344,19 @@ inv_weight
 
 invWeight DFB 0
 	DFB 0
-emptyhanded ASC "You are empty handed."
+emptyhanded ASC 'You are empty handed.'
 	DFB 0
-carrying ASC "You are carrying:"
+carrying ASC 'You are carrying:'
 	DFB 0
-leadingA ASC "A "
+leadingA ASC 'A '
 	DFB 0	
-taken ASC "Taken."
+taken ASC 'Taken.'
 	DFB 0
-dropped ASC "Dropped."
+dropped ASC 'Dropped.'
 	DFB 0
-space ASC " "
+space ASC ' '
 	DFB 0
-tooHeavy ASC "Your load is too heavy."	
+tooHeavy ASC 'Your load is too heavy.'	
 	DFB 0
 	
 visibleChild DFB 0

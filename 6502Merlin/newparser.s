@@ -137,7 +137,8 @@ bad_word
 		sta strAddr
 		lda #>endquote
 		sta strAddr+1		
-		jsr printstrcr
+		jsr printstr
+		jsr printcr
 		rts
 
 find_prep_index
@@ -445,20 +446,25 @@ no_input
 		jsr printstrcr
 		rts 
 		
-ambig	ASC "I don't know which one you mean."
+ambig	ASC 'I don',27,'t know which one you mean.'
 	DB 0	 	
 	
 
-pardon  ASC "Pardon?"
+pardon  ASC 'Pardon?'
 	DB 0
-badword  ASC "I don't know the word '"
+badword  ASC 'I don',27,'t know the word '
+	DB 27
 	DB 0
-badverb ASC "I don't know the verb '"
+badverb ASC 'I don',27,'t know the verb ',27
 	DB 0
-dontsee ASC "You don't see that here."
+dontsee ASC 'You don',27,'t see that here.'
 	DB 0
-endquote DFB "'"
-	DB 0
+endquote 
+	ASC 27
+	DB 27
+	ASC '. '
+	DB	0
+	 
 
 
 scores DS 128,0  ; WASTEFUL! FIX LATER

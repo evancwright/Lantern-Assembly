@@ -4,8 +4,15 @@
 ;assumes check_move has been called so the move is valid 
 move_player
 		jsr verb_to_direction ; puts dir in y
-		jsr get_player_room 
-		jsr get_obj_attr ; obj=a attr=y  (get room's property)
+		cpy #ENTER
+		bne :ne
+		; get direct object's enter property
+		lda dobjId  ; player is trying to enter this
+;		jsr get_obj_attr ; obj=a attr=y  (get room's property)
+		jmp :mv
+		; get room' direction property
+:ne		jsr get_player_room ; player room ->a		
+:mv		jsr get_obj_attr ; obj=a attr=y  (get room's property)
 		sta newRoom
  		ldx #DOOR
 		jsr get_obj_prop   ; door?
@@ -55,9 +62,9 @@ verb_to_direction
 		rts
 		
 
-the ASC "The "
+the ASC 'The '
 	DB 0 
-isclosed ASC "is closed."
+isclosed ASC ' is closed.'
 	DB 0 
 direction DB 0
 doorDirection DB 0
