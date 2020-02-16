@@ -64,9 +64,9 @@ getcommand
 ;		inc sp
 ;		inc sp
 ;		jp print_ret_pardon	
-$go?	call validate_words		; make sure verb,io,do are in tables
-		call encode				; try to map words to objects
-		call validate_encode	; make sure it worked
+$go?	;call validate_words		; make sure verb,io,do are in tables
+		;call encode				; try to map words to objects
+		;call validate_encode	; make sure it worked
 		call run_sentence
 		call do_events
 		call draw_top_bar
@@ -76,7 +76,8 @@ quit	ret
 *INCLUDE io.asm	
 *INCLUDE input.asm
 *INCLUDE printing.asm
-*INCLUDE parser.asm
+*INCLUDE parser2Z80.asm
+;*INCLUDE parserZ80.asm
 *INCLUDE look.asm
 *INCLUDE tables.asm
 *INCLUDE strings.asm
@@ -102,7 +103,6 @@ quit	ret
 *INCLUDE UserVarsZ80.asm
 *INCLUDE ObjectWordTableZ80.asm
 *INCLUDE NogoTableZ80.asm
-*INCLUDE BackDropTableZ80.asm
 *INCLUDE before_table_Z80.asm
 *INCLUDE instead_table_Z80.asm
 *INCLUDE after_table_Z80.asm
@@ -115,6 +115,7 @@ quit	ret
 
 
 stacksav DW 0
+hcur DW 0
 msg db "THIS IS A MESSAGE",0h		
 	
 	end start
