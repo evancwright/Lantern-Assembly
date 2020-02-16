@@ -67,10 +67,13 @@ getcommand
 $go?	;call validate_words		; make sure verb,io,do are in tables
 		;call encode				; try to map words to objects
 		;call validate_encode	; make sure it worked
+		call check_parse_fail
+		cp 1
+		jr z,$x?
 		call run_sentence
 		call do_events
-		call draw_top_bar
-quit	ret
+$x?		call draw_top_bar
+		ret
 
 *INCLUDE doeventsZ80.asm		
 *INCLUDE io.asm	

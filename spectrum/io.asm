@@ -6,6 +6,7 @@ CURMODE EQU 23761 ; K,
 *MOD
 getlin
 		;clear buffer
+		ei
 		call clrbuf
 		
 		;output the prompt
@@ -56,7 +57,8 @@ $s?		cp 13	; newline
 $out?	;ld a,13 ; echo a newline
 		;rst 16
 		call zx_newline
-$x?		ret
+$x?		di
+		ret
 
 
 ;prints the string in (hl) followed
