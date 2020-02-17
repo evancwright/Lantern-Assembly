@@ -73,6 +73,7 @@ start
 	jsr player_can_see	
 	jsr do_events
 	jsr inv_weight
+	inc moves
 	jmp :lp
 :x 	jsr printcr
 	rts
@@ -95,6 +96,7 @@ start
 	put inventory6502
 	put containers6502
 	put math6502
+	put itoa6502
 	put a2save
 	put doevents6502
 	put wear_sub

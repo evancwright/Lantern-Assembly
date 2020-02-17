@@ -14,14 +14,16 @@ fi
 
 rm -f test.dsk
 
-echo "creating a disk image"
+echo "creating disk image __DISK_NAME__.dsk"
 
-cp PRODOS.dsk advent.dsk
+cp PRODOS.dsk __DISK_NAME__.dsk
 
-echo "attaching file to disk image"
+echo "attaching game to disk image"
 
-java -jar ../apple2/AppleCommander-1.3.5.13-ac.jar -p advent.dsk game.bin bin 0x800 < main.bin
+java -jar ../apple2/AppleCommander-1.3.5.13-ac.jar -p __DISK_NAME__.dsk game.bin bin 0x800 < main.bin
 
-cp advent.dsk "/cygdrive/c/Users/Evan/Documents/Apple2/ADTPro-2.0.2/disks"
+#change to the name of your ADT pro directory
+cp __DISK_NAME__.dsk "/cygdrive/c/Users/Evan/Documents/Apple2/ADTPro-2.0.2/disks"
 
-../apple2/Applewin.exe -d1 advent.dsk -d2 PRODOS.dsk
+#run applewin
+../apple2/Applewin.exe -d1 __DISK_NAME__.dsk -d2 PRODOS.dsk

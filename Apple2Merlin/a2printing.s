@@ -23,6 +23,7 @@ print_title_bar
 		lda hcur
 		pha
 		lda vcur
+		lda vcur
 		pha
 		ldy #2	
 		sty vcur
