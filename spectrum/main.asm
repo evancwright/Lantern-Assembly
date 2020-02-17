@@ -118,7 +118,6 @@ $x?		call draw_top_bar
 
 
 stacksav DW 0
-hcur DW 0
 msg db "THIS IS A MESSAGE",0h		
 	
 	end start
