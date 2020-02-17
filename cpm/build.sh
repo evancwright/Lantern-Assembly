@@ -1,6 +1,8 @@
 #!/bin/sh
 
 
+echo "This script use z80Asm.exe by permission of Matthew Reed"
+echo "Please visit trs-80emulators.com for more information"
 
 if [ ! -e "../bin/z80asm.exe" ]
 then
