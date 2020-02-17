@@ -1,7 +1,7 @@
 #!/bin/sh
 echo "This build script uses Z80asm by permission of Matthew Reed"
-echo "Thanks for your awesome assembler!"
-
+echo "Thanks for your great assembler."
+echo "mctrd.exe also used with permission. Thanks, samstyle."
 rm data 
 ../bin/Z80asm.exe -com main.asm
 
