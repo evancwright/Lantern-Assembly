@@ -6,7 +6,6 @@ CURMODE EQU 23761 ; K,
 *MOD
 getlin
 		;clear buffer
-		ei
 		call clrbuf
 		
 		;output the prompt
@@ -16,6 +15,10 @@ getlin
 		;rst 16
 		
 		;loop until enter key is pressed
+		push ix
+		push iy
+		ei
+
 $lp2?	call readkb
 		
 		;convert to ASCII
@@ -58,6 +61,8 @@ $out?	;ld a,13 ; echo a newline
 		;rst 16
 		call zx_newline
 $x?		di
+		pop iy
+		pop ix
 		ret
 
 
@@ -114,17 +119,23 @@ $lp?	ld (hl),b
 ;an uppercase ascii char.		
 *MOD
 zx_to_ascii
-		cp 97  ; bail if < lowercase a
+		cp 0Ch
+		jr z,$x?
+		cp 0Dh
+		jr z,$x?
+		cp 91  ; 'Z'
+		jp c,$lc?
+		cp 123  ; bail if < lowercase a (it's an uppercase letter)
 		jp c,$x?	
-		cp 122 ; if greater than lowercase z, detokenize?
-		jp nc,$sc?
-		sub 32		;make it uppercase	
+		cp 170 ; less than UDG 'Z'
+		jp nc,$x?
+		sub 47 ; convert to ascii
 		jp $x?
-
-$sc?		
-		sub 165 ; convert to ascii
-$x?		
-		ret
+$lc?	ld b,a
+		ld a,32  ; make it lowercase
+		add a,b
+		jr $x?
+$x?		ret
 
 
 	  DB 0  ; padding - do not remove
