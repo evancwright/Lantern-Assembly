@@ -13,7 +13,11 @@ wear_sub
 		ld c,WORN
 		ld a,1
 		call set_obj_prop
-		ld hl,done
+		ld hl,youputon
+		call outlin
+		ld a,(sentence+1)
+		call print_obj_name
+		ld hl,periodstr
 		call outlincr
 		jp $x?
 $aw?	ld a,(sentence+1)
@@ -50,4 +54,5 @@ $c? add hl,de
 	jp $lp?
 $x?	ret
 		
+youputon DB "You are now wearing the ",0h
 alreadyworn DB "You're already wearing that.",0h	

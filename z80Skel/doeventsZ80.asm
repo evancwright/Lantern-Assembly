@@ -12,4 +12,7 @@ do_events
 	jp $x?
 $y?	ld a,0
 	ld (turnsWithoutLight),a
-$x?	ret
+$x?	ld a,(moves)
+	inc a
+	ld (moves),a
+	ret

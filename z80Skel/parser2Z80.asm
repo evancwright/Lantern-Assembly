@@ -217,7 +217,7 @@ concat_verb
 		ld ix,(WordPtrs) ; print verb
 		push ix
 		pop hl
-		call OUTLINCR
+		;call OUTLINCR
 		call shift_down 
 		pop iy
 		pop ix
@@ -962,7 +962,7 @@ itoa
 		push iy
 		ld c,a
 		ld iy,itoabuffer
-		ld a,20 ; ASCII Space
+		ld a,20h ; ASCII Space
 		ld (iy),a
 		ld (iy+1),a
 		ld (iy+2),a

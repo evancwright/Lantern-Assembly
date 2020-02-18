@@ -310,10 +310,7 @@ $lp?	push af
 		pop bc  ; restore parent id
 		cp 0
 		jr z,$c?
-$w?		ld a,d ; DEBUG
-		call print_obj_name ; DEBUG
-		call PRINTCR ; DEBUG
-		push bc ; save parent
+$w?		push bc ; save parent
 		ld b,d ;get mass of 'd'
 		ld a,MASS
 		ld c,a
