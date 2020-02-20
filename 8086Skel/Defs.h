@@ -43,6 +43,7 @@
 #define USER3  10
 #define WEARABLE  11
 #define BEINGWORN  12
+#define BEING_WORN 12  
 #define USER1  13
 #define LIT  14
 #define EMITTING_LIGHT  14

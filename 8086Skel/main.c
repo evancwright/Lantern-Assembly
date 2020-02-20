@@ -8,6 +8,8 @@
 #include "Dictionary.h"
 #include "NogoTable.h"
 #include "Events.h"
+//#define DEBUG
+//#define DEBUG_MAPPING
 
 unsigned short stackp;
 
@@ -16,11 +18,10 @@ extern const int NumObjects;
 
 extern char ObjectData[];
 extern unsigned char ObjectWordTableData[];
-char scores[255]; /* object scores for word matching*/
 
 #define  BOOL unsigned char
 #define BYTE unsigned char
-
+BYTE scores[256];
 //typedef unsigned char BYTE;
 
 #include "Defs.h"
@@ -29,6 +30,8 @@ char scores[255]; /* object scores for word matching*/
 
 #define TRUE 1
 #define FALSE 0
+#define true 1
+#define false 0
 #define WILDCARD 254
 #define INVALID 255
 #define KBBUF	$02dd	; keyboard buffer 
@@ -65,7 +68,7 @@ typedef struct Sentence
 	unsigned char dobj;
 	unsigned char prep;
 	unsigned char iobj;
-	void (*handler)();
+	void ( *handler)();
 } Sentence;
 
 #pragma pack(0)
@@ -87,7 +90,7 @@ unsigned char IobjId=255;
 unsigned char DobjSupplied=0;
 unsigned char IobjSupplied=0;
 
-char VerbBuffer[80];
+char VerbBuffer[55];
 
 Sentence *BeforeTable;
 Sentence *InsteadTable;
@@ -100,7 +103,7 @@ BOOL Handled=0;
 int NumWords=0;
 char *wordPointers[10];
 const int BufSize=80;
-char Buffer[80];
+char Buffer[256];
 char UCaseBuffer[256]; 
 char *words[10];
 Object * ObjectTable;
@@ -116,7 +119,7 @@ char * propNames[] = {
 "SCENERY", 
 "SUPPORTER",
 "CONTAINER",
-"TRANSPARENT",
+"USER3",
 "OPENABLE",
 "OPEN",
 "LOCKABLE",
@@ -145,7 +148,7 @@ void put_sub();
 void unwear_sub();
 void open_sub();
 void dump_flags();
-void dump_flags();
+void dump_sentence_table();
 void dbg_goto();
 void purloin();
 void close_sub();
@@ -168,6 +171,7 @@ void print_word(char* w);
 void collapse_verb();
 void __cdecl print_cr();
 void __cdecl print_string(unsigned short entryId);
+void __cdecl print_var(unsigned short var);
 void list_any_contents(unsigned char objectId);
 void get_obj_name(unsigned char objectId, char *buffer);
 void get_room_name(unsigned char objectId, char *buffer);
@@ -179,6 +183,7 @@ void score_objects(unsigned char wordId);
 void look_in_sub();
 void printstr(char *str);
 
+
 BYTE get_object_prop(BYTE o, BYTE p);
 BYTE get_object_attr(BYTE o, BYTE p);
 
@@ -186,8 +191,11 @@ BOOL parse_and_map();
 BOOL can_see();
 BOOL parse();
 BOOL map();
+BOOL check_move();
+BOOL check_put();
 BOOL check_rules();
 BOOL check_see_dobj();
+BOOL check_see_iobj();
 BOOL check_dobj_supplied();
 BOOL check_iobj_supplied();
 BOOL check_dobj_portable();
@@ -206,6 +214,7 @@ BOOL check_iobj_container();
 BOOL check_not_self_or_child();
 BOOL check_dobj_unlocked();
 BOOL check_prep_supplied();
+BOOL any_visible();
 BOOL is_article(char *word);
 BOOL emitting_light(unsigned char objId);
 BOOL is_prep(char *word);
@@ -253,7 +262,7 @@ BYTE iobjScore;
 BYTE DobjId;
 BYTE IobjId;
 BYTE PrepId;
-BYTE PrepIndex=0;
+int PrepIndex=0;
 BYTE isAmbiguous = FALSE;
  
 
@@ -287,7 +296,7 @@ int main(int argv, char **argc)
 	
 		printf(">");
 		gets(Buffer);
-	
+		
 		if (strcmp(Buffer,"flags")==0)
 		{
 			dump_flags();
@@ -311,6 +320,13 @@ int main(int argv, char **argc)
 			printf("Your score is %d/100.\n",score);
 			continue;
 		}
+
+		if (strcmp(Buffer,"sentences")==0)
+		{
+			dump_sentence_table();
+			continue;
+		}
+
 		
 		/* parse a line */
 	//	if (parse()==TRUE)
@@ -322,6 +338,10 @@ int main(int argv, char **argc)
 				
 				if (check_rules()==TRUE)
 				{
+#ifdef DEBUG
+				  printf("trying to run %d,%d,%d,%d\n",
+				  VerbId,DobjId,PrepId,IobjId);
+#endif
 					execute();
 				}
 			}
@@ -384,20 +404,29 @@ void quit_sub()
   
 void set_obj_attr(unsigned short objNum, unsigned short attrNum, unsigned short  val)
 {
-//	printf("setting attr:  %d.%d to %d\n", objNum,attrNum,val);
+#ifdef DEBUG
+	printf("setting attr:  %d.%d to %d\n", objNum,attrNum,val);
+#endif
 	ObjectTable[objNum].attrs[attrNum] = (unsigned char)val;
+#ifdef DEBUG
+	printf("set\n");
+#endif	
 }
 
 void set_obj_prop(unsigned short objNum, unsigned short propNum, unsigned short val)
 {
 	unsigned short mask;
 	unsigned short temp;
-//	printf("setting prop:  %d.%d(%s) to %d\n", objNum,propNum,propNames[propNum],val);
-//	printf("current flags=%u\n", ObjectTable[objNum].flags);
+#ifdef DEBUG
+	printf("setting prop:  %d.%d(%s) to %d\n", objNum,propNum,propNames[propNum],val);
+	printf("current flags=%u\n", ObjectTable[objNum].flags);
+#endif
 	mask = PropMasks[propNum];
 	temp = ObjectTable[objNum].flags;
 	
-//	printf("mask=%u\n", mask);
+#ifdef DEBUG	
+	printf("mask=%u\n", mask);
+#endif
 	if (val == 0)
 	{//clear it
 		mask = 65535 - mask; /* flip it */
@@ -411,6 +440,9 @@ void set_obj_prop(unsigned short objNum, unsigned short propNum, unsigned short 
 	
 	ObjectTable[objNum].flags = temp;
 //	printf("flags are now =%u\n", ObjectTable[objNum].flags);
+#ifdef DEBUG
+	printf("bit flag set\n");
+#endif
 }
 
 unsigned short get_obj_attr(unsigned short obj, unsigned short attrNum)
@@ -421,7 +453,7 @@ unsigned short get_obj_attr(unsigned short obj, unsigned short attrNum)
 	return (unsigned short) ObjectTable[obj].attrs[attrNum];
 }
 
-/*prop is 1-15 */
+//prop is 1-15 
 
 
 
@@ -467,6 +499,12 @@ void __cdecl print_cr()
 {
 	printf("\n");
 	Col=0;
+}
+
+//prints var as text
+void __cdecl print_var(unsigned short var)
+{
+	printf("%d",var);
 }
 
 #include "ObjectTable.c"
@@ -616,12 +654,18 @@ BYTE get_object_attr(BYTE o, BYTE p)
 
 void set_object_attr(BYTE o, BYTE a, BYTE v)
 {
-	set_object_attr(o,a,v);
+	set_obj_attr(o,a,v);
 }
 
 void set_object_prop(BYTE o, BYTE p, BYTE v)
 {
-	set_object_prop(o,p,v);
+#ifdef DEBUG
+	printf("setting prop %d,%d to %d\n", o, p, v);
+#endif
+	set_obj_prop(o,p,v);
+#ifdef DEBUG
+	printf("prop set\n");
+#endif
 }
 
  
@@ -633,9 +677,32 @@ void fix_endianess()
 void ask()
 {
 	gets(Buffer);
-	answer=get_word_id(Buffer);
+	answer=get_word_id(Buffer, StringTable, StringTableSize);
 
 }
-#include "checks.c"
+
+void dump_sentence_table()
+{
+	int i=0;
+	for (; i < InsteadTableSize;i++)
+	{
+		
+		printf("%d:%d,%d,%d,%d->%x\n",
+			i+1,
+			InsteadTable[i].verb,
+			InsteadTable[i].dobj,
+			InsteadTable[i].prep,
+			InsteadTable[i].iobj,
+			InsteadTable[i].handler
+			);
+	}
+	
+	printf("There are %d sentences.\n", InsteadTableSize);
+	
+}
+
+#include "checks8086.c"
 #include "Events.c"
-#include "common.c"
+#include "Common8086.c"
+
+
