@@ -271,7 +271,7 @@ void open_sub()
 	char name[80];
 	printstr("Opened.\n");
 	set_object_prop(DobjId, OPEN, 1);
-	printf("prop set\n");
+	
 	get_obj_name(DobjId, name);
 	if (has_visible_children(DobjId)==TRUE)
 	{
@@ -360,6 +360,8 @@ void list_any_contents(BYTE objectId)
 			printstr(Buffer);
 			print_obj_contents(objectId);
 		}
+		
+		/*
 		else
 		{
 			memset(name,0,80);
@@ -367,6 +369,7 @@ void list_any_contents(BYTE objectId)
 			sprintf(Buffer,"There is nothing on the %s.\n", name);
 			printstr(Buffer);
 		}
+		*/
 	}		
 }
 
