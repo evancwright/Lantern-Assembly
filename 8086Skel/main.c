@@ -172,6 +172,7 @@ void collapse_verb();
 void __cdecl print_cr();
 void __cdecl print_string(unsigned short entryId);
 void __cdecl print_var(unsigned short var);
+void __cdecl print_obj_name(unsigned short objId); 
 void list_any_contents(unsigned char objectId);
 void get_obj_name(unsigned char objectId, char *buffer);
 void get_room_name(unsigned char objectId, char *buffer);
@@ -246,12 +247,13 @@ int max_score_matches(int score);
 BYTE get_inv_weight(BYTE obj);
 
 #include "CheckTable.h"
-unsigned char done=FALSE;
-unsigned char score=0;
-unsigned char health=100;
-unsigned char gameOver=0;
-unsigned char turnsWithoutLight=0;
+BYTE done=FALSE;
+BYTE score=0;
+BYTE health=100;
+BYTE gameOver=0;
+BYTE turnsWithoutLight=0;
 BYTE answer=0;
+BYTE moves=0;
 
 BYTE MaxScore=0;
 BYTE MaxScoreObj=0;
@@ -343,6 +345,7 @@ int main(int argv, char **argc)
 				  VerbId,DobjId,PrepId,IobjId);
 #endif
 					execute();
+					moves++;
 				}
 			}
 //			else

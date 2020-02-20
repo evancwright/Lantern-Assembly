@@ -1321,7 +1321,7 @@ int max_score_matches(int max)
 	return count;
 }
 
-void print_obj_name(BYTE id)
+void print_obj_name(unsigned short id)
 {
 	get_obj_name(id, Buffer);
 	printstr(Buffer);
