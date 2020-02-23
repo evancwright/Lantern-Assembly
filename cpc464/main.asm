@@ -68,7 +68,8 @@ quit	ret
 *INCLUDE doeventsZ80.asm		
 *INCLUDE cpc464printing.asm
 *INCLUDE cpc464input.asm
-*INCLUDE parser.asm
+;*INCLUDE parser.asm
+*INCLUDE parser2Z80.asm
 *INCLUDE look.asm
 *INCLUDE tables.asm
 *INCLUDE strings.asm
