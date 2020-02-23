@@ -154,7 +154,7 @@ print_score
 
 $lp?	ld a,d
 		ld b,10
-		call mod ; a mod b
+		call modulus ; a mod b
 		ld c,a ;save char
 		
 		ld a,d
