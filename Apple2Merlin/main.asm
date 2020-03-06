@@ -105,7 +105,7 @@ start
 	put StringTable6502
 	put VerbTable6502
 	put CheckRules6502
-	put a2fileio
+;	put a2fileio
 	put formatting6502
 beginData
 	put ObjectTable6502
