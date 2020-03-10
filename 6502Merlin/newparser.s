@@ -379,7 +379,7 @@ clr_buffr
 		lda #0
 :lp		sta kbdbuf,y
 		iny
-		cpy #255
+		cpy #BUFFER_SIZE
 		beq :x
 		jmp :lp
 :x		ldy #0
@@ -445,7 +445,10 @@ no_input
 		sta strAddr+1
 		jsr printstrcr
 		rts 
-		
+
+ 
+	
+char DFB 0				
 ambig	ASC 'I don',27,'t know which one you mean.'
 	DB 0	 	
 	
