@@ -1,0 +1,17 @@
+--the quick way to run the game
+*CAT to see files
+*LOAD ADVDATA  20000
+PRINT USR(&2000)
+
+
+--the better way
+Launch BEEBEM
+Open advgame.ssd
+Attach ADVDATA to the disk
+Attach the save file to the disk
+Run the basic program.
+	It loads the adventure game data, then saves it as a machine language file to the disk.
+	It does the same with the save game file
+
+
+
