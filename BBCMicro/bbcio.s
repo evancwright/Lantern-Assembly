@@ -6,6 +6,10 @@ charout1	EQU $FFEE
 cout1	EQU $FFEE 
 OSWRCH EQU $FFEE 
 
+;charout1  EQU $40EE 
+;cout1 EQU $40EE
+;OSWRCH EQU $40EE 
+
 OSRDCH EQU $FFE0
 OSNEWL EQU $FFE7
 
@@ -19,9 +23,21 @@ getline
 	jsr OSWRCH
 :lp	jsr OSRDCH
 	jsr OSWRCH
+	;enter?
 	cmp #13 ; CR
 	beq :x
-	sta buffer,y
+	;delete
+	cmp #$7F ; DELETE
+	bne :ch
+	lda #0
+	sta buffer,y ; null current char
+	;do we have room do back up?
+	cpy #0
+	beq :lp
+	dey ;
+	sta buffer,y ; null out previous char
+	jmp :lp
+:ch	sta buffer,y
 	iny 
 	jmp :lp
 :x	lda #0
@@ -31,37 +47,10 @@ getline
 
 printcr
 	jsr OSNEWL
+	lda #scrWdth
+	sta charsLeft
 	rts
-	
-	;string  addr must be in strlo,strhi
- 
-;clr_words
-;		lda #0
-;		ldy #0
-;:lp		sta word1,y
-;		iny
-;		cpy #128  ; 4 32 byte words
-;		beq :x
-;		jmp :lp
-;:x		lda #255	
-;		sta sentence
-;		sta sentence+1
-;		sta sentence+2
-;		sta sentence+3		
-;		rts
- 
-;printline
-;;printstr
-;	ldy #0
-;:lp	lda ($strAddr),y
-;	cmp #0
-;	beq :x
-;	jsr OSWRCH
-;	iny
-;	jmp :lp 
-;:x	lda #' '
-;	jsr OSWRCH
-;	rts	
+		
 
 ask
 	jsr clr_buffr
@@ -86,6 +75,10 @@ print_title_bar
 	rts
 
 printsp
+	pha
+	lda spcChar
+	jsr cout1
+	pla
 	rts
 	
 message ASC 'PLS ENTER A MESSAGE'
