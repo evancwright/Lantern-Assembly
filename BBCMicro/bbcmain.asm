@@ -1,34 +1,34 @@
 ;main.asm
 ;evanwright 2017
 
-.include "defs6502.asm"	
+put defs6502.asm"	
 
-
-#define scrWdth $21
-#define hcur $24
-#define vcur $25
+scrWdth EQU $21
+hcur EQU $24
+vcur EQU $25
 
 ;zero page vars
 
-#define strSrc 	$70 ; some zero page addr
-#define strDest	$72 ; some zero page addr
-#define tableAddr $74
-#define strAddr $76
-#define PAGE_19 $1900
-#define PAGE_20 $2000
-#define PAGE_107 $6B00
-#define OSFILESAV #0 
+strSrc EQU	$70 ; some zero page addr
+strDest	EQU $72 ; some zero page addr
+tableAddr EQU $74
+strAddr EQU $76
+PAGE_19 EQU $1900
+PAGE_20 EQU $2000
+PAGE_107 EQU $6B00
+OSFILESAV EQU #0 
 
 .org $PAGE_20
-	.module main
+	
 start
 	tsx			 ;save stack
 	stx stack
-	l	
+	lda #scrWdth
+	sta charsLeft
 	jsr cls
 	jsr show_intro
  	jsr look_sub
-_lp
+:lp
  	jsr clr_buffr
 	jsr clr_words
     jsr printcr
@@ -37,23 +37,13 @@ _lp
 	nop
 	lda buffer
 	cmp #0 ; cr
-	bne _c
+	bne :c
 	jsr no_input
-	jmp _lp
-_c 	jsr toascii
+	jmp :lp
+:c 	jsr toascii
 	lda #0
 	sta strSrc
 	
-;	lda #kbBufHi ; did the user type quit
-;	sta strSrc+1
-;	lda #quit%256
-;	sta strDest
-;	lda #quit/256	
-;	sta strDest+1
-;	jsr streq6
-;	cmp #1
-;	beq _x
-
 	jsr remove_articles
 	jsr get_verb
 	jsr get_nouns ; 
@@ -61,76 +51,77 @@ _c 	jsr toascii
 	jsr encode_sentence
 	lda #1
 	cmp encodeFailed
-	beq _lp
+	beq :lp
 	
 	jsr map_nouns
 	
 	jsr check_mapping ; make sure objects were visible
 	lda #1
 	cmp encodeFailed
-	beq _lp
+	beq :lp
 	
 	jsr process_sentence	
 	
-;	jsr do_events
 	jsr player_can_see	
 	jsr do_events
 	jsr inv_weight
  		
-	jmp _lp
+	jmp :lp
 
-_x 	jsr printcr
+:x 	jsr printcr
 	rts
 
 
-.include "intro6502.asm"
-.include "strings6502.asm"
-.include "printing6502.asm"
-.include "look6502.asm"
-.include "bbcparser.asm"
-.include "tables6502.asm"
-.include "routines6502.asm"
-.include "attributes6502.asm"
-.include "checks6502.asm"
-.include "sentences6502.asm"
-.include "movement6502.asm"
-.include "light6502.asm"
-.include "inventory6502.asm"
-.include "containers6502.asm"
-.include "math6502.asm"
-.include "bbcsave.asm"
-.include "doevents6502.asm"
-.include "wear_sub.asm"
-.include "Events6502.asm"
-.include "ObjectWordTable6502.asm"
-.include "Dictionary6502.asm"
-.include "StringTable6502.asm"
-.include "VerbTable6502.asm"
-.include "CheckRules6502.asm"
-.include "bbcio.asm"
+put intro6502.asm
+put strings6502.asm
+put printing6502.asm
+put look6502.asm
+put bbcparser.asm
+put tables6502.asm
+put routines6502.asm
+put attributes6502.asm
+put checks6502.asm
+put sentences6502.asm
+put movement6502.asm
+put light6502.asm
+put inventory6502.asm
+put containers6502.asm
+put math6502.asm
+put bbcsave.asm
+put doevents6502.asm
+put wear_sub.asm
+put Events6502.asm
+put ObjectWordTable6502.asm
+put Dictionary6502.asm
+put StringTable6502.asm
+put VerbTable6502.asm
+put CheckRules6502.asm
+put bbcio.asm
 beginData
-.include "ObjectTable6502.asm"	
-.include "builtInVars6502.asm"
-.include "userVars6502.asm"	
+put ObjectTable6502.asm	
+put builtInVars6502.asm
+put userVars6502.asm
 endData
-.include "NogoTable6502.asm"
-.include "PrepTable6502.asm"
-.include "articles6502.asm"
-.include "sentence_table_6502.asm"
-.include "before_table_6502.asm"
-.include "instead_table_6502.asm"
-.include "after_table_6502.asm"
-.include "Welcome6502.asm"
+put NogoTable6502.asm
+put PrepTable6502.asm
+put articles6502.asm
+put sentence_table_6502.asm
+put before_table_6502.asm
+put instead_table_6502.asm
+put after_table_6502.asm
+put Welcome6502.asm
 
-temp	.byte 0
-msg	.text	"HELLO"
-	.byte 0
-goodbye .text "BYE"
-	.byte 0
-prompt 	.text ">"
-	.byte 0
-confused .text "I DON'T FOLLOW YOU."
-	.byte 0
-;quit .byte "QUIT",0h
-stack .byte 0
-.end
+__INCLUDES__
+
+temp	DB 0
+msg	ASC	"HELLO"
+	DB 0
+goodbye ASC "BYE"
+	DB 0
+prompt 	ASC ">"
+	DB 0
+confused ASC "I DON'T FOLLOW YOU."
+	DB 0
+;quit DB "QUIT",0h
+stack DB 0
+

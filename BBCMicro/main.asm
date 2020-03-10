@@ -5,7 +5,8 @@ BUFFER_SIZE EQU 80
 
 	put defs6502
 
-scrWdth EQU $21
+;scrWdth EQU $21
+scrWdth EQU $28
 hcur EQU $24
 vcur EQU $25
 
