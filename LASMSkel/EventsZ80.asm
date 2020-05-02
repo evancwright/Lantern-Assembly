@@ -1,0 +1,41 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Machine generated include file
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+*INCLUDE no_air_death_event_Z80.asm
+*INCLUDE move_slug_event_Z80.asm
+*INCLUDE check_radio_event_Z80.asm
+*INCLUDE not_possible_sub_Z80.asm
+*INCLUDE get_portable_sub_Z80.asm
+*INCLUDE kill_self_sub_Z80.asm
+*INCLUDE default_kill_sub_Z80.asm
+*INCLUDE kill_player_sub_Z80.asm
+*INCLUDE talk_to_self_sub_Z80.asm
+*INCLUDE default_talk_sub_Z80.asm
+*INCLUDE listen_sub_Z80.asm
+*INCLUDE smell_sub_Z80.asm
+*INCLUDE wait_sub_Z80.asm
+*INCLUDE yell_sub_Z80.asm
+*INCLUDE jump_sub_Z80.asm
+*INCLUDE default_eat_sub_Z80.asm
+*INCLUDE default_drink_sub_Z80.asm
+*INCLUDE use_airlock1_sub_Z80.asm
+*INCLUDE go_down_sub_Z80.asm
+*INCLUDE go_up_sub_Z80.asm
+*INCLUDE kill_slug_sub_Z80.asm
+*INCLUDE use_airlock2_sub_Z80.asm
+*INCLUDE use_radio_sub_Z80.asm
+*INCLUDE bad_slot_sub_Z80.asm
+*INCLUDE wont_fit_sub_Z80.asm
+*INCLUDE put_board_sub_Z80.asm
+*INCLUDE go_east_sub_Z80.asm
+*INCLUDE throw_any_sub_Z80.asm
+*INCLUDE read_note_sub_Z80.asm
+*INCLUDE ride_slug_sub_Z80.asm
+*INCLUDE go_west_sub_Z80.asm
+*INCLUDE read_placard_sub_Z80.asm
+*INCLUDE wear_underwr_sub_Z80.asm
+*INCLUDE try_kill_sub_Z80.asm
+*INCLUDE after_go_e_sub_Z80.asm
+*INCLUDE smell_underwear_sub_Z80.asm
+*INCLUDE dlft_smell_sub_Z80.asm
+*INCLUDE score_sub_Z80.asm
