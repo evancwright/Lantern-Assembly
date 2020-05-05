@@ -80,7 +80,6 @@ $x?		call draw_top_bar
 *INCLUDE input.asm
 *INCLUDE printing.asm
 *INCLUDE parser2Z80.asm
-;*INCLUDE parserZ80.asm
 *INCLUDE look.asm
 *INCLUDE tables.asm
 *INCLUDE strings.asm
@@ -118,7 +117,6 @@ $x?		call draw_top_bar
 
 
 stacksav DW 0
-msg db "THIS IS A MESSAGE",0h		
 	
-	end start
+;	end start ; uncomment for z80ASM
 	

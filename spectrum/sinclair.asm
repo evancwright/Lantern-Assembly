@@ -1,14 +1,18 @@
 ;sinclair
 
 ;BASE equ  3C00H ; address of charset
-ATTRS equ 22528  ; address of attr
-REGION1 equ 16384
-ROW2 equ 16384+256
-REGION2 equ 18432
-REGION3 equ 20480
+ATTRS equ 5800H ; 22528 address of attr
+ATTRS_PLUS_32 equ 5820H  ; address of attr
+ATTRS_PLUS_64 equ 5840H  ; address of attr
+REGION1 equ 4000H
+REGION1_PLUS_32 equ 4020H
+REGION1_PLUS_64 equ 4040H
+ROW2 equ 040DCH ; 16384+256  1604
+REGION2 equ 04800H  ; 18432
+REGION3 equ 05000H ; 20480
 
-ROMCHARS equ 3C00H
-S_POS equ 23688
+ROMCHARS equ 03C00H
+S_POS equ 05C88H ; 23688 
 
 ;ENTRY :	B=LINE,C=COLUMN 
 ;PRESERVED : BC,DE 
@@ -73,8 +77,8 @@ locate
 ;clears screen and attrs
 ;PRESERVED: A ;EXIT: BC-0, DE =5B0ßH, HL=5AFFH
 cls1 
-		ld hl,4000h
-		ld bc,1800h
+		ld hl,04000h
+		ld bc,01800h
 		ld (hl),l
 		ld d,h
 		ld e,1
@@ -234,19 +238,19 @@ zx_scroll
  		
 		call scroll_rgn1
 
-		ld a,7
+		ld a,8
 		ld (SCROLL_LPS),a
 		ld de,REGION2
 		call scroll_rgn
 		
-		ld a,7
+		ld a,8
 		ld (SCROLL_LPS),a
 		ld de,REGION3
 		call scroll_rgn
  
 		ld bc,704 ; scroll attrs
-		ld hl,ATTRS+64
-		ld de,ATTRS+32
+		ld hl,ATTRS_PLUS_64
+		ld de,ATTRS_PLUS_32
 		ldir ; hl->de repeating		
 		
 		call clr_btm_line
@@ -375,8 +379,8 @@ clr_btm_line
 		ld (NOSCROLL),a
 		
 		ld a,0
-		ld (CRSRX),a
-		ld a,23
+		ld (CRSRX),a ; col 0
+		ld a,23  ; line 23
 		ld (CRSRY),a
 		call repos_cursor
 		
@@ -447,8 +451,8 @@ scroll_rgn1
 
 		ld a,8
 
-		ld de,REGION1 + 32
-		ld hl,REGION1 + 64
+		ld de,REGION1_PLUS_32
+		ld hl,REGION1_PLUS_64
 $lp?	
 		ld bc,192
 		ldir ; hl->de repeating
@@ -480,6 +484,7 @@ MASK DB 0 ; Attribute mask for printing
 DFCC DW 4000 ; DF Address of cell x,y (set by locate sub)
 BASE DW 3C00h
 CRSRY DB 0
+hcur  ; hcur and crsrx are same
 CRSRX DB 0
 SCROLLTEMP DW 0
 NOSCROLL DB 0

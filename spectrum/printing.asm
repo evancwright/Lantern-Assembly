@@ -2,9 +2,9 @@
 ;print routines for ZX spectrum
 ;(c) Evan Wright, 2017
 
-SCREEN equ 16384 ; 4000 hex
-SCRSIZE equ 702 ; 32*22 line
-SCRCOLOR equ 23693
+SCREEN equ 04000H ; 4000 hex
+SCRSIZE equ 002BEh ; 32*22 line = 207
+SCRCOLOR equ 05C8DH ; 23693
 
 ;output a char
 CRTBYTE
@@ -56,7 +56,7 @@ draw_top_bar
 		push de
 
 		ld bc,0
-		ld(CRSRY),bc
+		ld (CRSRY),bc
 		call repos_cursor
 		
 		;draw 32 inverse spaces
@@ -153,7 +153,7 @@ backup_2
 	push de
 	and a ; clr flag
 	ld a,(CRSRX)
-	sbc a,2
+	sbc 2
 	ld (CRSRX),a
 	call repos_cursor
 	pop de

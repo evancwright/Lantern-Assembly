@@ -119,10 +119,14 @@ $lp?	ld (hl),b
 ;an uppercase ascii char.		
 *MOD
 zx_to_ascii
-		cp 0Ch
+		cp 20h ; space
 		jr z,$x?
-		cp 0Dh
+		cp 0Ch ; enter 
 		jr z,$x?
+		cp 0Dh ; backspace
+		jr z,$x?
+		cp 58  ; number?
+		jp c,$x? ; no conversion
 		cp 91  ; 'Z'
 		jp c,$lc?
 		cp 123  ; bail if < lowercase a (it's an uppercase letter)
