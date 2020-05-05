@@ -10,9 +10,9 @@ $lp?  	call WAIT_CHAR
 		jp nc,$lp?	;no char ready
 		call atoupper
 		ld (hl),a
-		cp a,0Dh ; CR
+		cp 0Dh ; CR
 		jp z,$out?
-		cp a,BS ; BS
+		cp BS ; BS
 		jp z,$bs?
 		push hl
 		call CHAROUT

@@ -192,7 +192,7 @@ backup_2
 	push hl
 	call TXT_GET_CUR
 	ld a,h
-	sub a,2
+	sub 2
 	call TXT_SET_COL
 	pop hl
  	pop de

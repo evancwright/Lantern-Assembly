@@ -15,11 +15,10 @@ main
 		;set screen as output channel
 		call CLS  
 		
-		ld hl,0
-		call TXT_SET_CUR
+		ld hl,0 	; this needs to move to vm
+		call TXT_SET_CUR  ; this needs to move to vm
 		
 		call printcr
-		
 		
 		ld hl,welcome ; print welcome,author,version
 		call OUTLINCR
@@ -40,8 +39,6 @@ $inp?
 		call draw_top_bar
 		call getcommand
  
-		 
-		
 		pop iy
 		pop ix
  
@@ -51,9 +48,7 @@ $inp?
 
 getcommand
 		;call QINPUT
-		ei
 		call getlin
-		di	
  		call parse				; get the words
 $go?	call check_parse_fail
 		cp 1
@@ -106,5 +101,5 @@ $x?		call draw_top_bar
 stacksav DW 0
 	
 	nop 	; force CPC to load last byte
-	end start
+;	end start  - this was for Z80 ASM
 	
