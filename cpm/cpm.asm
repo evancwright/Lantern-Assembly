@@ -9,7 +9,7 @@ C_READSTR EQU 0Ah
 ESC EQU 1Bh
 CR EQU 0Dh
 LF EQU 0Ah
-SCR_WIDTH EQU 79
+SCR_WIDTH EQU 60
 *MOD
 CLS
 	push hl
@@ -164,11 +164,12 @@ print_char
 	pop af
 	ret
 
-showcrsr DB ESC,'[?25h',0
-hidecrsr DB ESC,'[?25l',0
-cpmcls 	DB ESC,'[2J',0
-cpmhome DB ESC,'[;H',0
-set40col DB ESC, '[=0',0
+;not all CP/M supports this
+;showcrsr DB ESC,'[?25h',0
+;hidecrsr DB ESC,'[?25l',0
+cpmcls 	DB 01bh,"[2J",0
+;cpmhome DB ESC,'[;H',0
+;set40col DB ESC, '[=0',0
 
 
 inrec 	DB 40  ; len of buffer

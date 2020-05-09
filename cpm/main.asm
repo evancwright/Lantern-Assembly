@@ -1,6 +1,6 @@
 ;main file for trs-80 shell
  
-*INCLUDE objdefsZ80.asm ; equs
+*INCLUDE objdefsZ80.asm 
  
 ;QINPUT equ 1bb3h		; ROM ROUTINES
 ;CRTBYTE equ  0033H
@@ -39,9 +39,14 @@ getcommand
 		call do_events
 $x?		ret
 
+*INCLUDE ObjectTableZ80.asm
+*INCLUDE BuiltInVarsZ80.asm
+*INCLUDE UserVarsZ80.asm
+DATAEND
+hcur DW 0
+stacksav DW 0
 *INCLUDE doeventsZ80.asm		
-*INCLUDE cpm.asm	
-;*INCLUDE parser.asm
+*INCLUDE cpm.asm
 *INCLUDE parser2Z80.asm
 *INCLUDE look.asm
 *INCLUDE tables.asm
@@ -56,17 +61,12 @@ $x?		ret
 *INCLUDE put.asm
 *INCLUDE quitZ80.asm
 *INCLUDE wear_sub.asm
-*INCLUDE print_rets.asm
 *INCLUDE EventsZ80.asm
 *INCLUDE articlesZ80.asm
 *INCLUDE PrepTableZ80.asm
 *INCLUDE StringTableZ80.asm
 *INCLUDE DictionaryZ80.asm
 *INCLUDE VerbTableZ80.asm
-*INCLUDE ObjectTableZ80.asm
-*INCLUDE BuiltInVarsZ80.asm
-*INCLUDE UserVarsZ80.asm
-DATAEND
 *INCLUDE ObjectWordTableZ80.asm
 *INCLUDE NogoTableZ80.asm
 *INCLUDE before_table_Z80.asm
@@ -77,8 +77,5 @@ DATAEND
 *INCLUDE WelcomeZ80.asm
 *INCLUDE save.asm
 *INCLUDE math.asm
-hcur DW 0
-stacksav DW 0
-
-	END START
+;	END START
 ;END

@@ -36,7 +36,7 @@ save_sub
 		call itoa
 		ld hl,itoabuffer
 		call OUTLINCR
-$ol		push bc ; save loop counter
+$ol?	push bc ; save loop counter
 		push hl
 		;fill DMA area with data to save
 		ld b,128 ; CP/M has 128 byte records
@@ -56,7 +56,7 @@ $il?	push bc
 		call BDOS
 		pop hl
 		pop bc ; restore loop counter
-		djnz $ol
+		djnz $ol?
 		;close the file
 		ld hl,closingstr
 		call OUTLINCR
