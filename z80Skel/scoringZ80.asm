@@ -17,7 +17,7 @@ $lp?  ;;is the word in the dictionary
 	ld iy,dictionary  ; table to search
 	jsr get_table_index
 	ld a,255
-	cp a,b
+	cp b
 	jp z, $f?
 	ld a,b  ;store word id so we can score it
 	ld (wordId),a

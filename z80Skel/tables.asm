@@ -12,21 +12,21 @@ print_table_entry
 	push hl
 	push ix
 	ld a,0d ; lp counter 
-_lp	cp b	; compare accumulator to a
-	jp nz,_sk ; skip this entry
+$lp?	cp b	; compare accumulator to a
+	jp nz,$sk? ; skip this entry
 	inc ix  ; skip length byte
 	push ix ; move string addr to hl
 	pop hl
 	call OUTLIN
-	jp _x
-_sk	inc a		; increment loop counter
+	jp $x?
+$sk?	inc a		; increment loop counter
 	ld	e,(ix+0) ; load length byte
 	ld d,0
 	add ix,de  ; add it to ix (skip string)
 	inc ix 	   ; add 1 to skip length byte
 	inc ix 	   ; add 1 to skip null terminator
-	jp _lp
-_x	pop ix
+	jp $lp?
+$x?	pop ix
 	pop hl
 	pop de
 	pop bc
@@ -43,19 +43,19 @@ print_obj_name
 		push ix
 		ld ix,obj_word_table
 		ld de,4		; step amount through table
-_lp$	cp 0		; done?
-		jp z,_out$
+$lp?	cp 0		; done?
+		jp z,$out?
 		add ix,de
 		dec a		; dec loop counter		
-		jp _lp$
-_out$	inc ix 		; skip past the id byte to the words
+		jp $lp?
+$out?	inc ix 		; skip past the id byte to the words
 		ld b,0
-_l2$	ld a,b
+$l2?	ld a,b
 		cp 3		; hit 3 word max?
-		jp z,_x?
+		jp z,$x?
 		ld a,(ix)	; get word id
 		cp 255d		; done (empty entry)?
-		jp z,_x?	
+		jp z,$x?	
 		push bc		;save loop counter
 		ld b,a		; put word id in b
 		push ix		; save ix
@@ -66,8 +66,8 @@ _l2$	ld a,b
 		inc ix		; move to next word id
 		pop bc		; restore loop counter
 		inc b
-		jp _l2$	
-_x?		pop ix
+		jp $l2?	
+$x?		pop ix
 		pop de
 		pop bc
 		pop af
@@ -97,13 +97,13 @@ get_table_index
 		push ix
 		push iy
 		ld b,0
-$_lp?	ld a,(iy)
+$lp?	ld a,(iy)
 		cp 255 ; hit end
-		jp z,$_nf?
+		jp z,$nf?
 		inc	iy ; skip len byte
 		call streq ; test equality - result in a
 		cp 1    ; done - b contains index
-		jp z,$_x?	;jump if found
+		jp z,$x?	;jump if found
 		inc b		;update loop counter (index)
 		dec iy		;back up an get length byte
 		ld d,0
@@ -111,10 +111,10 @@ $_lp?	ld a,(iy)
 		add iy,de	; skip to next string
 		inc iy		; skip length byte
 		inc iy		; skip null
-		jp $_lp?	;repeat
-		jp $_x?
-$_nf?   ld b,255		
-$_x?	pop iy
+		jp $lp?	;repeat
+		jp $x?
+$nf?    ld b,255		
+$x?		pop iy
 		pop ix
 		pop de
 		ret
@@ -165,9 +165,9 @@ $c?		inc ix		; not found. increment ix to next entry
 		jp $lp?	; go to next object
 $y?		ld a,(ix)	; they match! back up put the id in b
 		ld b,a
-		jp $_x?
+		jp $x?
 $nf?	ld b,255 	; not found code
-$_x?	pop ix
+$x?	pop ix
 		pop de
 		pop af
 		ret

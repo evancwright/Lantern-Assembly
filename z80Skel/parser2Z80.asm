@@ -140,14 +140,14 @@ move_to_start
 		push iy
 		pop ix
 		inc ix
-$lp		ld a,(ix)
+$lp?	ld a,(ix)
 		cp 20h 		; space?
 		jr z,$cnt?	; quit
 		cp 0 		; null?
 		jr z,$cnt?	; quit
 		jr $x?
 $cnt?	inc ix		;next char
-		jr $lp		;repeat
+		jr $lp?		;repeat
 $x?		push ix	;copy ix to iy
 		pop iy	;iy needs to catch up
 		pop af
@@ -357,13 +357,13 @@ map_words
 ;	/* are there any more words after the verb? */
 ;	if (NumWords > 1)
 		ld a,(numWords)
-		cp a,1
+		cp 1
 		jp z,$nmw? ; equal is not gt
 ;	{
 ;		/* is there a prep? */
 		;BOOL prep = found_prep(); //sets prepIndex and id
 		ld a,(prepFound)
-		cp a,0
+		cp 0
 		jp z,$on? ; one noun
 ;		if (prep == TRUE)
 ;		{/* score do and io */			
@@ -372,10 +372,10 @@ map_words
 	; score words 1 to prepIndex -1 		
 	;did the score fail because a word could n't be mapped?
 		ld a,(wordIdFail)
-		cp a,1
+		cp 1
 		jp z,$x? ; fail->quit
 		ld a,(ambigFail)
-		cp a,1 
+		cp 1 
 		jp z,$x? ; fail->quit
 $na?	; noun1 was successfully mapped		
 		ld a,(MaxScoreObj) ; save noun1
@@ -504,7 +504,7 @@ score_only_noun
 		jp z,$x?
 		call disambiguate
 		ld a,(ambigFail)
-		cp a,1
+		cp 1
 		jp z,$x?
 		call save_noun1
 $x?		ret
@@ -566,7 +566,7 @@ score_noun1
 		jp z,$x?
 		call disambiguate
 		ld a,(ambigFail)
-		cp a,1
+		cp 1
 		jp z,$x?
 		call save_noun1
 $x?		pop hl
@@ -620,7 +620,7 @@ score_noun2
 		jp z,$x? 
 		call disambiguate
 		ld a,(ambigFail)
-		cp a,1
+		cp 1
 		jp z,$x?
 		call save_noun2		
 		pop bc
@@ -1013,7 +1013,7 @@ anyVisible DB 0
 maxScore DB 0
 maxScoreCount DB 0
 MaxScoreObj DB 0
-score_table DS  128
+score_table DS 128
 scoring DB "scoring word:",0
 pardonstr DB "Pardon?",0
 onenoun DB "one noun",0

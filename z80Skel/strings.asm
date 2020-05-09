@@ -33,7 +33,7 @@ $lp?  	ld a,(hl)
 		inc b  ; inc char to copy
 		inc hl  ; inc index
  		jr $lp?
-$x?		cp a,20h  ; space?
+$x?		cp 20h  ; space?
 		jr nz,$c?
 		inc b   ; add one more to print the space  
 $c?		pop hl
@@ -88,15 +88,15 @@ strcpyi
 	push af
 	push ix
 	push iy
-lp? ld a,(ix)
+$lp? ld a,(ix)
 	ld (iy),a
 	cp 0		; null?
-	jp z,$_x?
+	jp z,$x?
 	inc ix
 	inc iy
-	jp z,$_x?
-	jp lp?
-$_x?	pop iy
+	jp z,$x?
+	jp $lp?
+$x?	pop iy
 	pop ix
 	pop af
 	ret	

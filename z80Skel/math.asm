@@ -2,7 +2,7 @@
 
 LEFT_BIT equ 16
 RIGHT_BIT equ 4
-RAND_MASK equ LEFT_BIT + RIGHT_BIT
+RAND_MASK equ 20
  
 
 
@@ -43,7 +43,7 @@ $x?			ld a,d
 *MOD
 rand
 		ld a,(random)
-		and a,RAND_MASK
+		and RAND_MASK
 		cp LEFT_BIT
 		jp z,$po?
 		cp RIGHT_BIT

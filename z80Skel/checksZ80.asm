@@ -267,6 +267,20 @@ $x?	ret
 
 
 *MOD
+check_dobj_lockable
+	ld a,(sentence+1)
+	ld b,a	
+	ld c,LOCKABLE
+	call get_obj_prop
+	cp 1
+	jr z,$x?
+	ld hl,notlockable
+	call OUTLINCR
+	inc sp
+	inc sp
+$x?	ret
+
+*MOD
 check_dobj_unlocked
 	ld a,(sentence+1)
 	ld b,a	
@@ -279,6 +293,8 @@ check_dobj_unlocked
 	inc sp
 	inc sp
 $x?	ret
+
+
 
 *MOD
 check_dobj_locked
@@ -424,3 +440,12 @@ closed DB "It's closed.",0h
 notcontainer DB "You can't put things in that.",0h
 notsupporter DB "You find no suitable surface.",0h
 tooheavystr DB "Your load is too heavy.",0h
+pitchdark DB "It is pitch dark.",0h
+dontsee  DB "You don't see that.",0h
+donthave DB "You don't have that.",0h
+cantopen DB "You can't open that.",0h
+badnoun DB "I don't know the word '",0h ; null	
+badverb DB "I don't know the verb '", 0 ; null	
+missing_io DB "Missing second noun.", 0h
+pardon DB "Pardon?",3fh,0 ; null
+period DB "'.",0h
