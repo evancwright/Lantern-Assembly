@@ -16,7 +16,7 @@ main
 		call 0DAFh  ; CLS
 		;call cls1
 		
-		ld bc,0
+	ld bc,0
 		call locate
 		
 		call printcr
