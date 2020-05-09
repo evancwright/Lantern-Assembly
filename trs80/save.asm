@@ -1,8 +1,8 @@
 ; TRS-80 SAVE TEST
 ; Assemble with: z80asm -nh save.asm
 
-KEYIN EQU 40H
-CRTBYTE EQU  0033H
+;KEYIN EQU	0040H - defined in main
+;CRTBYTE EQU  0033H - defined in main
 
 	;CLS EQU 01C9H
  		
@@ -31,9 +31,9 @@ open_file
 	call KEYIN
 	ld a,(hl)
 	cp 49d; 'ascii '0'
-	jp c,$bf
+	jp c,$bf?
 	cp 54d; 'ascii '6'
-	jp nc,$bf
+	jp nc,$bf?
 
 	
 	ld hl, FCB+4
@@ -48,18 +48,18 @@ open_file
 	ld b,0 ;Specify the Logical Record Length (255)
 	call 4420h ; call open/create new sub
 	call nz,IOERR ;Transfer on a returned error
-	jp $x
-$bf	ld hl,BADSLOT ; print welcome,author,version
+	jp $x?
+$bf?	ld hl,BADSLOT ; print welcome,author,version
 	call OUTLINCR
 	inc sp
 	inc sp
 	ret
 IOERR
-  	add a,65  ; convert err to an ascii letter
+  	add 65  ; convert err to an ascii letter
 	call CRTBYTE
 	ld hl,IOERRSTR ; print err msg
 	call OUTLINCR	
-$x	ret
+$x?	ret
 
 *MOD
 close_file
@@ -203,7 +203,7 @@ IOERRSTR DB "I/O ERROR",0
 ;WITH THE FILE NAME FOLLOWED BY AN EXT CHAR
 
 FCB
-	DB "SAVE0/SAV:0",3h
+	DB "SAVE0/SAV:0",03h
 	DB 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 		
 GETOFNAME DB "Enter save slot(1-5):",0
@@ -214,6 +214,6 @@ BADSLOT DB "bad slot number",0
 WRITING DB "SAVING...",0
 LOADING DB "LOADING...",0
 IOBUF 
-	DC 256,0ah ; must be 256	END START		
-	
+;	DC 256,0ah ; must be 256	END START		
+	DS 256	
 	

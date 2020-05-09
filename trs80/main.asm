@@ -1,6 +1,6 @@
 ;main file for trs-80 shell
  
-*INCLUDE objdefsZ80.asm ; equs
+*INCLUDE objdefsZ80.asm 
  
 ;QINPUT equ 1bb3h		; ROM ROUTINES
 CRTBYTE equ  0033H
@@ -10,6 +10,7 @@ CLS equ 01c9h
 
 	ORG 5200H
 START
+		ld (stackSav),sp
 		call CLS
 		ld hl,welcome ; print welcome,author,version
 		call OUTLIN
@@ -25,24 +26,26 @@ START
 $inp?	call getcommand
 		jp $inp?
 		ret
-		
+
+*MOD		
 getcommand
 		;call QINPUT
 		call getlin
 		call parse				; get the words
-		ld a,(sentence)
-		cp 0
-		jp z,$inp?
-		call validate_words		; make sure verb,io,do are in tables
-		call encode				; try to map words to objects
-		call validate_encode	; make sure it worked
+;		call validate_words		; make sure verb,io,do are in tables
+;		call encode				; try to map words to objects
+;		call validate_encode	; make sure it worked
+		call check_parse_fail
+		cp 1
+		jr z,$x?
 		call run_sentence
 		call do_events
-		ret
+$x?		ret
 
 *INCLUDE doeventsZ80.asm		
 *INCLUDE io.asm	
-*INCLUDE parser.asm
+;*INCLUDE parser.asm
+*INCLUDE parser2Z80.asm
 *INCLUDE look.asm
 *INCLUDE tables.asm
 *INCLUDE strings.asm
@@ -54,7 +57,7 @@ getcommand
 *INCLUDE inventoryZ80.asm
 *INCLUDE open_close.asm
 *INCLUDE put.asm
-*INCLUDE miscZ80.asm
+*INCLUDE quitZ80.asm
 *INCLUDE wear_sub.asm
 *INCLUDE print_rets.asm
 *INCLUDE EventsZ80.asm
@@ -68,7 +71,6 @@ getcommand
 *INCLUDE UserVarsZ80.asm
 *INCLUDE ObjectWordTableZ80.asm
 *INCLUDE NogoTableZ80.asm
-*INCLUDE BackDropTableZ80.asm
 *INCLUDE before_table_Z80.asm
 *INCLUDE instead_table_Z80.asm
 *INCLUDE after_table_Z80.asm
@@ -76,8 +78,9 @@ getcommand
 *INCLUDE sentence_tableZ80.asm
 *INCLUDE WelcomeZ80.asm
 *INCLUDE save.asm
+*INCLUDE math.asm
 
 stacksav DW 0
 
-	END START
+;	END START  - was here for z80 asm
 ;END
