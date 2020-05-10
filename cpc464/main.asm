@@ -77,7 +77,6 @@ $x?		call draw_top_bar
 *INCLUDE wear_sub.asm
 *INCLUDE put.asm
 *INCLUDE quitZ80.asm
-*INCLUDE print_rets.asm
 *INCLUDE EventsZ80.asm
 *INCLUDE articlesZ80.asm
 *INCLUDE PrepTableZ80.asm
