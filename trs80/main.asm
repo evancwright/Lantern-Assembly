@@ -12,7 +12,6 @@ CLS equ 01c9h
 START
 		ld (stackSav),sp
 		call CLS
-		call set_attrs
 		ld hl,welcome ; print welcome,author,version
 		call OUTLIN
 		call printcr
