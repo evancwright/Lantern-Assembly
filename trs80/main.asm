@@ -12,6 +12,7 @@ CLS equ 01c9h
 START
 		ld (stackSav),sp
 		call CLS
+		call set_attrs
 		ld hl,welcome ; print welcome,author,version
 		call OUTLIN
 		call printcr
@@ -59,7 +60,6 @@ $x?		ret
 *INCLUDE put.asm
 *INCLUDE quitZ80.asm
 *INCLUDE wear_sub.asm
-*INCLUDE print_rets.asm
 *INCLUDE EventsZ80.asm
 *INCLUDE articlesZ80.asm
 *INCLUDE PrepTableZ80.asm
