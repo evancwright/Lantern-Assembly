@@ -121,25 +121,25 @@ $nxtRow?	ld a,(hl)
 			djnz $nxtRow?
 
 			;construct attr address
-			ld a,d
-			rrca
-			rrca
-			rrca
-			dec a
-			and 3
-			or 58h
-			ld d,a
-			ld hl,(ATT)
-			;take old attr
-			ld a,(de)
+;			ld a,d
+;			rrca
+;			rrca
+;			rrca
+;			dec a
+;			and 3
+;			or 58h
+;			ld d,a
+;			ld hl,(ATT)
+;			;take old attr
+;			ld a,(de)
 			
 			;construct new one
-			xor l
-			and h
-			xor l
+;			xor l
+;			and h
+;			xor l
 			
 			;replace attr
-			ld (de),a
+;			ld (de),a
 			
 			;finally set DFCC to next print pos
 			ld hl,DFCC
@@ -474,10 +474,26 @@ $lp?
 		cp 0
 		jp nz,$lp?
 		ret
-		
 
+	
 *MOD
-
+set_attrs
+	ld hl,ATTRS
+	ld b,32 ; 32 attr blocks across top
+$l1? ld (hl),078h ; black on white
+	inc hl
+	djnz $l1?
+	;load white on black
+	ld bc,760
+	ld a,0
+$l2? ld (hl),047h  ; no flash, bright, black, white
+	dec bc
+	inc hl
+	cp b
+	jp nz,$l2?
+	cp c
+	jp nz,$l2?
+ 	ret
 		
 ATT DB 38h ; 
 MASK DB 0 ; Attribute mask for printing	

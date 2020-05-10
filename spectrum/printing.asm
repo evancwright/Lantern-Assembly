@@ -63,7 +63,7 @@ draw_top_bar
 		
 		ld a,31
 $lp?	push af
-		ld a,0 ; BLACK SQUARE
+		ld a,020h ; space
 		call print1_zx
 		pop af
 		dec a
