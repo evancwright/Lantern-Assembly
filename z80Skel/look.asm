@@ -16,12 +16,32 @@ look_sub
 		;call printcr
 		call OUTLINCR
 		jp $x?
-$y?		call get_player_room
+$y?		call get_player_room ; -> a
+		ld d,a  ; stash room in d
 		call print_obj_name
 		call printcr
-		ld b,a
+
+		;initial description on room?
+		ld b,a		; get initial desc for room
+		ld c,INITIAL_DESC_ID
+		call get_obj_attr ; -> a
+		cp 0ffh ; intial description
+		jp z,$lk?
+		;print it
+		ld b,a ; print_table_entry takes string id in b
+		ld ix,string_table
+		call print_table_entry
+		call printcr
+		;clear the initial description
+		ld b,d ; room		
+		ld c,INITIAL_DESC_ID
+		ld a,0ffh
+		call set_obj_attr	
+		ld a,d ; reset room 
+		jp $itm?
+$lk?	ld b,d
 		call print_obj_desc
-		ld h,a
+$itm?	ld h,a
 		nop ; now print all visible objects
  		ld ix,obj_table
 $lp?	ld a,(ix);get id
