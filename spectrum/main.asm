@@ -3,7 +3,7 @@
 ;(c) Evan Wright, 2017
 
 *INCLUDE objdefsZ80.asm
-
+*INCLUDE attrs.asm
 ; BASIC STARTS AT 5CCB for Spectrum
 	org 25000 ; 5CCBh  
 start
@@ -12,6 +12,13 @@ start
 main
 		ld (stackSav),sp
 
+		ld a,BORDERCOLOR
+		halt
+		;out 254,a 
+		;can't use OUT opcode because OUT is a direction
+db 0d3h
+db 0feh
+		
 		;set screen as output channel
 		call 0DAFh  ; CLS
 		;call cls1
