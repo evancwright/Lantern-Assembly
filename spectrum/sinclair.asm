@@ -480,13 +480,15 @@ $lp?
 set_attrs
 	ld hl,ATTRS
 	ld b,32 ; 32 attr blocks across top
-$l1? ld (hl),078h ; black on white
+;  $l1? ld (hl),078h ; black on white
+$l1? ld (hl),STATUSATTR ; black on white
 	inc hl
 	djnz $l1?
 	;load white on black
 	ld bc,760
 	ld a,0
-$l2? ld (hl),047h  ; no flash, bright, black, white
+;$l2? ld (hl),047h  ; no flash, bright, black, white
+$l2? ld (hl),TEXTATTR  ; no flash, bright, black, white
 	dec bc
 	inc hl
 	cp b
