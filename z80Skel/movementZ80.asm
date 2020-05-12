@@ -29,7 +29,28 @@ $go?	nop ; is 'a' a door?
 $go2?	ld b,PLAYER_ID		; move player to location
 		ld c,HOLDER_ID
 		call set_obj_attr	
-		call look_sub
+		ld d,a  ; stash room in d
+		ld b,a		; get initial desc for room
+		ld c,INITIAL_DESC_ID
+		call get_obj_attr ; -> a
+		cp 0ffh ; intial description
+		jp z,$lk?
+		;print it
+		call printcr
+		call printcr
+		ld b,a
+		push ix
+		ld ix,string_table
+		call print_table_entry
+		pop ix
+		call printcr
+		call printcr
+		;clear the initial description
+		ld b,d ; room		
+		ld c,INITIAL_DESC_ID
+		ld a,0ffh
+		call set_obj_attr	
+$lk?	call look_sub
  		pop de
 		pop bc
 		ret
