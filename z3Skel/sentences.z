@@ -1,0 +1,88 @@
+;code for crawling through a table
+
+
+routine run_default_sentences
+byte 3
+word 0,0,0
+    store l01 gdd
+.lp
+    loadb l01 00 -> l02
+    je l02 ff .x
+    je l02 VERB_ID [false] .c
+    inc l01 ; move to address word
+    loadw l01 00 -> l02
+    div l02 2 -> l02
+    call l02 -> (sp)
+    rtrue
+.c  add l01 03 -> l01 ; move to next entry
+    jump .lp
+.x   rfalse
+
+
+;param 1 is the table address
+routine run_sentences
+byte 7
+word 0,0,0,0,0,0,0
+    store l01 l00 ; table address
+    ;try to find an exact match
+.lp
+    storeb l01 0 -> l03 ;get verb
+    je l03 ff .wildcards  ; hit the end
+    je l03 VERB_ID [false] .cont
+    storeb l01 01 -> l03 ;get noun 1
+    je l03 NOUN_1 [false] .cont
+    storeb l01 02 -> l03 ;get noun 1
+    je l03 PREP_ID [false] .cont
+    storeb l01 03 -> l03 ;get noun 1
+    je l03 NOUN_2 [false] .cont
+    storew l01 02 -> l03
+    div l03 02 -> l03
+    call l03 -> (sp)
+    ret_popped
+.cont
+    add l01 06 -> l01 ; skip to next entry
+    jump .lp
+.wildcards
+    ;if sentence contains 254 as the noun and the actual noun isn't 255
+    ;it is considered a match
+    store l01 l00 ; reset table address
+    store l02 00 ;reset byte index
+    store l03 02 ;reset word index
+.lp2
+    store l05 NOUN_1
+    store l06 NOUN_2
+    storeb l01 0 -> l03 ;get verb
+    je l03 ff .out  ; hit the end
+    je l03 VERB_ID [false] .cont2
+    storeb l01 02 -> l03 ;get noun 1
+    je l03 PREP_ID [false] .cont2
+    ;now check nouns
+    storeb l01 01 -> l02 ;get sentence noun 1
+    store  l05 NOUN_1 ;get sentence noun 1
+    ;if sentence noun 1 is 254 and 
+    je l02 fe [false] .c
+    ;actual noun1 is not ff
+    je l05 ff [false] .c
+    store l05 fe ; put 254 in NOUN_1
+.c
+    je l05 l02 [false] .cont2 ; wildcards didn't match
+    ;now repeat for noun2
+    storeb l01 03 -> l02 ;get sentence noun 2
+    store  l05 NOUN_2 ;get actual noun 2
+    ;if sentence noun 1 is 254 and 
+    je l02 fe [false] .c2
+    ;actual noun1 is not ff
+    je l05 ff [false] .c2
+    store l05 fe ; put 254 in NOUN_2
+    je l05 l02 [false] .cont2 ; wildcards didn't match
+.c2
+    ;match found, call the function    
+    storew l01 02 -> l03
+    div l03 02 -> l03
+    call l03 -> (sp)
+    ret_popped
+.cont2
+    add l01 06 -> l01 ; skip to next entry
+    jump .lp2
+.out
+    rtrue

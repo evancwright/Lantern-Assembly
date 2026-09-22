@@ -1,0 +1,6 @@
+;
+
+*mod		
+quit_sub
+byte 0
+	ret 0  ; standard way to quit a CP/M program

@@ -1,0 +1,23 @@
+;z3 wear function
+
+
+routine wear_sub
+byte 0
+	put_prop NOUN1 BEING_WORN #01
+	call get_inv_weight->(sp)
+	ret 0 
+
+;sets beingworn to false if
+;holder is not the player
+
+routine unwear_items
+byte 1
+word 0
+		store l01 #01
+.top 	je l01 NUM_OBJECTS .out
+		test_attr l01 BEING_WORN [FALSE] .no
+		clear_attr l01 BEING_WORN	
+.no		inc l01
+		jump .top
+.out	ret 0
+ 

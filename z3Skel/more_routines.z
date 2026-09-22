@@ -1,0 +1,15 @@
+
+		
+;put 1 or 0 in a if b is an ancestor of c		
+
+routine l01_ancestor_of_l02
+byte 2
+word 0,0
+.loop
+		get_parent l02 -> (l02)
+		je L01 L02 .yes
+		jz L01 .no
+		jump .loop
+.no		rfalse
+.yes	rtrue
+

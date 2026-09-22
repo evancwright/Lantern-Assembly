@@ -1,0 +1,83 @@
+;property numbers
+
+#define OFFSCREEN 0
+#define PLAYER 1
+#define PLAYER_ID 1
+
+#define NO_OBJECT 255
+#define ANY_OBJECT 254
+
+#define MAX_INV_WEIGHT 10
+
+;attributes ids
+
+#define SIBLING 01
+
+
+; attribute words
+#define WORD_0 19
+#define WORD_1 18
+#define WORD_2 17
+#define WORD_3 16
+#define WORD_4 15
+#define WORD_5 14
+#define OBJ_SCORE 13
+#define NORTH 12
+#define SOUTH 11
+#define EAST 10
+#define WEST 0F
+#define NORTHEAST 0E
+#define SOUTHEAST 0D
+#define SOUTHWEST 0C
+#define NORTHWEST 0B
+#define UP 0A
+#define DOWN 09
+#define ENTER 08
+#define OUT 07
+#define MASS 06
+#define DESCRIPTION 05
+#define INITIAL_DESCRIPTION 04
+#define PARENT #03  ; hack
+#define LOCATION #03  ; hack
+
+
+
+
+;"scenery", "supporter", "container", "user4",
+;                               "openable", "open", "lockable", "locked",
+;                               "portable", "user3", "wearable", "beingworn",
+;                               "user1", "emittinglight", "door", "user2"
+
+; property bits
+
+#define SCENERY #00
+#define SUPPORTER #01
+#define CONTAINER #02
+#define USER4 #03
+#define OPENABLE #04
+#define OPEN #05
+#define LOCKABLE #06
+#define LOCKED #07
+#define PORTABLE #08
+#define USER3 #09
+#define WEARABLE #0A
+#define BEING_WORN #0B
+#define WORN #0B
+#define USER1 #0C
+#define LIT #0D
+#define EMITTING_LIGHT #0D
+#define DOOR #0E
+#define USER2 #0F
+
+#define SPACE #20
+#define LPAREN #28
+#define RPAREN #29
+#define PERIOD #2e
+#define EXCL #21
+#define LETTER_A #41
+
+#define INVALID #FF
+
+#define VERB_FLAG 20
+#define ARTICLE_FLAG 40
+#define PREP_FLAG 80

@@ -1,0 +1,85 @@
+
+;this is a hack to get around that you have to test properties
+;using a literal and can't store then in a variable
+routine my_get_prop
+byte 2
+word 0000,0000		 
+  je [false] l02 #00 .one
+  get_prop l01 #00 -> (sp)
+  ret_popped 
+.one
+  je [false] l02 #01 .two
+  get_prop l01 #01 -> (sp)
+  ret_popped 
+.two
+  ;WARNING! THIS IS NOT COMPLETE
+  ret 0	
+
+routine get_player_room
+byte 2
+word 0000,0000		 
+	get_parent #1 -> (SP)
+	ret_popped
+
+		
+;put 1 or 0 in a if b is an ancestor of c		
+
+routine b_ancestor_of_c
+byte 2
+word 0000,0000		 
+ 	ret 0
+
+#returns true if l01 is visible to l02 
+#l02 is potential ancestor
+#l01 is the object
+routine is_visible_to()
+byte 03
+word 0,0,0
+  ;if not, start looping up the tree 
+.loop ; l01 is changing, l02 not
+  ;is the l02 the parent of l01?
+  get_prop l01 PARENT ->(l03)
+  je (l03) #0 .no  ; hit top of tree
+  je (l03) l02 .yes ; crawled up to ancestor
+  ;is the parent a closed container?
+  test_attr l02 CONTAINER [false] .cont 
+  ;it is a container, it is closed?
+  test_attr l02 OPEN [false] .no 
+.cont
+  store l01 l03 
+.no
+  ret_false
+.yes
+  ret_true
+ 	
+;table of mask bytes for looking up
+;properties of objects		
+;mask_table
+;	DB SCENERY_MASK ;equ 1 
+;	DB SUPPORTER_MASK ;equ 2
+;	DB CONTAINER_MASK ;equ 4
+;	DB USER4_MASK ;equ 8
+;	DB OPENABLE_MASK ;equ 16
+;	DB OPEN_MASK ;equ 32
+;	DB LOCKABLE_MASK ;equ 64
+;	DB LOCKED_MASK ;equ 128
+;	;byte 2
+;	DB PORTABLE_MASK ;equ 1
+;	DB USER3_MASK ;equ 2
+;	DB WEARABLE_MASK ;equ 4
+;	DB BEING_WORN_MASK ;equ 8
+;	DB USER1_MASK ;equ 16
+;	DB LIT_MASK ;equ 32	
+;	DB DOOR_MASK ;equ 64
+;	DB USER2_MASK ;equ 128
+
+;byte 2
+;PORTABLE_MASK equ 1
+;USER3_MASK equ 2
+;WEARABLE_MASK equ 4
+;BEING_WORN_MASK equ 8
+;USER1_MASK equ 16
+;LIT_MASK equ 32	
+;EMITTING_LIGHT_MASK equ 32
+;DOOR_MASK equ 64
+;USER2_MASK equ 128

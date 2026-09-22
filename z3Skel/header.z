@@ -1,0 +1,38 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;header
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+word 0300 ;version + flags
+word 0000 ; unused
+word .hi_mem 
+word .initial_pc  ;6,7
+
+word .dictionary  ;8,9
+word .object_table ;10,11
+word .globals  ;12,13
+word .static_mem  ;14,15
+
+word 0040  ; flags 2 (Taken from Zork)
+word 0000,0000,0000 ; unused  (bytes 18-23)
+
+word .synonyms ; abbreviations/synonyms?
+word .file_size
+word 0000 ; checksum (can be empty?)
+word 0000  ; terp num, terp version (This is 0 is Zork)
+
+word 0000 ; height, width (unused)
+word 0000 ; height units (unused)
+word 0000 ; width units (not used)
+word 0000 ; font width/height (not used)
+
+word .routines
+word 0000 ; .static_strings (can be 0)
+word 00ff ; bg color,fgcolor
+word 0000 ; term chars addr
+
+word 0000
+word 0000
+word 0000 ;alphabet addr
+word 0000 ;header ext addr
+;padd header to 64 bytes
+resb 8

@@ -1,0 +1,127 @@
+;look.asm
+
+
+routine look_sub
+byte 4
+word 0,0,0,0
+		; can the player see?
+;		call player_has_light->(sp)
+;		jz (sp) [false] .yes
+;		store (sp) @pitchdark
+;		print_paddr (sp)
+;		new_line
+;		jump .x
+.yes	;print room description
+		store l01 PLAYER_ID
+		get_parent l01 -> l01
+		get_prop l01 DESCRIPTION -> (sp)
+		print_paddr (sp)
+		new_line
+
+		;initial description on room?
+;		get_prop L01 INITIAL_DESCRIPTION ->(sp)		; get initial desc for room
+;		je (sp) ff .look ; intial description ; jump if no initial desc
+;		put_prop L01 INITIAL_DESCRIPTION 00
+;		jump .items
+
+		store l01 PLAYER_ID
+		get_parent l01 -> l01
+		get_child l01 -> l01 [false] .x
+.loop
+		je l01 PLAYER_ID .c
+		test_attr l01 SCENERY .c
+		call list_object l01 -> l02	; prints "There is a ..." then the object
+.c		get_sibling l01 -> l01 .loop
+.x		rfalse
+
+ 
+;called by look_sub		
+;prints the initial description for object in b
+;if it has one. Otherwise it defaults to "THERE IS A ____ HERE"
+;the contents of the object are also printed.
+;ix contains addr of object in table
+
+;param 1 is the object
+;param 2 is the indent level
+routine list_object
+byte 4
+word 0,0,0,0	 
+	;is it scenery
+	test_attr l00 SCENERY [true] .x
+	get_prop l00 INITIAL_DESCRIPTION ->l03 
+	print_num l03
+	new_line
+	je l03 00 .no	
+	print_paddr l03
+	new_line
+	jump .c
+.no
+	store (l03) @thereisa
+	print_paddr (l03)
+	print_obj l00
+	store l03 @here
+	print_paddr l03
+	new_line
+.c	get_child l01 -> l01 [false] .x
+	call list_siblings l01 -> l01
+.x	rtrue
+		
+;player has light	
+;player has light result in 'a'
+;sets can_see
+
+routine player_has_light
+byte 2
+word 0,0
+	rtrue		 
+		;is the room emitting light?
+		get_parent PLAYER -> (sp) 
+		test_attr (sp) LIT [true] .yes
+		
+		;is the player emitting light?
+		test_attr PLAYER LIT [true] .yes
+		
+	rfalse		
+
+.yes	rtrue
+
+ 
+
+routine look_at_sub
+byte 2
+word 0,0 
+		get_prop NOUN_1 DESCRIPTION -> (sp)
+		print_paddr (sp)
+		new_line
+		rtrue
+
+		
+ 	
+		
+		
+		
+;L01 contains object
+
+routine print_contents_header
+byte 2
+word 0,0
+	rfalse
+
+
+
+routine look_in_sub
+byte 2
+word 0,0	
+	rfalse
+		
+;a contains object to look in 		
+routine look_in_user_fn
+byte 2
+word 0,0	
+	rfalse
+	
+routine describe_object
+byte 2
+word 0,0
+	rfalse
+	

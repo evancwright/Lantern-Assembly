@@ -1,0 +1,26 @@
+
+
+*mod
+;search table for a noun or prep's index
+
+#P1 is the address of the table
+#P2 is dictionary address
+
+get_word_index()
+byte 3
+word 0,0,0
+	load [L02]->(sp) ; get the value we're comparing
+	store L03 0  ; array index
+.loop	
+	loadw L01 L03 ->(sp) ; get the table entry
+	je (SP) .found
+	inc L03
+	jump .loop
+.found
+	push L03
+	ret_popped
+.not found
+	ret FFFF	
+*mod
+
+	

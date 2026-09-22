@@ -1,0 +1,175 @@
+;inventory_sub
+
+routine inventory_sub
+byte 02
+word 0000,0000
+		call has_contents(PLAYER) -> (sp)
+		jz (sp) .no_contents
+		store (sp) @carrying
+		print_paddr (sp)
+		new_line
+		; recurse through child items
+		call print_contents(PLAYER_ID) -> (sp)
+		jump .x		
+.no_contents
+		store (sp) @noitems
+		print_paddr (sp)
+		new_line
+.x		ret 0
+
+;prints name of L01 and it's contents of obj in L01
+
+routine print_contents
+byte 03
+word 0000,0000,0000
+		store l01 l03	; save parent
+		store l02 #01   ;1st object
+		;loop through each object (L02)
+.loop	je l02 NUM_OBJECTS .exit; done?
+		jin l02 l03 [FALSE] .cont
+		test_attr l02 SCENERY .scenery
+		call indent -> (sp)
+		call printa -> (sp)
+		print_obj L02
+		call append_adj(l02)->(sp)  ; tack on providing light, being worn,...
+		new_line
+		; need to test container/supporter
+		test_attr l02 CONTAINER [FALSE] .scenery
+		test_attr l02 OPEN [FALSE] .scenery
+		call print_container_contents(L02)->(sp)
+		jump .cont
+.scenery ;supports can be scenery, so print any contents
+		test_attr l02 SCENERY [FALSE] .cont
+		call print_supporter_contents(l02) -> (sp)
+.cont	inc l02
+		jump .loop
+.exit 	ret 0
+		
+;if 'a' has any visible items
+;1 is returned in 'a' otherwise 0
+
+routine has_contents
+byte 02	
+word 0000,0000	 
+		store l01 #01
+.loop	je l01 NUM_OBJECTS .no
+		jin l01 l02 [false] .c
+		test_attr l01 SCENERY [true] .c  ; test scenery bit
+		ret #1
+.c		inc l01
+		jump .loop
+.no		ret #0
+
+
+;put an object in the player's inventory
+;sets its parent to the player
+		
+routine get_sub
+byte 02
+word 0000,0000
+		; move to player
+		store L01 NOUN1
+		store L02 PLAYER
+		insert_obj L01 PLAYER 
+		put_prop L01 INITIAL_DESCRIPTION #FF
+		call get_inv_weight(PLAYER)->(sp)
+		ret_popped
+		
+
+routine drop_sub
+byte 01
+word 0000 
+	get_parent PLAYER->(sp)
+	insert_obj NOUN1 (sp)
+	call get_inv_weight(l01) -> (sp)
+	ret #0
+
+		
+;print contents of container in SP
+;(sp) is a container
+routine print_container_contents
+byte 01	
+word 0000
+	store SP L01 	
+	call has_contents->(sp)
+	je (sp) #00 .x
+	store (sp)  @the 
+	print_paddr (sp)
+	print_obj (sp)
+	store (sp) @contains
+	print_paddr (sp)
+	new_line
+	call indent_more->(sp)
+	call print_contents(l01) -> (sp)
+	call indent_less -> (sp)
+.x	ret 0
+
+		
+;print contents of container in 'a'
+routine print_supporter_contents
+byte 01
+word 0000
+	call has_contents(sp)->(sp)
+	jz (SP) .no
+	store (sp) @onthe
+	print_paddr (sp)
+	print_obj l01
+	store (sp) @is
+	print_paddr (sp)
+	call indent_more->(sp)
+	call print_contents(sp)->(sp)
+	call indent_less->(sp)
+.no		ret #0
+
+	
+routine indent
+byte 1		 
+word 0000
+		store L01 indentAmt
+		jz L01 .x
+.lp		print_char SPACE
+		dec L01
+		jz L01 [FALSE] .lp 
+.x		ret #0
+
+routine indent_more
+byte 0
+	inc indentAmt
+	inc indentAmt
+	inc indentAmt
+	ret #0
+		
+routine indent_less
+byte 0
+	dec indentAmt
+	dec indentAmt
+	dec indentAmt
+	ret #0
+
+
+routine printa
+byte 0
+	store (sp) @leadinga
+	print_paddr (sp)
+	ret #0
+
+;prints adjectives for object in SP
+
+routine append_adj 
+byte 0
+		test_attr (sp) LIT [false] .not_lit
+		store (sp) @providingLight 
+		print_paddr (sp)
+.not_lit 
+		test_attr (sp) BEING_WORN [false] .x
+		store (sp) @beingworn
+		print_paddr (sp)
+.x		ret #0
+
+		
+;returns weight of obj in 'a' + its contents
+
+routine get_inv_weight
+byte 0 
+	ret #0
+

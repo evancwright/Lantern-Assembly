@@ -1,0 +1,493 @@
+;check rules for z3 game shell
+
+routine run_checks()
+defb 4
+defw 0,0,0,0
+	store l01 gdF ; load check_table start address
+	print_num l01 ; table addr is correct
+	new_line
+.lp
+	loadb l01 00 -> l03 ; get verb id
+	inc l01 ; move to function address word  
+	je l03 FF .pass ; hit end, cleared all checks
+	je l03 VERB_ID [false] .next 
+	;call the check function
+	loadw l01 00 -> l03
+	print_char 'r'
+	div l03 02 -> l03 ; pack it
+	print_num l03
+	new_line
+	call l03 -> (sp)  ; address is correct
+	je (sp) 0 .fail
+.next
+	add l01 02 -> l01 ; go to next byte
+	jump .lp
+.pass rtrue
+.fail rfalse
+
+routine check_move
+byte 4
+word 0,0,0,0
+		;convert the verb to a direction
+		store l01 PLAYER_ID
+		get_parent (l01) -> l01  ;set current_room variable
+		call get_target_room(l01) -> l01 
+		je VERB_ID ENTER [false] .normal_move
+		store l01 NOUN_1 ;replace l01 w/ object trying to enter
+.normal_move
+		print_char 't'
+		print_char 'o'
+		print_num l01
+		new_line
+		;is this a no-go message
+		jl l01 7F [true] .door_chk
+		sub ff l01 -> l01
+		inc l01
+		print_char 'n'
+		print_char 'o'
+		print_num l01
+		new_line
+		loadw gdc l01 -> l01
+		;print_num l01
+		;div l01 02 -> l01
+		print_paddr l01
+		new_line
+		rfalse
+.door_chk	
+		; is L01 a closed door?
+		test_attr l01 DOOR [false] .go
+		test_attr l01 OPEN [false] .go
+		store l01 @doorclosed
+		print_paddr l01
+		new_line	
+		rfalse
+.go		rtrue
+
+;#define NORTH 12
+;#define SOUTH 11
+;#define EAST 10
+;#define WEST 0F
+;#define NORTHEAST 0E
+;#define SOUTHEAST 0D
+;#define NORTHWEST 0C
+;#define SOUTHWEST 0B
+;#define UP 0A
+;#define DOWN 09
+;#define ENTER 08
+routine get_target_room()
+byte 02
+word 0,0
+	print_char 'r'
+	print_char 'm'
+	store l01 l00
+	print_num l01
+	new_line
+	je VERB_ID 0 [false] .s
+	get_prop l01 NORTH -> (sp)
+.s	je VERB_ID 1 [false] .e
+	get_prop l01 SOUTH -> (sp)
+.e je VERB_ID 2 [false] .w
+	get_prop l01 EAST -> (sp)
+.w je VERB_ID 3 [false] .ne
+	get_prop l01 WEST -> (sp)
+.ne je VERB_ID 4 [false] .se
+	get_prop l01 NORTHEAST -> (sp)
+.se je VERB_ID 5 [false] .sw
+	get_prop l01 SOUTHEAST -> (sp)
+.sw je VERB_ID 6 [false] .nw
+	get_prop l01 SOUTHWEST -> (sp)
+.nw je VERB_ID 7 [false] .up
+	print_char 'n'
+	print_char 'w'
+	new_line
+	get_prop l01 NORTHWEST -> (sp)
+.up	je VERB_ID 8 [false] .dn
+	get_prop l01 UP -> (sp)
+.dn je VERB_ID 9 [false] .in
+	get_prop l01 DOWN -> (sp)
+.in je VERB_ID 0A [false] .out
+	get_prop l01 ENTER -> (sp)
+.out je VERB_ID 0B [false] .x ; must be out
+	push OUT
+.x	ret_popped
+
+;returns 1 or 0 in register a
+;not sure we need this check anympre
+
+routine check_see_dobj
+byte 03
+word 0,0,0
+	store l01 PLAYER_ID
+	call sees( l01 , NOUN_1 ) -> (sp)
+	je (sp) 01 .yes
+	store l01 @dontseestr
+	print_paddr l01	
+	new_line
+	rfalse
+.yes
+	rtrue
+
+;if the prep is in,
+;the iobj must be an open container
+;if the prep is on,
+;the obj must be a supporter
+;capacity is not checked, but should be!
+
+routine check_put
+byte 3
+word 0,0,0
+;		store PREP_ID L01
+		je PREP_ID 01 .on  ; 'on' is 1
+		je PREP_ID  00 .in   ; 'in' is 0
+		jump .no
+.in		; is do a container?		
+		test_attr NOUN_2 CONTAINER [false] .notc
+		test_attr NOUN_2 OPEN [false] .closed
+		rtrue
+.on		; is do a supporter?
+		test_attr NOUN_2 SUPPORTER [true] .x
+		store l01 @notsupporter
+		print_paddr l01
+		new_line
+		rfalse
+.closed store l01 @closed 
+		print_paddr l01
+		new_line
+		rfalse
+.notc	store l01 @notcontainer
+		print_paddr l01
+		new_line	
+		rfalse
+.no     store l01 @impossible
+		print_paddr l01
+		new_line		
+		rfalse		
+.notsupporter
+		store l01 @notsupporter
+		print_paddr l01
+		new_line
+		rfalse
+.n	
+.y		
+.x		rtrue
+
+;returns 1 or 0 in register a
+
+routine check_see_iobj
+byte 2
+word 0,0
+	store l01 PLAYER_ID
+	call sees  (l01, NOUN_2)  -> (sp)
+	je (sp) #01 .yes
+	store l01  @dontseestr
+	print_paddr	l01
+	new_line
+	rfalse
+.yes
+	rtrue	
+
+
+routine check_dobj_supplied
+byte 2
+word 0,0
+		je NOUN_1 ff [false] .out
+		store l01 @missingnoun
+		print_paddr l01 
+		new_line
+		rfalse
+.out	rtrue
+
+routine check_iobj_supplied
+byte 2
+word 0,0
+		je NOUN_2 ff [false] .out
+		store l01 @missingnoun
+		print_paddr l01 
+		new_line
+		rfalse
+.out	rtrue
+
+
+
+routine check_dobj_portable
+byte 2
+word 0,0
+	test_attr NOUN_1 PORTABLE .y
+	store l01 @notportable
+	print_paddr l01
+	new_line
+	rfalse
+.y	rtrue
+	
+
+routine check_have_dobj 
+byte 4
+word 0,0,0,0
+	store l01 NOUN_1
+	store l02 PLAYER	
+	call descendant_of(l02,l01) -> (sp)
+	je (sp) 01 .yes
+	store l01 @donthave
+	print_paddr l01 
+	new_line
+	rfalse
+.yes	
+	rtrue
+
+
+routine check_have_iobj 
+byte 4
+word 0,0,0,0
+	store l02 NOUN_2
+	store l01 PLAYER_ID	
+	call descendant_of(l01,l02) -> (sp)
+	je (sp) 00 .yes
+	store l01 @donthave
+	print_paddr l01 
+	new_line
+	rfalse
+.yes	
+	rtrue
+
+
+
+routine check_dont_have_dobj 
+byte 03
+word 0,0,0
+	store l01 noun1
+	store l02 PLAYER	
+	call descendant_of(l01,l02) -> (sp)
+	je (sp) 01 [false] .yes
+	store l01 @donthave
+	print_paddr l01 
+	new_line
+	rfalse
+.yes	
+	rtrue
+
+;openable?
+	
+routine check_dobj_opnable
+byte 2
+word 0,0
+	test_attr NOUN_1 OPENABLE [true] .yes
+	store l01 @notopenable
+	print_paddr l01 
+	new_line
+	rfalse
+.yes rtrue
+
+;called by close
+;open?
+	
+routine check_dobj_open
+byte 2
+word 0,0
+	test_attr NOUN_1 OPEN [true] .yes
+	store l01 @alreadyclosed
+	print_paddr l01 
+	new_line
+	rfalse
+.yes rtrue
+
+
+
+routine check_dobj_lockable
+byte 2
+word 0,0
+	;openable?
+	test_attr NOUN_1 LOCKABLE [true] .yes
+	store l01 @notLockable
+	print_paddr l01
+	new_line
+	rfalse
+.yes rtrue
+
+
+;openable?
+
+routine check_dobj_unlocked
+byte 2
+word 0,0
+	test_attr NOUN_1 LOCKED [false] .yes
+	store l01 @itslocked
+	print_paddr l01
+	new_line 
+	rfalse
+.yes rtrue
+
+
+
+routine check_dobj_locked
+byte 2
+word 0,0
+		test_attr NOUN_1 LOCKED [false] .yes
+		store l01 @notlocked
+		print_paddr l01
+		new_line
+		rfalse
+.yes 	rtrue
+
+;called by open
+
+routine check_dobj_closed
+byte 2
+word 0,0
+	test_attr NOUN_1 OPEN [false] .yes
+	store l01 @alreadyopen
+	print_paddr l01
+	new_line
+	rfalse
+.yes rtrue
+
+;checks if noun1 is a child of noun2	
+;and forbids this
+routine check_not_self_or_child
+byte 3
+word 0,0,0
+	store l02 NOUN_1
+	store l01 NOUN_2
+	call descendant_of(l01,l02) -> (sp)
+	je (sp) 00 .x
+	store l01 @badput
+	print_paddr l01 
+	new_line
+	rfalse 
+.x	rtrue
+
+;checks if NOUN1 is a child of the NOUN2	
+;returns 1 or 0 in 'a'
+;1 means the containership is invalid
+
+routine check_nested_containership
+byte 2
+word 0,0
+	; check self
+	je l01 l02 .no
+	; check contains
+	store l01 NOUN_1
+	store l02 NOUN_2
+	call descendant_of(l02,l01) -> (sp)
+	je (sp) #0 .no
+	rtrue
+.no rfalse
+
+;l00 - parent
+;l01 - child
+routine descendant_of()
+byte 4
+word 0,0,0,0
+	print_char 'p'
+	print_num l00 
+	new_line
+	print_char 'c'
+	print_num l01
+	new_line
+	jin l00 l01 .y
+.lp
+	get_parent l01 -> l01
+	je l01 00 .n	
+	je l01 l00 .y	
+	jump .lp
+.y rtrue
+.n rfalse
+
+
+;l00 - seer
+;l01 - object
+routine sees()
+byte 4
+word 0,0,0,0
+	print_char 'p'
+	print_num l00
+	new_line
+	print_char 'c'
+	print_num l01
+	new_line
+	jin l01 l00 .y
+	get_parent l00 -> l00
+.lp
+	get_parent l01 -> l01
+	je l01 00 .n	
+	je l01 l00 .y	
+	;if parent isn't a container, object is hidden
+	test_attr l01 CONTAINER [false] .n
+	;if we're here, parent is a container, check closed
+	test_attr l01 OPEN [false] .n
+	get_parent l01 -> l01
+	jump .lp
+.y rtrue
+.n rfalse
+
+
+routine check_prep_supplied
+byte 2
+word 0,0
+	je PREP_ID #FF [false] .x
+	store l01 @missingprep
+	print_paddr l01
+	new_line
+	rfalse
+.x	rtrue
+
+
+routine check_light
+byte 2
+word 0,0
+	call player_has_light->(sp) ; in look.z
+	je (sp) #00 .x
+	store l01 @pitchdark
+	print_paddr l01
+	new_line
+	rfalse
+.x	rtrue
+	
+
+ 
+;container or supporter
+routine check_iobj_container
+byte 2
+word 0,0
+	test_attr NOUN_2 CONTAINER .y
+	test_attr NOUN_2 SUPPORTER .y
+	store l01 @notcontainer
+	print_paddr l01
+	new_line
+	rfalse
+.y	rtrue
+
+
+routine check_dobj_wearable
+byte 2
+word 0,0
+		test_attr NOUN_1 WEARABLE [false] .nw
+		test_attr NOUN_1 BEING_WORN [true] .bw
+		rtrue
+.nw		store l01 @notwearable
+		print_paddr l01
+		new_line
+		rfalse
+.bw		store l01 @alreadyworn
+		print_paddr l01		
+		new_line
+		rfalse
+
+
+
+;see if the weight of the dobj + inv weight is greater than player's capacity
+routine check_weight
+byte 02
+word 0,0
+;		store NOUN_1 L01
+;		call get_inv_weight(L01)->(sp)
+;		store (sp) l02
+;		store l01 PLAYER_ID
+; 		call get_inv_weight(L01)->(sp) ; result -> a 
+;		add (sp) l02 -> L01
+;		jg L02 maxWeight .no
+		rtrue
+;.no		store l01 @tooheavystr
+;		print_paddr l01
+;		new_line
+		rfalse
+ 

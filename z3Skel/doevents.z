@@ -1,0 +1,14 @@
+;doevents.z
+
+ 
+routine do_events
+byte 0
+	call unwear_items->(sp)   
+include event_jumps_z3.z
+	call player_has_light->(sp)	
+	jz (sp) [false] .y
+	inc turnsWithoutLight
+	jump .x
+.y	store turnsWithoutLight #00
+.x	inc moves
+	ret 0

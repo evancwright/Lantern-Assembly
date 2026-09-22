@@ -1,0 +1,150 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;These routines are jumped to by the 
+;default actions table
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+routine inventory_sub
+byte 4
+word 0,0,0,0
+    store l01 PLAYER_ID
+    get_child l01 -> l02 [false] .noItems
+    store l01 @carrying
+    print_paddr l01
+    new_line
+.lp
+    call list_siblings l02 -> l01
+    rtrue
+.noItems
+    store l01 @noitems
+    print_paddr l01
+    new_line
+    rtrue
+
+;This routine is used by look_sub and inventory_sub
+;l00 is the first sibling
+routine list_siblings
+byte 4
+word 0,0,0,0
+.lp
+    store l02 l00
+    print_obj l02
+    new_line
+    test_attr l02 CONTAINER .container
+    test_attr l02 SUPPORTER .supporter
+    jump .c
+;   list contents    
+.supporter
+    store l01 @onthe
+    jump .p
+.container
+    test_attr l02 OPEN [false] .c
+    store l01 @contains
+.p  print_paddr l01
+    new_line
+    get_child l02 -> l03 [false] .c
+    call list_siblings l03 -> l01    
+.c  get_sibling l02 -> l02 .lp
+.x  rtrue
+
+ 
+routine move_player
+byte 4
+word 0,0,0,0
+    store l01 PLAYER_ID
+    get_parent (l01) -> l01  ;set current_room variable
+    call get_target_room(l01) -> l02
+    print_char 't'
+    print_char 'g'
+    print_char 't'
+    print_num l02
+    new_line
+    ;put the player in that room
+    insert_obj PLAYER_ID l02
+    ;is l01 a door? if no, skip, else move through door
+;    test_attr l02 DOOR [false] .x
+;    call get_target_room  -> l02 
+;    insert_obj PLAYER_ID l02
+.x  call look_sub -> sp
+    ;set the global variable with the player's location
+    store g00 l02
+    rtrue
+
+routine get_sub
+byte 4
+word 0,0,0,0
+    store l02 PLAYER_ID
+    insert_obj NOUN_1 l02
+    rtrue
+
+routine enter_sub
+byte 4
+word 0,0,0,0
+    store l01 PLAYER_ID
+    insert_obj l01 NOUN_1
+    ;set the global variable with the player's location
+    store g00 NOUN_1
+    call look_sub -> sp
+    ret_popped
+
+routine drop_sub
+byte 4
+word 0,0,0,0
+    store l01 PLAYER_ID
+    get_parent l01 -> l01
+    insert_obj NOUN_1 l01
+    rtrue
+  
+
+routine put_sub
+byte 4
+word 0,0,0,0
+    insert_obj NOUN_1 NOUN_2
+    rtrue
+
+routine open_sub
+byte 4
+word 0,0,0,0
+    set_attr NOUN_1 OPEN
+    rtrue
+
+routine close_sub
+byte 4
+word 0,0,0,0
+    clear_attr NOUN_1 OPEN
+    rtrue
+
+
+
+routine quit_sub
+byte 4
+word 0,0,0,0
+    rtrue
+
+routine lock_sub
+byte 4
+word 0,0,0,0
+    set_attr NOUN_1 LOCKED
+    rtrue
+
+routine unlock_sub
+byte 4
+word 0,0,0,0
+    clear_attr NOUN_1 LOCKED
+    rtrue
+
+;assumes checks have passed    
+routine wear_sub
+byte 4
+word 0,0,0,0
+    set_attr NOUN_1 BEING_WORN
+    rtrue
+    
+routine save_sub
+byte 4
+word 0,0,0,0
+    rtrue
+
+routine restore_sub
+byte 4
+word 0,0,0,0
+    rtrue
+
