@@ -5,12 +5,12 @@ routine look_sub
 byte 4
 word 0,0,0,0
 		; can the player see?
-;		call player_has_light->(sp)
-;		jz (sp) [false] .yes
-;		store (sp) @pitchdark
-;		print_paddr (sp)
-;		new_line
-;		jump .x
+		call player_has_light->(sp)
+		jz (sp) [false] .yes
+		store (sp) @pitchdark
+		print_paddr (sp)
+		new_line
+		jump .x
 .yes	;print room description
 		store l01 PLAYER_ID
 		get_parent l01 -> l01
@@ -39,7 +39,6 @@ word 0,0,0,0
 ;prints the initial description for object in b
 ;if it has one. Otherwise it defaults to "THERE IS A ____ HERE"
 ;the contents of the object are also printed.
-;ix contains addr of object in table
 
 ;param 1 is the object
 ;param 2 is the indent level
@@ -49,8 +48,8 @@ word 0,0,0,0
 	;is it scenery
 	test_attr l00 SCENERY [true] .x
 	get_prop l00 INITIAL_DESCRIPTION ->l03 
-	print_num l03
-	new_line
+;	print_num l03
+;	new_line
 	je l03 00 .no	
 	print_paddr l03
 	new_line
@@ -70,19 +69,27 @@ word 0,0,0,0
 ;player has light result in 'a'
 ;sets can_see
 
+;This could probably be optimized
 routine player_has_light
-byte 2
-word 0,0
-	rtrue		 
+byte 3
+word 0,0,0
 		;is the room emitting light?
 		get_parent PLAYER -> (sp) 
 		test_attr (sp) LIT [true] .yes
 		
 		;is the player emitting light?
 		test_attr PLAYER LIT [true] .yes
-		
-	rfalse		
 
+		;find a lit object visible to the player's room
+		store l02 02
+.lp		test_attr l01 LIT [false] .c
+		store l02 PLAYER_ID
+		call sees(l02, l01) -> (sp)
+		je (sp) 00 .c  ; not lit, keep looking
+		rtrue
+.c		inc l01
+		je l01 NUM_OBJECTS_ [false] .lp
+	rfalse		
 .yes	rtrue
 
  
@@ -93,35 +100,26 @@ word 0,0
 		get_prop NOUN_1 DESCRIPTION -> (sp)
 		print_paddr (sp)
 		new_line
+		;now list the contents
 		rtrue
-
-		
- 	
-		
-		
-		
-;L01 contains object
-
-routine print_contents_header
-byte 2
-word 0,0
-	rfalse
-
-
-
+ 
 routine look_in_sub
 byte 2
-word 0,0	
-	rfalse
+word 0,0
+	call list_siblings NOUN_1 -> (sp)
+	ret_popped
 		
 ;a contains object to look in 		
 routine look_in_user_fn
 byte 2
-word 0,0	
+word 0,0
+
 	rfalse
-	
+
+;where does the param come from?	
 routine describe_object
 byte 2
 word 0,0
+
 	rfalse
 	

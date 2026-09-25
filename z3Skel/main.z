@@ -21,7 +21,11 @@ include objects.z
 #define POSTACTIONS_TABLE ge2
 #define PREP_ID Ge3
 #define NOUN_1 Ge4
+#define noun1 Ge4
+#define dobj Ge4
 #define NOUN_2 Ge5
+#define noun2 Ge5
+#define iobj Ge5
 #define COMPOUND_VERB_TABLE GE6
 #define VERB_PREP_ID GE7
 #define VERB_ID GE8
@@ -29,19 +33,21 @@ include objects.z
 #define TWO_WORD_VERB GEA
 #define WRD_ID_BUFFER gEB
 #define REAL_WORDS gEC ;number of input words minus articles
+#define STRINGS gdb
 
 ;number of globals needs to add up to 240
 defw 02   	;player location G00
-defw 0A   	; score?
-defw 11		;moves	
-resw 217
+defw 00   	; score?
+defw 00		;moves	
+resw 216
+defw .static_strings ;gdb
 defw .nogo_string_table ;gdc
 defw .default_sentence_table  ; gdd
 defw 0 ; indent amount gde
 defw .check_table ; gdF 
-defw 00; .preactions_table ;ge0
-defw 00; .actions_table ;ge1
-defw 00; .postactions_table ;ge2
+defw .preactions_table ;ge0
+defw .actions_table ;ge1
+defw .postactions_table ;ge2
 defw 00 ;PREP_ID ge3
 defw FF ;NOUN_1 ge4
 defw FF ;NOUN_2 ge5 
@@ -77,14 +83,11 @@ include dictionary.z
 
 ;we need the verb check table
 include check_table.z
-;include before_table_z3.z
-;include before_table_z3.z
-;include after_table_z3.z
+include before_table_z3.z
+include instead_table_z3.z
+include after_table_z3.z
 
 include default_sentence_table.z
-;include instead_table.z
-;include after_table.z
- 
 include nogo_table.z
 
 .hi_mem
@@ -105,7 +108,7 @@ defw 0,0
 	new_line
 	store L01 @version
 	print_paddr L01
-;	new_line	
+	new_line	
 ;	call game_start_sub -> (sp)
 	new_line
 	call look_sub -> (sp)
@@ -133,25 +136,28 @@ defw 0,0
 	call score_noun1 -> (sp)
 	call score_noun2 -> (sp)
 	;dump the sentence
-	print_char 's'
-	print_char ':'
-	print_num VERB_ID
-	print_char '_'
-	print_num NOUN_1
-	print_char '_'
-	print_num PREP_ID
-	print_char '_'
-	print_num NOUN_2
- 	new_line
+;	print_char 's'
+;	print_char ':'
+;	print_num VERB_ID
+;	print_char '_'
+;	print_num NOUN_1
+;	print_char '_'
+;	print_num PREP_ID
+;	print_char '_'
+;	print_num NOUN_2
+;	new_line
 	;now call the verb checks
 	call run_checks() -> (sp)
 	je (sp) 00 .main_loop
-;	call run_sentences(PREACTIONS_TABLE) -> l01
-;	call run_sentences(ACTIONS_TABLE) -> l01
+	call run_sentences(PREACTIONS_TABLE) -> l01
+	call run_sentences(ACTIONS_TABLE) -> l01
+	je l01 01 .no_def ; was it handled?
 	call run_default_sentences() -> l01
-;	call run_sentences(POSTACTIONS_TABLE) -> l01
+.no_def
+	call run_sentences(POSTACTIONS_TABLE) -> l01
 
 	;run events
+	call do_events() -> (l01)
 
 	jump .main_loop
 	 
@@ -225,13 +231,6 @@ defb 6
 defw 0,0,0,0,0,0
 	;get the address of the 1st word_0
 	loadw GEE 01 -> l01
-;	print_char 'v'
-;	print_char 'a'
-;	print_char 'd'
-;	print_char 'd'
-;	print_char 'r'
-;	print_num l01  ; addr is valid
-;	new_line
 	;get the flags
 	loadb l01 06 -> (sp) ; flags is the last byte in the entry
 	je (sp) VERB_FLAG .go
@@ -247,19 +246,19 @@ defw 0,0,0,0,0,0
 .go
 	;get the word id 2 words past that
 	loadw l01 02 -> VERB_ID
-	store l05 @string109 ; "Lantern verb id="
-	print_paddr (l05)
-	print_num VERB_ID
-	new_line
+;	store l05 @string109 ; "Lantern verb id="
+;	print_paddr (l05)
+;	print_num VERB_ID
+;	new_line
 	je TWO_WORD_VERB 01 .compoundverb
 ;	print_char 56
 ;	print_num VERB_ID
 ;	newline
 	rtrue
 .compoundverb
-	store l05 @string112 ; compound verb
-	print_paddr l05
-	newline
+;	store l05 @string112 ; compound verb
+;	print_paddr l05
+;	newline
 	;[word:Lantern Id][(byte):prep id][byte:Lantern id]
 	;the lantern id of first word is in VERB_ID
 	;the lantern id of the prep is in VERB_PREP_ID
@@ -280,11 +279,11 @@ defw 0,0,0,0,0,0
 	;found a match
 	inc l03 ; move to the lantern id byte
 	loadb COMPOUND_VERB_TABLE l03 -> VERB_ID
-	print_char 'v'
-	print_char 'r'
-	print_char 'b'
-	print_num VERB_ID
-	new_line
+;	print_char 'v'
+;	print_char 'r'
+;	print_char 'b'
+;	print_num VERB_ID
+;	new_line
 	rtrue
 .skip
 	add l02 02 -> l02 ;skip to next verb	
@@ -337,13 +336,13 @@ defw 0,0,0,0,0
 	rtrue
 
 .compoundv
-	store l04 @string112 ; "compound verb"
-	print_paddr l04
-	new_line
+;	store l04 @string112 ; "compound verb"
+;	print_paddr l04
+;	new_line
 	store TWO_WORD_VERB 01
 	store VERB_PREP_ID l03 ; save lantern prep id
-	print_num VERB_PREP_ID
-	new_line
+;	print_num VERB_PREP_ID
+;	new_line
 	inc REAL_WORDS
 	rtrue
 
@@ -393,11 +392,11 @@ word 0,0,0,0,0
 	je l02 ff .c ; already invalid skip
 	call sees ( l04 , l01 ) -> l03
 	je l03 00 .c ; not visible to player skip
-	print_char 'b'
-	print_char 'm'
-	print_char 'p'
-	print_num l01
-	new_line
+;	print_char 'b'
+;	print_char 'm'
+;	print_char 'p'
+;	print_num l01
+;	new_line
 	inc l02 ; bump up score by 1
 	put_prop l01 OBJ_SCORE l02 ; set score property of l01 to l02
 .c	inc l01 ; i++
@@ -448,7 +447,6 @@ word 0,0
 	put_prop l01 OBJ_SCORE 00 ; set object l01 score to 0
 	inc l01
 	je l01 NUM_OBJECTS [FALSE] .loop ;jump back if not done
-	new_line
 	rtrue
 
 ;param1 is the word to apply to the objects
@@ -486,10 +484,10 @@ word 0,0,0,0,0
 	put_prop l02 OBJ_SCORE INVALID
 	jump .skip
 .addscore	
-	store l04 @string115 ;match
-	print_paddr l04
-	print_obj l02
-	new_line
+;	store l04 @string115 ;match
+;	print_paddr l04
+;	print_obj l02
+;	new_line
 	get_prop l02 OBJ_SCORE -> l03 ; reload score
 	inc l03  ; score++
 	put_prop l02 OBJ_SCORE -> l03 ; write it back 
@@ -527,12 +525,12 @@ defw 0,0,0,0,0,0,0
 .skpme	
 	inc l01 
 	je l01 NUM_OBJECTS_ [false] .lp1
-	print_char 'm'
-	print_char 'a'
-	print_char 'x'
-	print_char '='
-	print_num L02
-	new_line
+;	print_char 'm'
+;	print_char 'a'
+;	print_char 'x'
+;	print_char '='
+;	print_num L02
+;	new_line
 ;now count the objects with that score
 	store l01 01
 .lp2
@@ -544,37 +542,22 @@ defw 0,0,0,0,0,0,0
 	inc l01 
 	je l01 NUM_OBJECTS_ [false] .lp2
 	;done, print result
-	print_char 'm'
-	print_char 'a'
-	print_char 'x'
-	print_char '='
-	print_obj l05
-	new_line
+;	print_char 'm'
+;	print_char 'a'
+;	print_char 'x'
+;	print_char '='
+;	print_obj l05
+;	new_line
 	push l05 
 	ret_popped
 
-routine mini_look
-defb 2
-defw 0,0
-	get_prop G00 DESCRIPTION -> (sp)
-	print_paddr (sp)
-	new_line
-	rtrue
 
-;include movement.z
 include events.z
 include checks.z
 include default_actions.z
 include sentences.z
-;include doevents.z
 include look.z
-;include containers.z
-;include open_close.z
-;include put.z
-;include wear_sub.z
-;include routines.z	
-;include more_routines.z
-
+include doevents.z
 
 .static_strings
 include strings.z

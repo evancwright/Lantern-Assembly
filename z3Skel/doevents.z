@@ -1,14 +1,16 @@
 ;doevents.z
 
  
-routine do_events
-byte 0
+routine do_events()
+byte 2
+word 0,0
 	call unwear_items->(sp)   
 include event_jumps_z3.z
 	call player_has_light->(sp)	
 	jz (sp) [false] .y
-	inc turnsWithoutLight
+	inc l01 ; dummy statement
+	inc l01 ; dummy statement
 	jump .x
-.y	store turnsWithoutLight #00
-.x	inc moves
+.y	store turnsWithoutLight 00
+.x	inc G02 ; moves++
 	ret 0

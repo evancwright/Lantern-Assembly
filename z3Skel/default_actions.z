@@ -24,17 +24,19 @@ word 0,0,0,0
 routine list_siblings
 byte 4
 word 0,0,0,0
-.lp
     store l02 l00
-    print_obj l02
+.lp
+    print_obj l02 ;print the object
     new_line
+    get_child l02 -> (l03) [false] .c ; skip if no children
+    ;TBD: also need to check if children are visible    
     test_attr l02 CONTAINER .container
     test_attr l02 SUPPORTER .supporter
     jump .c
 ;   list contents    
 .supporter
     store l01 @onthe
-    jump .p
+    jump .p ;print string
 .container
     test_attr l02 OPEN [false] .c
     store l01 @contains
@@ -52,11 +54,11 @@ word 0,0,0,0
     store l01 PLAYER_ID
     get_parent (l01) -> l01  ;set current_room variable
     call get_target_room(l01) -> l02
-    print_char 't'
-    print_char 'g'
-    print_char 't'
-    print_num l02
-    new_line
+;    print_char 't'
+;    print_char 'g'
+;    print_char 't'
+;    print_num l02
+;    new_line
     ;put the player in that room
     insert_obj PLAYER_ID l02
     ;is l01 a door? if no, skip, else move through door
@@ -73,7 +75,11 @@ byte 4
 word 0,0,0,0
     store l02 PLAYER_ID
     insert_obj NOUN_1 l02
-    rtrue
+    ;can't set a property that is just the default value
+    get_prop NOUN_1 INITIAL_DESCRIPTION -> (sp)
+    je (sp) 00 .c
+    put_prop NOUN_1 INITIAL_DESCRIPTION 00 ; clear initial description
+.c    rtrue
 
 routine enter_sub
 byte 4
@@ -137,7 +143,27 @@ byte 4
 word 0,0,0,0
     set_attr NOUN_1 BEING_WORN
     rtrue
-    
+
+
+;if a wearable item's parent isn't the player
+;it's worn bit in unset
+routine unwear_items()
+byte 3
+word 0,0,0
+    store l01 02 ; loop counter
+.lp
+    test_attr l01 WEARABLE [false] .c
+    get_parent l01 -> l02
+    je l02 PLAYER_ID [true] .c
+    clear_attr l01 WEARABLE
+.c 
+    inc l01
+    je l01 NUM_OBJECTS_ [false] .lp    
+    rtrue
+
+
+
+
 routine save_sub
 byte 4
 word 0,0,0,0
@@ -147,4 +173,23 @@ routine restore_sub
 byte 4
 word 0,0,0,0
     rtrue
+
+;returns the pointer to a string
+;the number of the string is passed
+;in via l00
+routine get_string_ptr()
+byte 3
+word 0,0,0
+    store l01 STRINGS ; base pointer
+.lp
+    loadb l01 00 -> l02
+    and l02 80 -> l02 ; clear all but top bit
+    je l02 00 [false] .c
+    dec l00  ; loop counter--
+.c  add l02 02 -> l02 ;next word   
+    je l00 00 [false] .lp
+    add l02 02 -> l02 ; advance to 1st byte of next string
+    push l02
+    ret_popped
+        
 

@@ -4,7 +4,7 @@ routine run_checks()
 defb 4
 defw 0,0,0,0
 	store l01 gdF ; load check_table start address
-	print_num l01 ; table addr is correct
+;	print_num l01 ; table addr is correct
 	new_line
 .lp
 	loadb l01 00 -> l03 ; get verb id
@@ -13,10 +13,10 @@ defw 0,0,0,0
 	je l03 VERB_ID [false] .next 
 	;call the check function
 	loadw l01 00 -> l03
-	print_char 'r'
+;	print_char 'r'
 	div l03 02 -> l03 ; pack it
-	print_num l03
-	new_line
+;	print_num l03
+;	new_line
 	call l03 -> (sp)  ; address is correct
 	je (sp) 0 .fail
 .next
@@ -35,18 +35,18 @@ word 0,0,0,0
 		je VERB_ID ENTER [false] .normal_move
 		store l01 NOUN_1 ;replace l01 w/ object trying to enter
 .normal_move
-		print_char 't'
-		print_char 'o'
-		print_num l01
-		new_line
+;		print_char 't'
+;		print_char 'o'
+;		print_num l01
+;		new_line
 		;is this a no-go message
 		jl l01 7F [true] .door_chk
 		sub ff l01 -> l01
 		inc l01
-		print_char 'n'
-		print_char 'o'
-		print_num l01
-		new_line
+;		print_char 'n'
+;		print_char 'o'
+;		print_num l01
+;		new_line
 		loadw gdc l01 -> l01
 		;print_num l01
 		;div l01 02 -> l01
@@ -77,11 +77,11 @@ word 0,0,0,0
 routine get_target_room()
 byte 02
 word 0,0
-	print_char 'r'
-	print_char 'm'
+;	print_char 'r'
+;	print_char 'm'
 	store l01 l00
-	print_num l01
-	new_line
+;	print_num l01
+;	new_line
 	je VERB_ID 0 [false] .s
 	get_prop l01 NORTH -> (sp)
 .s	je VERB_ID 1 [false] .e
@@ -97,9 +97,6 @@ word 0,0
 .sw je VERB_ID 6 [false] .nw
 	get_prop l01 SOUTHWEST -> (sp)
 .nw je VERB_ID 7 [false] .up
-	print_char 'n'
-	print_char 'w'
-	new_line
 	get_prop l01 NORTHWEST -> (sp)
 .up	je VERB_ID 8 [false] .dn
 	get_prop l01 UP -> (sp)
@@ -258,7 +255,7 @@ word 0,0,0
 	store l02 PLAYER	
 	call descendant_of(l01,l02) -> (sp)
 	je (sp) 01 [false] .yes
-	store l01 @donthave
+	store l01 @alreadyhave
 	print_paddr l01 
 	new_line
 	rfalse
@@ -398,12 +395,12 @@ word 0,0,0,0
 routine sees()
 byte 4
 word 0,0,0,0
-	print_char 'p'
-	print_num l00
-	new_line
-	print_char 'c'
-	print_num l01
-	new_line
+;	print_char 'p'
+;	print_num l00
+;	new_line
+;	print_char 'c'
+;	print_num l01
+;	new_line
 	jin l01 l00 .y
 	get_parent l00 -> l00
 .lp
