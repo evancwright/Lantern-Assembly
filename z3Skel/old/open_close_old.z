@@ -1,0 +1,56 @@
+
+;assumes check_dobj_opnable has been called.
+
+routine open_sub
+byte 0
+	set_attr NOUN1 OPEN
+	store (sp) @done
+ 	print_paddr (sp)
+	call reveal_items  -> (sp)
+	ret 0
+
+
+routine close_sub
+	byte 0
+	clear_attr NOUN1 OPEN
+	store (sp) @done
+ 	print_paddr (sp)
+	ret 0
+
+
+routine lock_sub
+	byte 0
+		test_attr NOUN1 LOCKED [true] .al ; test open prop bit
+		set_attr NOUN1 LOCKED
+		store (sp) @done
+		print_paddr (sp)
+		new_line
+		jump .x
+.al		store (sp) @alreadyLocked
+		print_paddr (sp)
+		new_line
+.x		ret 0
+
+	
+routine reveal_items
+byte 1
+word 0
+	store (sp) NOUN1 
+	call has_contents -> (sp)
+	jz (sp) .x	
+	store (sp) @openingThe
+	print_paddr (sp)
+	print_obj NOUN1
+	store (sp) @reveals
+	print_paddr (sp)
+	new_line
+	call indent_more -> (sp)
+	store (sp) NOUN1  
+	call print_contents -> (sp)
+	call indent_less -> (sp)
+.x	ret 0
+		
+		
+routine unlock_sub
+byte 0
+	ret 0

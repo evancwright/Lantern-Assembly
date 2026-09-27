@@ -7,8 +7,8 @@ word 0,0,0,0
 		; can the player see?
 		call player_has_light->(sp)
 		jz (sp) [false] .yes
-		store (sp) @pitchdark
-		print_paddr (sp)
+		store l01 @pitchdark
+		print_paddr l01
 		new_line
 		jump .x
 .yes	;print room description
@@ -55,8 +55,8 @@ word 0,0,0,0
 	new_line
 	jump .c
 .no
-	store (l03) @thereisa
-	print_paddr (l03)
+	store l03 @thereisa
+	print_paddr l03
 	print_obj l00
 	store l03 @here
 	print_paddr l03
@@ -95,31 +95,102 @@ word 0,0,0
  
 
 routine look_at_sub
-byte 2
-word 0,0 
+byte 03
+word 0,0,0 
+		store l01 l00
+	    call dump_bit -> l01
 		get_prop NOUN_1 DESCRIPTION -> (sp)
 		print_paddr (sp)
 		new_line
 		;now list the contents
+		call has_visible_children NOUN_1 -> l02
+		je l02 00 .x ; no contents ; no contents, done
+		test_attr NOUN_1 CONTAINER .container
+		test_attr NOUN_1 SUPPORTER .x
+		;list supporter's visible contents
+		store l01 @onthe
+		print_paddr l01
+		print_obj NOUN_1
+		store l01 @is
+		print_paddr l01
+		new_line
+		get_child NOUN_1 l01 [false] .x
+		call list_siblings l01 -> l01
 		rtrue
- 
+.container
+		test_attr NOUN_1 SUPPORTER [false] .x ;could be neither
+		test_attr NOUN_1 OPEN [false] .x
+		print_char 'n'
+		print_char '1'
+		print_num NOUN_1
+		new_line
+		call look_in_sub NOUN_1 -> l01
+.x		rtrue
+
+;l00 is the object whose children to check 
+routine has_visible_children
+byte 02
+word 0,0
+	store l01 l00
+	get_child l01 -> l01 [false] .x  ;get first child
+.lp	
+	test_attr l01 SCENERY .c
+	rtrue ; not scenery, return true
+.c get_sibling l01 -> l01 .lp	
+.x	rfalse
+
 routine look_in_sub
 byte 2
 word 0,0
-	call list_siblings NOUN_1 -> (sp)
-	ret_popped
-		
+	print_num l00 
+	new_line
+	store l01 l00
+	test_attr l01 SUPPORTER .solid
+	test_attr l01 CONTAINER [false] .solid; 
+	; must be a container    
+	test_attr l01 OPEN .lookin 
+	jump .closed
+.solid
+	print_char 's'
+	store l01 @cantlook
+	print_paddr l01
+	new_line
+	rtrue
+.closed
+	store l01 @the
+	print_paddr l01
+	print_obj NOUN_1
+	store l01 @isclosed
+	print_paddr l01
+	new_line
+	rtrue
+.lookin
+	call has_visible_children l01 -> (sp)
+	je (sp) 00 .empty
+	call list_siblings NOUN_1 -> l01
+	rtrue
+.empty	
+	store l01 @isempty
+	print_paddr l01
+	new_line
+	rtrue
+
+.check_not_self_or_child		
 ;a contains object to look in 		
 routine look_in_user_fn
 byte 2
 word 0,0
-
+	store l01 l00
+	print_num l01
+	call look_in_sub l01 -> l01
 	rfalse
 
-;where does the param come from?	
+;Called from generated code
+;param is the object to look at	
 routine describe_object
 byte 2
 word 0,0
-
-	rfalse
+	store l01 l00
+	call look_at_sub l01 -> l01
+	rtrue
 	

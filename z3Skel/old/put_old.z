@@ -1,0 +1,15 @@
+;put.z
+;this needs to be redone! (put in vs. put on)
+;before this runs the following checks have passed
+;iobject supplied
+;iobject container
+;not self or child
+
+routine put_sub
+byte 0
+		insert_obj NOUN1 NOUN2
+		store (sp) @done
+		print_paddr (sp) 
+		new_line 
+		ret 0
+

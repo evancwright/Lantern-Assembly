@@ -6,7 +6,8 @@ routine inventory_sub
 byte 4
 word 0,0,0,0
     store l01 PLAYER_ID
-    get_child l01 -> l02 [false] .noItems
+    call has_visible_children l01 -> l02 
+    je l02 00  .noItems
     store l01 @carrying
     print_paddr l01
     new_line
@@ -26,6 +27,7 @@ byte 4
 word 0,0,0,0
     store l02 l00
 .lp
+    test_attr l02 SCENERY .c
     print_obj l02 ;print the object
     new_line
     get_child l02 -> (l03) [false] .c ; skip if no children
@@ -62,9 +64,9 @@ word 0,0,0,0
     ;put the player in that room
     insert_obj PLAYER_ID l02
     ;is l01 a door? if no, skip, else move through door
-;    test_attr l02 DOOR [false] .x
-;    call get_target_room  -> l02 
-;    insert_obj PLAYER_ID l02
+    test_attr l02 DOOR [false] .x
+    call get_target_room l02 -> l02 
+    insert_obj PLAYER_ID l02
 .x  call look_sub -> sp
     ;set the global variable with the player's location
     store g00 l02
@@ -106,11 +108,30 @@ word 0,0,0,0
     insert_obj NOUN_1 NOUN_2
     rtrue
 
+
 routine open_sub
 byte 4
 word 0,0,0,0
     set_attr NOUN_1 OPEN
-    rtrue
+    call dump_bit -> l01
+    call has_visible_children NOUN_1 -> (sp)
+	je (sp) 00 .empty
+    store l02 @openingThe
+    print_paddr l02
+    print_obj NOUN_1
+    store l02 @reveals
+    print_paddr l02
+    new_line
+	call list_siblings NOUN_1 -> l01
+	rtrue
+.empty
+    store l01 @the
+    print_paddr l01
+    print_obj NOUN_1
+	store l01 @isempty
+	print_paddr l01
+	new_line
+.x  rtrue
 
 routine close_sub
 byte 4
@@ -161,9 +182,6 @@ word 0,0,0
     je l01 NUM_OBJECTS_ [false] .lp    
     rtrue
 
-
-
-
 routine save_sub
 byte 4
 word 0,0,0,0
@@ -178,18 +196,64 @@ word 0,0,0,0
 ;the number of the string is passed
 ;in via l00
 routine get_string_ptr()
-byte 3
-word 0,0,0
+byte 4
+word 0,0,0,0
+    store l03 l00 ;counter
     store l01 STRINGS ; base pointer
 .lp
-    loadb l01 00 -> l02
+    loadb l01 00 -> l02 ;get 1st byte of word
     and l02 80 -> l02 ; clear all but top bit
-    je l02 00 [false] .c
-    dec l00  ; loop counter--
-.c  add l02 02 -> l02 ;next word   
-    je l00 00 [false] .lp
-    add l02 02 -> l02 ; advance to 1st byte of next string
-    push l02
+ ;   print_num l02
+    je l02 00 .c
+    dec l03  ; loop counter--
+.c  add l01 02 -> l01 ;next word   
+    je l03 00 [false] .lp
+    div l01 02 -> l01 ; pack address
+    push l01
+ ;   print_char 's'
+ ;   print_num l01
+ ;   new_line
     ret_popped
         
 
+;called every turn to set the weight of the inventory
+routine set_inv_weight()
+byte 3
+word 0,0,0
+    store invWeight 00
+    store l01 PLAYER_ID
+    call add_child_weights PLAYER_ID -> l01
+    rtrue
+
+;1st param is parent of the child whose add_child_weights
+;need to be added up
+routine add_child_weights()
+byte 3
+word 0,0,0
+    store l01 L00
+    get_child l00 -> l01 .x
+.lp
+    get_sibling l01 -> l01 [false] .x
+    get_prop l01 WEIGHT -> (sp)
+    add invWeight (sp) -> invWeight
+    jump .lp
+.x rtrue
+
+routine dump_bit
+byte 02
+word 0,0
+    print_char 'c'
+    test_attr NOUN_1 CONTAINER .one
+    print_char '0'
+    jump .c
+.one
+    print_char '1'
+.c  print_char ':'
+    test_attr NOUN_1 OPEN .one2
+    print_char '0'
+    new_line
+    rtrue
+.one2
+    print_char '1'
+    new_line
+    rtrue

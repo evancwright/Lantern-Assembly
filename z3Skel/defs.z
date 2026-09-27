@@ -35,6 +35,7 @@
 #define ENTER 08
 #define OUT 07
 #define MASS 06
+#define WEIGHT 06
 #define DESCRIPTION 05
 #define INITIAL_DESCRIPTION 04
 #define PARENT #03  ; hack

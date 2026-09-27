@@ -136,16 +136,16 @@ defw 0,0
 	call score_noun1 -> (sp)
 	call score_noun2 -> (sp)
 	;dump the sentence
-;	print_char 's'
-;	print_char ':'
-;	print_num VERB_ID
-;	print_char '_'
-;	print_num NOUN_1
-;	print_char '_'
-;	print_num PREP_ID
-;	print_char '_'
-;	print_num NOUN_2
-;	new_line
+	print_char 's'
+	print_char ':'
+	print_num VERB_ID
+	print_char '_'
+	print_num NOUN_1
+	print_char '_'
+	print_num PREP_ID
+	print_char '_'
+	print_num NOUN_2
+	new_line
 	;now call the verb checks
 	call run_checks() -> (sp)
 	je (sp) 00 .main_loop
@@ -157,8 +157,8 @@ defw 0,0
 	call run_sentences(POSTACTIONS_TABLE) -> l01
 
 	;run events
-	call do_events() -> (l01)
-
+	call do_events() -> l01
+;	call set_inv_weight() -> l01
 	jump .main_loop
 	 
 ;param 1 is the index

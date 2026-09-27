@@ -32,13 +32,16 @@ word 0,0,0,0
 		store l01 PLAYER_ID
 		get_parent (l01) -> l01  ;set current_room variable
 		call get_target_room(l01) -> l01 
-		je VERB_ID ENTER [false] .normal_move
+		print_char 't'
+		print_num l01
+		new_line
+		je VERB_ID enter_verb_id [false] .normal_move
 		store l01 NOUN_1 ;replace l01 w/ object trying to enter
 .normal_move
-;		print_char 't'
-;		print_char 'o'
-;		print_num l01
-;		new_line
+		print_char 't'
+		print_char 'o'
+		print_num l01
+		new_line
 		;is this a no-go message
 		jl l01 7F [true] .door_chk
 		sub ff l01 -> l01
@@ -56,12 +59,14 @@ word 0,0,0,0
 .door_chk	
 		; is L01 a closed door?
 		test_attr l01 DOOR [false] .go
-		test_attr l01 OPEN [false] .go
+		test_attr l01 OPEN  .go
 		store l01 @doorclosed
 		print_paddr l01
 		new_line	
 		rfalse
 .go		rtrue
+
+
 
 ;#define NORTH 12
 ;#define SOUTH 11
@@ -275,12 +280,10 @@ word 0,0
 .yes rtrue
 
 ;called by close
-;open?
-	
 routine check_dobj_open
 byte 2
 word 0,0
-	test_attr NOUN_1 OPEN [true] .yes
+	test_attr NOUN_1 OPEN  .yes
 	store l01 @alreadyclosed
 	print_paddr l01 
 	new_line
@@ -326,7 +329,6 @@ word 0,0
 .yes 	rtrue
 
 ;called by open
-
 routine check_dobj_closed
 byte 2
 word 0,0
