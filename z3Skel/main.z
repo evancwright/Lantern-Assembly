@@ -158,7 +158,20 @@ defw 0,0
 
 	;run events
 	call do_events() -> l01
-;	call set_inv_weight() -> l01
+	call set_inv_weight() -> l01
+
+	;handle light
+	store couldSee canSee
+	call player_has_light() -> (sp)
+	je (sp) 00 .noLight
+	store turnsWithoutLight 00
+	jump .loop
+.noLight
+	inc turnsWithoutLight	
+.loop
+;	print_char 'd'
+;	print_num turnsWithoutLight
+;	new_line
 	jump .main_loop
 	 
 ;param 1 is the index

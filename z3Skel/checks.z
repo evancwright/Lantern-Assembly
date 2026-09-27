@@ -434,7 +434,7 @@ routine check_light
 byte 2
 word 0,0
 	call player_has_light->(sp) ; in look.z
-	je (sp) #00 .x
+	je (sp) 01 .x
 	store l01 @pitchdark
 	print_paddr l01
 	new_line

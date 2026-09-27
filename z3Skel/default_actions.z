@@ -8,9 +8,11 @@ word 0,0,0,0
     store l01 PLAYER_ID
     call has_visible_children l01 -> l02 
     je l02 00  .noItems
-    store l01 @carrying
+    store l01 @carrying ; You are carrying...
     print_paddr l01
     new_line
+    store l01 PLAYER_ID
+    get_child l01 -> l02 [false] .lp ; should never branch 
 .lp
     call list_siblings l02 -> l01
     rtrue
@@ -220,9 +222,12 @@ word 0,0,0,0
 routine set_inv_weight()
 byte 3
 word 0,0,0
-    store invWeight 00
+    store invWeight 00 ; clear and recalculate
     store l01 PLAYER_ID
     call add_child_weights PLAYER_ID -> l01
+    print_char 'w'
+    print_num invWeight
+    new_line
     rtrue
 
 ;1st param is parent of the child whose add_child_weights
@@ -231,12 +236,14 @@ routine add_child_weights()
 byte 3
 word 0,0,0
     store l01 L00
-    get_child l00 -> l01 .x
+    get_child l01 -> l01 [false] .x
 .lp
-    get_sibling l01 -> l01 [false] .x
     get_prop l01 WEIGHT -> (sp)
     add invWeight (sp) -> invWeight
-    jump .lp
+    ;recurse through children
+    get_child l01 -> l02 [false] .c
+    call add_child_weights l02 -> l02
+.c  get_sibling l01 -> l01 .lp
 .x rtrue
 
 routine dump_bit
