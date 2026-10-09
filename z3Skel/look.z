@@ -89,8 +89,10 @@ word 0,0,0
 		rtrue
 .c		inc l01
 		je l01 NUM_OBJECTS_ [false] .lp
+	store canSee l01
 	rfalse		
-.yes	rtrue
+.yes	store canSee l01
+		rtrue
 
  
 
@@ -98,10 +100,10 @@ routine look_at_sub
 byte 03
 word 0,0,0 
 		store l01 l00
-	    call dump_bit -> l01
 		get_prop NOUN_1 DESCRIPTION -> (sp)
 		print_paddr (sp)
 		new_line
+		je NOUN_1 PLAYER_ID .x ; don't look inside player
 		;now list the contents
 		call has_visible_children NOUN_1 -> l02
 		je l02 00 .x ; no contents ; no contents, done
@@ -140,18 +142,22 @@ word 0,0
 .x	rfalse
 
 routine look_in_sub
-byte 2
-word 0,0
-	print_num l00 
-	new_line
-	store l01 l00
+byte 3
+word 0,0,0
+;	print_num l00 
+;	new_line
+;	print_char 'l'
+;	print_char 'i'
+;	print_obj NOUN_1
+;	new_line
+	store l01 NOUN_1
 	test_attr l01 SUPPORTER .solid
 	test_attr l01 CONTAINER [false] .solid; 
 	; must be a container    
 	test_attr l01 OPEN .lookin 
 	jump .closed
 .solid
-	print_char 's'
+;	print_char 's'
 	store l01 @cantlook
 	print_paddr l01
 	new_line
@@ -165,11 +171,25 @@ word 0,0
 	new_line
 	rtrue
 .lookin
-	call has_visible_children l01 -> (sp)
+	call has_visible_children NOUN_1 -> (sp)
 	je (sp) 00 .empty
-	call list_siblings NOUN_1 -> l01
+	get_child NOUN_1 -> l01 [false] .empty
+	store l02 @the
+	print_paddr l02
+	print_obj NOUN_1
+	store l02 @contains
+	print_paddr l02
+	new_line
+;	print_char 's'
+;	print_char 'i'
+;	print_char 'b'
+;	new_line
+	call list_siblings l01 -> l01
 	rtrue
 .empty	
+	store l01 @the
+	print_paddr l01
+	print_obj NOUN_1
 	store l01 @isempty
 	print_paddr l01
 	new_line
@@ -181,9 +201,14 @@ routine look_in_user_fn
 byte 2
 word 0,0
 	store l01 l00
-	print_num l01
-	call look_in_sub l01 -> l01
-	rfalse
+;	print_num l01
+;	new_line
+	push NOUN_1 ; save NOUN_1
+;	print_obj l01
+;	new_line
+	call look_in_sub -> l01
+	store NOUN_1 (sp) ; restore NOUN_1
+	rtrue
 
 ;Called from generated code
 ;param is the object to look at	

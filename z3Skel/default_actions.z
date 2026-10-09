@@ -23,26 +23,34 @@ word 0,0,0,0
     rtrue
 
 ;This routine is used by look_sub and inventory_sub
-;l00 is the first sibling
+;l01 is the first sibling
+;print the objects across the sibling level
+;if it's an open container, list it's contents
+;if it's a supporter, list it's contents
 routine list_siblings
 byte 4
 word 0,0,0,0
     store l02 l00
+;    print_num l02
 .lp
     test_attr l02 SCENERY .c
     print_obj l02 ;print the object
     new_line
-    get_child l02 -> (l03) [false] .c ; skip if no children
+    call has_visible_children l02 -> (l03) 
+    je l03 00 .c ; skip if no children
     ;TBD: also need to check if children are visible    
     test_attr l02 CONTAINER .container
     test_attr l02 SUPPORTER .supporter
     jump .c
-;   list contents    
+;   list contents
 .supporter
     store l01 @onthe
     jump .p ;print string
 .container
     test_attr l02 OPEN [false] .c
+    store l01 @the
+    print_paddr l01
+    print_char 20
     store l01 @contains
 .p  print_paddr l01
     new_line
@@ -101,6 +109,7 @@ word 0,0,0,0
     store l01 PLAYER_ID
     get_parent l01 -> l01
     insert_obj NOUN_1 l01
+    clear_attr l01 BEING_WORN
     rtrue
   
 
@@ -108,6 +117,9 @@ routine put_sub
 byte 4
 word 0,0,0,0
     insert_obj NOUN_1 NOUN_2
+    store l02 @done
+    print_paddr l02
+    new_line
     rtrue
 
 
@@ -115,7 +127,6 @@ routine open_sub
 byte 4
 word 0,0,0,0
     set_attr NOUN_1 OPEN
-    call dump_bit -> l01
     call has_visible_children NOUN_1 -> (sp)
 	je (sp) 00 .empty
     store l02 @openingThe
@@ -124,7 +135,8 @@ word 0,0,0,0
     store l02 @reveals
     print_paddr l02
     new_line
-	call list_siblings NOUN_1 -> l01
+    get_child NOUN_1 -> l01 [false] .x
+	call list_siblings l01 -> l01
 	rtrue
 .empty
     store l01 @the
@@ -165,7 +177,10 @@ routine wear_sub
 byte 4
 word 0,0,0,0
     set_attr NOUN_1 BEING_WORN
-    rtrue
+    get_prop_addr NOUN_1 INITIAL_DESCRIPTION -> l01 ; test if it has an initial desc
+    je l01 00 .x
+    put_prop NOUN_1 INITIAL_DESCRIPTION 00
+.x  rtrue
 
 
 ;if a wearable item's parent isn't the player
@@ -178,7 +193,7 @@ word 0,0,0
     test_attr l01 WEARABLE [false] .c
     get_parent l01 -> l02
     je l02 PLAYER_ID [true] .c
-    clear_attr l01 WEARABLE
+    clear_attr l01 BEING_WORN
 .c 
     inc l01
     je l01 NUM_OBJECTS_ [false] .lp    
@@ -225,8 +240,8 @@ word 0,0,0
     store invWeight 00 ; clear and recalculate
     store l01 PLAYER_ID
     call add_child_weights PLAYER_ID -> l01
-    print_char 'w'
-    print_num invWeight
+;    print_char 'w'
+;    print_num invWeight
     new_line
     rtrue
 
@@ -246,21 +261,3 @@ word 0,0,0
 .c  get_sibling l01 -> l01 .lp
 .x rtrue
 
-routine dump_bit
-byte 02
-word 0,0
-    print_char 'c'
-    test_attr NOUN_1 CONTAINER .one
-    print_char '0'
-    jump .c
-.one
-    print_char '1'
-.c  print_char ':'
-    test_attr NOUN_1 OPEN .one2
-    print_char '0'
-    new_line
-    rtrue
-.one2
-    print_char '1'
-    new_line
-    rtrue

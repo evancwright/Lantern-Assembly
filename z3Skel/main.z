@@ -36,7 +36,7 @@ include objects.z
 #define STRINGS gdb
 
 ;number of globals needs to add up to 240
-defw 02   	;player location G00
+defw START_LOC	;player location G00
 defw 00   	; score?
 defw 00		;moves	
 resw 216
@@ -78,6 +78,10 @@ resw 10
 .synonyms
 .verbs
 include zverbs.z 
+
+.verb_map
+include verb_map.z
+
 .dictionary
 include dictionary.z
 
@@ -135,17 +139,7 @@ defw 0,0
 	je (sp) 00 .main_loop
 	call score_noun1 -> (sp)
 	call score_noun2 -> (sp)
-	;dump the sentence
-	print_char 's'
-	print_char ':'
-	print_num VERB_ID
-	print_char '_'
-	print_num NOUN_1
-	print_char '_'
-	print_num PREP_ID
-	print_char '_'
-	print_num NOUN_2
-	new_line
+;	call dump_sentence -> (l01)
 	;now call the verb checks
 	call run_checks() -> (sp)
 	je (sp) 00 .main_loop
@@ -168,6 +162,7 @@ defw 0,0
 	jump .loop
 .noLight
 	inc turnsWithoutLight	
+	
 .loop
 ;	print_char 'd'
 ;	print_num turnsWithoutLight
@@ -188,383 +183,8 @@ defw 0,0,0
 	rtrue
 
 
-routine copy_words
-defb 06
-defw 0,0,0,0,0,0
-	;reset setence
-	store REAL_WORDS 00
-	store TWO_WORD_VERB 00
-	store PREP_INDEX 00
-	store PREP_ID FF
- 	;verify the user entered something
-	store l05 00  ; index into word_storage
-	loadb GEE, 01 -> l04 ; get number of words entered
-	je l04 00 [false] .not_empty  ; continue if not zero
-	store l01 @pardonstr
-	print_paddr l01 
-	new_line
-	rfalse
-.not_empty
-	;verify no words have an address of 0
-	;l01 is counter, l02 is index
-	loadb GEE, 01 -> l04 ; reload num words entered
-	store l02 01 ; start index is 2nd word (index 1)
-	store l01 00 ; loop counter
-.top
-	loadw GEE l02 -> l03 ; load word address
-;	print_num l03 ;print it for debugging
-;	new_line
-	je l03 00 .badword ; is it zero (not found?)
-	;copy word into word_storge if not an article
-	call copy_word (l03) -> l03
-	add l02 02 -> l02 ; move to next word index
-	inc l01 ; inc loop counter
-	je l01 l04 [false] .top
-	rtrue
-.badword
-	store l02 @dontknowstr
-	print_paddr l02
-	mul l01 04 -> l01 
-	add l01 04 -> l01 ; skip 1st two bytes + address word
-	loadb gEE l01 -> l02  ; len
-	inc L01
-	loadb gEE l01 -> l01  ; index
-	call print_word l01 l02 (sp)  ; (index , len)
-	print_char 27 ; close  quote
-	new_line
-	rfalse
 
-
-
-;looks up the lantern verb id in the compound verb table
-;if the second 
-;[][]
-routine find_verb_id
-defb 6
-defw 0,0,0,0,0,0
-	;get the address of the 1st word_0
-	loadw GEE 01 -> l01
-	;get the flags
-	loadb l01 06 -> (sp) ; flags is the last byte in the entry
-	je (sp) VERB_FLAG .go
-	store l01 @badverbstr
-	print_paddr l01
-	loadb GEE 05 -> l02 ; index
-	loadb GEE 04 -> l01 ; length
-	call print_word l02 l01 -> (sp)
-	print_char 27
-	print_char '.'
-	new_line
-	rfalse
-.go
-	;get the word id 2 words past that
-	loadw l01 02 -> VERB_ID
-;	store l05 @string109 ; "Lantern verb id="
-;	print_paddr (l05)
-;	print_num VERB_ID
-;	new_line
-	je TWO_WORD_VERB 01 .compoundverb
-;	print_char 56
-;	print_num VERB_ID
-;	newline
-	rtrue
-.compoundverb
-;	store l05 @string112 ; compound verb
-;	print_paddr l05
-;	newline
-	;[word:Lantern Id][(byte):prep id][byte:Lantern id]
-	;the lantern id of first word is in VERB_ID
-	;the lantern id of the prep is in VERB_PREP_ID
-	;get the address of the 1st word_0
-	;get the flags 6 bytes past 
-	loadw COMPOUND_VERB_TABLE 00 -> l01 ; loop counter/number of entries 
-	store l02 01 ; word index of verb id
-	store l03 04 ; byte index of preposition
-.top
-	loadw COMPOUND_VERB_TABLE l02 -> l04 ;get table verb id
-;	print_num l04
-;	print_char 20 ; space
-	je VERB_ID l04 [false] .skip
-	loadb COMPOUND_VERB_TABLE l03 -> l04 ;get table prep id
-;	print_num l04
-;	new_line
-	je VERB_PREP_ID l04 [false] .skip
-	;found a match
-	inc l03 ; move to the lantern id byte
-	loadb COMPOUND_VERB_TABLE l03 -> VERB_ID
-;	print_char 'v'
-;	print_char 'r'
-;	print_char 'b'
-;	print_num VERB_ID
-;	new_line
-	rtrue
-.skip
-	add l02 02 -> l02 ;skip to next verb	
-	add l03 04 -> l03 ;skip to next prep
-	dec l01
-	je l01 00 [false] .top
-;	print_char 3f
-;	new_line
-	rfalse
-
-
-
-;copies a word into the buffer if not an article
-;l00 is the addr in the dictionary of the word to copy
-routine copy_word
-defb 5
-defw 0,0,0,0,0
-	store l01 l00 ; l01 is word address
- 	loadb l01 06 -> l02  ;get flags, 6 bytes past the word addr
-;	print_char 'f'
-;	print_char 'l'
-;	print_char 'g'
-;	print_num l02  ;word flags print correctly
-;	new_line
-	je  l02 40 .article  ; skip if not an article
-	loadw l01 02 -> l03  ; get word's lantern id (third word in)
-	storew WRD_ID_BUFFER REAL_WORDS l03 ;write it to buffer 
-	je  l02 80 .prep  ; skip if not an article
-	inc REAL_WORDS
-.article
-	rtrue
-.prep
-	;is the index 1?
-	je REAL_WORDS 01 .compoundv
-	store PREP_INDEX REAL_WORDS
-	loadw l01 02 -> PREP_ID
-	inc REAL_WORDS
-	;what is the prep id?
-;	print_char 'p'
-;	print_char 'i'
-;	print_char 'x'
-;	print_num  PREP_INDEX
-;	new_line
-;	print_char 'p'
-;	print_char 'r'
-;	print_char 'e'
-;	print_char 'p'
-;;	print_num PREP_ID
-;	new_line
-	rtrue
-
-.compoundv
-;	store l04 @string112 ; "compound verb"
-;	print_paddr l04
-;	new_line
-	store TWO_WORD_VERB 01
-	store VERB_PREP_ID l03 ; save lantern prep id
-;	print_num VERB_PREP_ID
-;	new_line
-	inc REAL_WORDS
-	rtrue
-
-;crawl through WRD_ID_BUFFER and score noun1 
-;if prep index != 0, score verb word 1 or 2 to prep index
-;if prep_index == 0, score from word or 2 to REAL_WORDS
-;l01 is a loop counter
-;l02 is the stop index
-;l03 is the word to score
-routine score_noun1() 
-byte 5
-defw 0,0,0,0,0
-	store NOUN_1 FF
-	call clear_scores() -> (sp)
-	;set the start index
-	store l01 01 ; loop counter
-	je TWO_WORD_VERB 01 [false] .setend
-	inc l01
-.setend
-	;set the stop index
-	store l02 REAL_WORDS
-	je PREP_ID FF .go
-	store l02 PREP_INDEX ; stop at prep index
-.go
-	je l01 l02 .done ;if no words to score
-.top
-	;score word l03 against object l01
-	loadw WRD_ID_BUFFER l01 -> l03 ;get the word id in the buffer
-	call score_objects_on_word( l03 )->(sp)
-	inc l01 ;loop counter++
-	je l01 l02  [false] .top
-	call bump_scores -> (l01)
-	call get_obj_w_max_score()->NOUN_1
-.done
-	rtrue
-
-;bump scores
-;adds 1 to the score for objects that the player
-;can see and aren't already marked as FF
-routine bump_scores()
-byte 05
-word 0,0,0,0,0
-	store l04 PLAYER_ID
-	store l01 02 ; start with object after player
-.lp
-	get_prop l01 OBJ_SCORE -> l02
-	je l02 ff .c ; already invalid skip
-	call sees ( l04 , l01 ) -> l03
-	je l03 00 .c ; not visible to player skip
-;	print_char 'b'
-;	print_char 'm'
-;	print_char 'p'
-;	print_num l01
-;	new_line
-	inc l02 ; bump up score by 1
-	put_prop l01 OBJ_SCORE l02 ; set score property of l01 to l02
-.c	inc l01 ; i++
-	je l01 NUM_OBJECTS_ [false] .lp
-	rtrue
-
-
-;crawl through WRD_ID_BUFFER and score noun2 
-;if prep index == 0, return
-;score from prepIndex+1 to REAL_WORDS
-;l01 is a loop counter
-;l02 is the stop index
-;l03 is the word to score
-routine score_noun2() 
-byte 5
-defw 0,0,0,0,0
-	store NOUN_2 FF
-	je PREP_ID FF .done ;no prep, so no second noun
-	call clear_scores() -> (sp)
-	;set the start index
-	store l01 PREP_INDEX ; loop counter
-	inc l01
-	je l01 REAL_WORDS .missing_noun
-	;set the stop index
-	store l02 REAL_WORDS
-.top 
-	;score word l03 against object l01
-	loadw WRD_ID_BUFFER l01 -> l03 ;get the word id in the buffer
-	call score_objects_on_word( l03 )->(sp)
-	inc l01 ;loop counter++
-	je l01 l02  [false] .top
-	call bump_scores -> l01
-	call get_obj_w_max_score()->NOUN_2
-.done
-	rtrue
-.missing_noun
-	store l01 @missingnoun
-	print_paddr l01
-	new_line
-	rfalse
-
-;set all scores to 0
-routine clear_scores()
-byte 2
-word 0,0
-	store l01 01
-.loop
-	put_prop l01 OBJ_SCORE 00 ; set object l01 score to 0
-	inc l01
-	je l01 NUM_OBJECTS [FALSE] .loop ;jump back if not done
-	rtrue
-
-;param1 is the word to apply to the objects
-;if the object's score is INVALID, the 
-;object is skipped
-;if the word doesn't apply to the object
-;the object's score is set to INVALID
-;If the word applies, 1 is added to the object's score
-routine score_objects_on_word()
-byte 5
-word 0,0,0,0,0
-;	print_char 'w'
-;	print_char '='
-;	print_num l00
-;	new_line
-	store l02 00 ;loop counter
-.top
-	;skip object if already marked INVALID
-	get_prop l02 OBJ_SCORE -> l03
-	je l03 INVALID .skip
-	;see if word applies
-	get_prop l02 WORD_0 -> l03
-	je l00 l03 .addscore
-	get_prop l02 WORD_1 -> l03
-	je l00 l03 .addscore
-	get_prop l02 WORD_2 -> l03
-	je l00 l03 .addscore
-	get_prop l02 WORD_3 -> l03
-	je l00 l03 .addscore
-	get_prop l02 WORD_4 -> l03
-	je l00 l03 .addscore
-	get_prop l02 WORD_4 -> l03
-	je l00 l03 .addscore
-	;if we got here, word doesn't apply, so score is INVALID
-	put_prop l02 OBJ_SCORE INVALID
-	jump .skip
-.addscore	
-;	store l04 @string115 ;match
-;	print_paddr l04
-;	print_obj l02
-;	new_line
-	get_prop l02 OBJ_SCORE -> l03 ; reload score
-	inc l03  ; score++
-	put_prop l02 OBJ_SCORE -> l03 ; write it back 
-.skip	
-	inc l02 ; loop counter++
-	je l02 NUM_OBJECTS_ [false] .top
-	rtrue
-
- 
-;returns the object
-routine get_obj_w_max_score()
-defb 7
-defw 0,0,0,0,0,0,0
-	store l01 01 ; loop counter
-	store l02 00 ; max score
-	store l03 00 ; max score object count
-	store l04 00 ; temp
-	store l05 INVALID ; identified object
-;make a pass to get the max score
-.lp1
-;	print_num l04
-;	new_line
-;	print_char 'a'
-;	print_char 'd'
-;	print_char 'r'
-	get_prop_addr l01 OBJ_SCORE -> (sp)
-	loadw (sp) 00 -> l04 ; get the score property data byte
-;	print_char 's'
-;	print_num l04
-;	new_line
-	je l04 FF .skpme
-	je l04 l02 .skpme
-	jl l04 l02 .skpme ; ????
-	store l02 l04 ; update the max score	
-.skpme	
-	inc l01 
-	je l01 NUM_OBJECTS_ [false] .lp1
-;	print_char 'm'
-;	print_char 'a'
-;	print_char 'x'
-;	print_char '='
-;	print_num L02
-;	new_line
-;now count the objects with that score
-	store l01 01
-.lp2
-	get_prop l01 OBJ_SCORE -> l04
-	je l04 l02 [false] .skip2
-	inc l03 ; update count
-	store l05 l01  ; save obj with highest score
-.skip2
-	inc l01 
-	je l01 NUM_OBJECTS_ [false] .lp2
-	;done, print result
-;	print_char 'm'
-;	print_char 'a'
-;	print_char 'x'
-;	print_char '='
-;	print_obj l05
-;	new_line
-	push l05 
-	ret_popped
-
-
+include parser.z
 include events.z
 include checks.z
 include default_actions.z

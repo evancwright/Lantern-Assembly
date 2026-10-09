@@ -1,181 +1,370 @@
-;Crawls through the Lantern verb table, mapping dictionary ids to lantern verbs
-;looks in the parse buffer
-;if the 1st word isn't found -> error msg and return
-;get the flags for the 1st word
-;and it with VERB_MASK
-;if the 1st word isn't a verb -> error msg and return
-;if the word count is 1, set the prep id to 0
-;if the word is 2 or more:
-;get the flags for the 2nd word  
-;and it with the PREP_MASK
-;if zero skip, else put word id into prep
-;table format [verb][prep or 0]->[lantern verb]
+;Routines related to parsing
+
+routine copy_words
+defb 06
+defw 0,0,0,0,0,0
+	;reset setence
+	store REAL_WORDS 00
+	store TWO_WORD_VERB 00
+	store PREP_INDEX 00
+    store VERB_PREP_ID FF
+	store PREP_ID FF
+ 	;verify the user entered something
+	store l05 00  ; index into word_storage
+	loadb GEE, 01 -> l04 ; get number of words entered
+	je l04 00 [false] .not_empty  ; continue if not zero
+	store l01 @pardonstr
+	print_paddr l01 
+	new_line
+	rfalse
+.not_empty
+	;verify no words have an address of 0
+	;l01 is counter, l02 is index
+	loadb GEE, 01 -> l04 ; reload num words entered
+	store l02 01 ; start index is 2nd word (index 1)
+	store l01 00 ; loop counter
+.top
+	loadw GEE l02 -> l03 ; load word address
+;	print_num l03 ;print it for debugging
+;	new_line
+	je l03 00 .badword ; is it zero (not found?)
+	;copy word into word_storge if not an article
+	call copy_word (l03) -> l03
+	add l02 02 -> l02 ; move to next word index
+	inc l01 ; inc loop counter
+	je l01 l04 [false] .top
+	rtrue
+.badword
+	store l02 @dontknowstr
+	print_paddr l02
+	mul l01 04 -> l01 
+	add l01 04 -> l01 ; skip 1st two bytes + address word
+	loadb gEE l01 -> l02  ; len
+	inc L01
+	loadb gEE l01 -> l01  ; index
+	call print_word l01 l02 (sp)  ; (index , len)
+	print_char 27 ; close  quote
+	new_line
+	rfalse
 
 
 
+;looks up the lantern verb id in the compound verb table
+;if the second 
+;l01 is the loop counter
+;l02,l03,l04 are data about the sentence's verb
+;l05 is the table index ptr
+;l06 is data about a verb in the table
+routine find_verb_id
+defb 7
+defw 0,0,0,0,0,0,0
+    loadw COMPOUND_VERB_TABLE 00 -> l01 ; load loop counter
+    store l05 COMPOUND_VERB_TABLE
+    add l05 02 -> l05 ; skip path the length word
+	;get the address of the 1st word_0
+	loadw GEE 01 -> l02 ; get address 1st word of letters
+    loadw l02 00 -> l02 ; load the value into l02
+ ;   print_num l02 ; correct
+  ;  new_line
+	loadw GEE 01 -> l03 ; get address 2nd word of letters
+	loadw l03 01 -> l03 ; load the value into l03
+ ;   print_num l03
+ ;   new_line
+ ;   print_num VERB_PREP_ID
+ ;   new_line
+.top
+	loadw l05 00 -> l06 ; compare 1st word of letters
+    je l06 l02 [false] .next
+	loadw l05 01 -> l06 ; compare 2nd word of letters
+    je l06 l03 [false] .next
+	loadb l05 04 -> l06 ; load preposition
+    je l06 VERB_PREP_ID [false] .next
+    ;if here, we found a match
+	loadb l05 05 -> l06 ; load the verb id
+    store VERB_ID l06 ; save the verb id
+    rtrue
+.next
+    add l05 06 -> l05 ; go to next entry
+    dec l01
+    je l01 00 [false] .top
+    store l01 @badverbstr
+    print_paddr l01
+    loadb GEE 05 -> l02 ; index
+    loadb GEE 04 -> l01 ; length
+    call print_word l02 l01 -> (sp)
+    print_char 27
+    print_char '.'
+    new_line
+ 	rfalse
+    rtrue
+
+;copies a word into the buffer if not an article
+;l00 is the addr in the dictionary of the word to copy
+routine copy_word
+defb 5
+defw 0,0,0,0,0
+	store l01 l00 ; l01 is word address
+ 	loadb l01 07 -> l02  ;get flags, 6 bytes past the word addr
+;	print_char 'f'
+;	print_char 'l'
+;	print_char 'g'
+;	print_num l02  ;word flags print correctly
+;	new_line
+	je  l02 40 .article  ; skip if not an article
+	loadw l01 02 -> l03  ; get word's lantern id (third word in)
+	storew WRD_ID_BUFFER REAL_WORDS l03 ;write it to buffer 
+	je  l02 80 .prep  ; skip if not an article
+	inc REAL_WORDS
+.article
+	rtrue
+.prep
+	;is the index 1?
+	je REAL_WORDS 01 .compoundv
+	store PREP_INDEX REAL_WORDS
+	loadw l01 02 -> PREP_ID
+	inc REAL_WORDS
+	;what is the prep id?
+	print_char 'p'
+	print_char 'i'
+	print_char 'x'
+	print_num  PREP_INDEX
+	new_line
+	print_char 'p'
+	print_char 'r'
+	print_char 'e'
+	print_char 'p'
+	print_num PREP_ID
+	new_line
+	rtrue
+
+.compoundv
+	store l04 @string112 ; "compound verb"
+	print_paddr l04
+	new_line
+	store TWO_WORD_VERB 01
+	store VERB_PREP_ID l03 ; save lantern prep id
+	print_num VERB_PREP_ID
+	new_line
+	inc REAL_WORDS
+	rtrue
+
+;crawl through WRD_ID_BUFFER and score noun1 
+;if prep index != 0, score verb word 1 or 2 to prep index
+;if prep_index == 0, score from word or 2 to REAL_WORDS
+;l01 is a loop counter
+;l02 is the stop index
+;l03 is the word to score
+routine score_noun1() 
+byte 5
+defw 0,0,0,0,0
+	store NOUN_1 FF
+	call clear_scores() -> (sp)
+	;set the start index
+	store l01 01 ; loop counter
+	je TWO_WORD_VERB 01 [false] .setend
+	inc l01
+.setend
+	;set the stop index
+	store l02 REAL_WORDS
+	je PREP_ID FF .go
+	store l02 PREP_INDEX ; stop at prep index
+.go
+	je l01 l02 .done ;if no words to score
+.top
+	;score word l03 against object l01
+	loadw WRD_ID_BUFFER l01 -> l03 ;get the word id in the buffer
+	call score_objects_on_word( l03 )->(sp)
+	inc l01 ;loop counter++
+	je l01 l02  [false] .top
+	call bump_scores -> (l01)
+	call get_obj_w_max_score()->NOUN_1
+.done
+	rtrue
+
+;bump scores
+;adds 1 to the score for objects that the player
+;can see and aren't already marked as FF
+routine bump_scores()
+byte 05
+word 0,0,0,0,0
+	store l04 PLAYER_ID
+	store l01 02 ; start with object after player
+.lp
+	get_prop l01 OBJ_SCORE -> l02
+	je l02 ff .c ; already invalid skip
+	call sees ( l04 , l01 ) -> l03
+	je l03 00 .c ; not visible to player skip
+;	print_char 'b'
+;	print_char 'm'
+;	print_char 'p'
+;	print_num l01
+;	new_line
+	inc l02 ; bump up score by 1
+	put_prop l01 OBJ_SCORE l02 ; set score property of l01 to l02
+.c	inc l01 ; i++
+	je l01 NUM_OBJECTS_ [false] .lp
+	rtrue
+
+
+;crawl through WRD_ID_BUFFER and score noun2 
+;if prep index == 0, return
+;score from prepIndex+1 to REAL_WORDS
+;l01 is a loop counter
+;l02 is the stop index
+;l03 is the word to score
+routine score_noun2() 
+byte 5
+defw 0,0,0,0,0
+	store NOUN_2 FF
+	je PREP_ID FF .done ;no prep, so no second noun
+	call clear_scores() -> (sp)
+	;set the start index
+	store l01 PREP_INDEX ; loop counter
+	inc l01
+	je l01 REAL_WORDS .missing_noun
+	;set the stop index
+	store l02 REAL_WORDS
+.top 
+	;score word l03 against object l01
+	loadw WRD_ID_BUFFER l01 -> l03 ;get the word id in the buffer
+	call score_objects_on_word( l03 )->(sp)
+	inc l01 ;loop counter++
+	je l01 l02  [false] .top
+	call bump_scores -> l01
+	call get_obj_w_max_score()->NOUN_2
+.done
+	rtrue
+.missing_noun
+	store l01 @missingnoun
+	print_paddr l01
+	new_line
+	rfalse
 
 ;set all scores to 0
 routine clear_scores()
 byte 2
 word 0,0
+	store l01 01
 .loop
-	put_prop l01 OBJ_SCORE #00 ; set object l01 score to 0
+	put_prop l01 OBJ_SCORE 00 ; set object l01 score to 0
 	inc l01
 	je l01 NUM_OBJECTS [FALSE] .loop ;jump back if not done
-	ret
+	rtrue
 
-;for now ;l01 is the object, l02 is the word, l03 is loop counter, l04 is a temp
-;words addrs are in properties 25,24,23,22,21,20 decimal
-;score is property 19 decimal 
-routine update_object_score(object, word)
-byte 04
-word 00,00,19,00
-	;loop through each word property (25,24,23,22,21,20)
-	;has the object already been marked as INVALID?
-	get_prop l01 OBJ_SCORE -> l04 ;get the property or default value
-	je l04 INVALID .no
-	store l03 19 ; property 25
-.loop
-	get_prop l01 l03 -> l04 ;get the property or default value
-	je l04 ffff .c  ; word did not exist on object (we got default value)
-	;compare the address in L04 to the address in L01
-	loadw l04,#01->(sp)
-	je l01,(sp) [false] .c  ; compare first word (first 3 letters)
-	loadw l04,#02->(sp)
-	je l01,(sp) [false] .c  ; compare second word (second 3 letters)
-	; we have a match! 
-	get_prop l01 OBJ_SCORE -> L02
-	inc l02  ; increment the score
-	put_prop l01 OBJ_SCORE l02 
-	rtrue 
-.c	dec l03	; prop number--
-	je  l03 #13 [false] .loop ;loop until we hit 19h
-	;we never found a match, set score to INVALID
-.no	put_prop l01 OBJ_SCORE FF
-	rfalse  	 
+;param1 is the word to apply to the objects
+;if the object's score is INVALID, the 
+;object is skipped
+;if the word doesn't apply to the object
+;the object's score is set to INVALID
+;If the word applies, 1 is added to the object's score
+routine score_objects_on_word()
+byte 5
+word 0,0,0,0,0
+;	print_char 'w'
+;	print_char '='
+;	print_num l00
+;	new_line
+	store l02 01 ;loop counter
+.top
+	;skip object if already marked INVALID
+	get_prop l02 OBJ_SCORE -> l03
+	je l03 INVALID .skip
+	;see if word applies
+	get_prop l02 WORD_0 -> l03
+	je l00 l03 .addscore
+	get_prop l02 WORD_1 -> l03
+	je l00 l03 .addscore
+	get_prop l02 WORD_2 -> l03
+	je l00 l03 .addscore
+	get_prop l02 WORD_3 -> l03
+	je l00 l03 .addscore
+	get_prop l02 WORD_4 -> l03
+	je l00 l03 .addscore
+	get_prop l02 WORD_5 -> l03
+	je l00 l03 .addscore
+	;if we got here, word doesn't apply, so score is INVALID
+	put_prop l02 OBJ_SCORE INVALID
+	jump .skip
+.addscore	
+;	store l04 @string115 ;match
+;	print_paddr l04
+;	print_obj l02
+;	new_line
+	get_prop l02 OBJ_SCORE -> l03 ; reload score
+	inc l03  ; score++
+	put_prop l02 OBJ_SCORE -> l03 ; write it back 
+.skip	
+	inc l02 ; loop counter++
+	je l02 NUM_OBJECTS_ [false] .top
+	rtrue
 
-;L01 temp
-;L02 will be the prep id
-;L03 will be the table address (base pointer)
-;L04 will be the index into the table
-;L05 
-
-;l01 is loop counter
-;l02 is max so far
-routine get_max_score()
-	.db 1
-	.dw 1,255
-.loop
-	get_prop l01 13 -> (sp) ; get score of l01
-	;is l02 ff? if so set score to current object's score
-	je l01 NUM_OBJECTS [FALSE] .loop ;jump back if not done
-
-	ret
-
-
-
-
-routine get_verb_id
-.db 03
-.dw 0,0,0
-	load L03 .parse_buff ; load the table [# words 0-255][ addr hi | addr lo | #letters | index  ]
-	load L04 #01 ;offset of 1st word
-	loadw [l03][L04] -> [L01] ; put dict addr into L01
-	loadb L01 #05 -> L01
-	and L01 VERB_MASK -> L01
-	jz L01 .verb_not_found
-	;is the word count 2 or greater
-	
-.c		
-	
-	
-.verb_not_found
-	print_paddr .bad_verb_str	
-	ret 0
-	
-;l01 contains word address
-;l02 is a loop counter
-;l03 will be a local (table size)
-routine is_prep()
-byte 3
-word 0,0,0
-	load l02 #0
-	loadw .prep_table l02 -> (l03) ; get table size
-	inc l02
-.loop 	
-	load .prep_table l01 -> (l02)
-	je  l01 l02 .yes
-	inc l02
-	jle l02 l03 .loop
-	ret_false
-.yes ret_true
-
-
-routine execute_exact():
-byte 3
-word 0,0,0,0
-	load #0 
-.loop
-	loadb .sentence_table l01 -> l02 ;verb
-	inc l01
- 	loadb .sentence_table l01 -> l03 ;noun1
-	inc l01
- 	loadb .sentence_table l01 -> l03 ;prep
-	inc l01
- 	loadb .sentence_table l01 -> l03 ;noun2
-	inc l01 ; skip noun2
-	add l01 #2 ; skip address
-	;skip if we don't have a complete match
-	je l02 G00 [false] .loop
-	je l03 G01 [false] .loop
-	je l04 G02 [false] .loop
-	je l05 G03 [false] .loop
-	;load the routine address
-	sub l01 #2 ; back up to the address  
-	loadw .sentence_table l01  ;load the function address
-	storew .sneaky #02	l01 ;write the address to sneaky + 1
-.sneaky	
-	;set the handled variable
-	call dummy
-	ret
-
-;if noun1 or noun2 of the sentence are not FF,
-;and the entry in the table is 254 (the symbol for *)
-;call the routine
-routine execute_wildcard():
-byte 3
-word 0,0,0,0
-	load #0 
-.loop
-	loadb .sentence_table l01 -> l02 ;verb
-	inc l01
- 	loadb .sentence_table l01 -> l03 ;noun1
-	inc l01
- 	loadb .sentence_table l01 -> l03 ;prep
-	inc l01
- 	loadb .sentence_table l01 -> l03 ;noun2
-	inc l01 ; skip noun2
-	add l01 #2 ; skip address
-	;skip if we don't have a complete match
-	je l02 G00 [false] .loop ; verbs don't match
-	je l04 G02 [false] .loop ; preps don't match
-	;;;;;;;;SPACE OUT HERE;;;;;
-	;noun1 is 254 and g01 is not 255
-	je l02 #fe [false] .c
-	;noun1 is a wildcard in table
-	je g01 #ff [false] .c
-	;noun2 is 254 and g01 is not 255
-	je l03 #fe [false] .c
-	;noun2 is a wildcard in table
-	je g04 #ff [false] .c
-	;I think I am missing a case here?
-.c	
-	;load the routine address
-	sub l01 #2 ; back up to the address  
-	loadw .sentence_table l01  ;load the function address
-	storew .sneaky2 #02	l01 ;write the address to sneaky + 1
-.sneaky2	
-	;set the handled variable
-	call dummy
-	ret
  
+;returns the object
+routine get_obj_w_max_score()
+defb 7
+defw 0,0,0,0,0,0,0
+	store l01 01 ; loop counter
+	store l02 00 ; max score
+	store l03 00 ; max score object count
+	store l04 00 ; temp
+	store l05 INVALID ; identified object
+;make a pass to get the max score
+.lp1
+;	print_num l04
+;	new_line
+;	print_char 'a'
+;	print_char 'd'
+;	print_char 'r'
+	get_prop_addr l01 OBJ_SCORE -> (sp)
+	loadw (sp) 00 -> l04 ; get the score property data byte
+;	print_char 's'
+;	print_num l04
+;	new_line
+	je l04 FF .skpme
+	je l04 l02 .skpme
+	jl l04 l02 .skpme ; ????
+	store l02 l04 ; update the max score	
+.skpme	
+	inc l01 
+	je l01 NUM_OBJECTS_ [false] .lp1
+;	print_char 'm'
+;	print_char 'a'
+;	print_char 'x'
+;	print_char '='
+;	print_num L02
+;	new_line
+;now count the objects with that score
+	store l01 01
+.lp2
+	get_prop l01 OBJ_SCORE -> l04
+	je l04 l02 [false] .skip2
+	inc l03 ; update count
+	store l05 l01  ; save obj with highest score
+.skip2
+	inc l01 
+	je l01 NUM_OBJECTS_ [false] .lp2
+	;done, print result
+;	print_char 'm'
+;	print_char 'a'
+;	print_char 'x'
+;	print_char '='
+;	print_obj l05
+;	new_line
+	push l05 
+	ret_popped
+
+routine dump_sentence
+byte 02
+word 0,0
+	;dump the sentence
+	print_char 's'
+	print_char ':'
+	print_num VERB_ID
+	print_char '_'
+	print_num NOUN_1
+	print_char '_'
+	print_num PREP_ID
+	print_char '_'
+	print_num NOUN_2
+	new_line
+    rtrue

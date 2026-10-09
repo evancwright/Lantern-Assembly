@@ -5,7 +5,7 @@ defb 4
 defw 0,0,0,0
 	store l01 gdF ; load check_table start address
 ;	print_num l01 ; table addr is correct
-	new_line
+;	new_line
 .lp
 	loadb l01 00 -> l03 ; get verb id
 	inc l01 ; move to function address word  
@@ -32,16 +32,16 @@ word 0,0,0,0
 		store l01 PLAYER_ID
 		get_parent (l01) -> l01  ;set current_room variable
 		call get_target_room(l01) -> l01 
-		print_char 't'
-		print_num l01
-		new_line
+;		print_char 't'
+;		print_num l01
+;		new_line
 		je VERB_ID enter_verb_id [false] .normal_move
 		store l01 NOUN_1 ;replace l01 w/ object trying to enter
 .normal_move
-		print_char 't'
-		print_char 'o'
-		print_num l01
-		new_line
+;		print_char 't'
+;		print_char 'o'
+;		print_num l01
+;		new_line
 		;is this a no-go message
 		jl l01 7F [true] .door_chk
 		sub ff l01 -> l01
@@ -227,7 +227,7 @@ byte 4
 word 0,0,0,0
 	store l01 NOUN_1
 	store l02 PLAYER	
-	call descendant_of(l02,l01) -> (sp)
+	call has(l02,l01) -> (sp)
 	je (sp) 01 .yes
 	store l01 @donthave
 	print_paddr l01 
@@ -242,7 +242,7 @@ byte 4
 word 0,0,0,0
 	store l02 NOUN_2
 	store l01 PLAYER_ID	
-	call descendant_of(l01,l02) -> (sp)
+	call has(l01,l02) -> (sp)
 	je (sp) 00 .yes
 	store l01 @donthave
 	print_paddr l01 
@@ -258,7 +258,7 @@ byte 03
 word 0,0,0
 	store l01 noun1
 	store l02 PLAYER	
-	call descendant_of(l01,l02) -> (sp)
+	call has(l02,l01) -> (sp)
 	je (sp) 01 [false] .yes
 	store l01 @alreadyhave
 	print_paddr l01 
@@ -346,7 +346,7 @@ byte 3
 word 0,0,0
 	store l02 NOUN_1
 	store l01 NOUN_2
-	call descendant_of(l01,l02) -> (sp)
+	call has(l01,l02) -> (sp)
 	je (sp) 00 .x
 	store l01 @badput
 	print_paddr l01 
@@ -366,27 +366,23 @@ word 0,0
 	; check contains
 	store l01 NOUN_1
 	store l02 NOUN_2
-	call descendant_of(l02,l01) -> (sp)
+	call has(l02,l01) -> (sp)
 	je (sp) #0 .no
 	rtrue
 .no rfalse
 
-;l00 - parent
-;l01 - child
-routine descendant_of()
+;l00 - holder
+;l01 - object
+routine has()
 byte 4
 word 0,0,0,0
-	print_char 'p'
-	print_num l00 
-	new_line
-	print_char 'c'
-	print_num l01
-	new_line
-	jin l00 l01 .y
+	jin l01 l00 .y  ;JIN JUMP OFFSET MAY NOT WORK
 .lp
-	get_parent l01 -> l01
-	je l01 00 .n	
-	je l01 l00 .y	
+	get_parent l01 -> l01 ; get parent of object
+;	print_num l01
+;	new_line
+	je l01 00 .n ;hit top of tree
+	je l01 l00 .y ;reached the room
 	jump .lp
 .y rtrue
 .n rfalse
@@ -397,23 +393,21 @@ word 0,0,0,0
 routine sees()
 byte 4
 word 0,0,0,0
-;	print_char 'p'
-;	print_num l00
-;	new_line
-;	print_char 'c'
+	je l01 l00 .y ; you can see yourself
+	jin l01 l00 .y  ;JIN JUMP OFFSET MAY NOT WORK
+	get_parent l00 -> l00 ; get room the seer is in
+.lp
+	get_parent l01 -> l01 ; get parent of object
 ;	print_num l01
 ;	new_line
-	jin l01 l00 .y
-	get_parent l00 -> l00
-.lp
-	get_parent l01 -> l01
-	je l01 00 .n	
-	je l01 l00 .y	
+	je l01 00 .n ;hit top of tree
+	je l01 l00 .y ;reached the room
 	;if parent isn't a container, object is hidden
-	test_attr l01 CONTAINER [false] .n
-	;if we're here, parent is a container, check closed
-	test_attr l01 OPEN [false] .n
-	get_parent l01 -> l01
+	test_attr l01 CONTAINER [false] .cs
+	; parent is a container, check if it's OPEN
+	test_attr l01 OPEN [false] .n 
+	jump .lp
+.cs	test_attr l01 SUPPORTER [false] .n ;if not supporter (object is hidden)
 	jump .lp
 .y rtrue
 .n rfalse
@@ -459,6 +453,8 @@ word 0,0
 routine check_dobj_wearable
 byte 2
 word 0,0
+		print_obj NOUN_1
+		new_line
 		test_attr NOUN_1 WEARABLE [false] .nw
 		test_attr NOUN_1 BEING_WORN [true] .bw
 		rtrue
