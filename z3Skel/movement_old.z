@@ -1,0 +1,69 @@
+;movement.asm
+;assumes the move check has been passed
+;puts move dir in a
+
+routine move_player
+byte 2
+word 0,0		 
+ 		;convert the verb to a direction
+		get_parent PLAYER ->(SP) ; get room
+		store L01 (sp)
+		call get_move_dir->(sp) ; get direction
+		store l02 (sp)
+		call my_get_prop l01 l02 -> (sp); get room in that direction
+		store l01 (sp)
+		test_attr l01 DOOR .nodoor ;
+		call my_get_prop L01 L02->(sp) ; get the door's neighbor
+		store l01 (sp)  	
+.nodoor
+;		NO OPCODE FOR THIS?????
+;		put_prop PLAYER LOCATION l01
+		call look_sub->(sp) 		 
+		ret 0
+
+;assumes enter check has passed
+
+routine enter_sub
+byte 0
+ 		put_prop PLAYER LOCATION noun1
+		call look_sub -> (sp)
+		ret 0
+	
+;puts move dir (attr) in a 	
+
+routine get_move_dir
+byte 1
+word 0
+		store l01 VERB
+;		je L01 "NORTH" .north
+;		je L01 "SOUTH" .south
+;		je L01 "EAST" .east
+;		je L01 "WEST" .west
+;		je L01 "NORTHEAST" .ne
+;;		je L01 "SOUTHEAST" .se
+;		je L01 "NORTHWEST" .nw
+;		je L01 "SOUTHWEST" .sw
+;		je L01 "UP" .up
+;		je L01 "DOWN" .down
+;		je L01 "IN" .in
+;		je L01 "ENTER" .in
+;		je L01 "OUT" .out
+.north ret NORTH
+.south ret SOUTH
+.east ret EAST
+.west ret WEST
+.ne ret NORTHEAST
+.se ret SOUTHEAST
+.nw ret NORTHWEST
+.sw ret SOUTHWEST
+.up ret UP
+.down ret DOWN
+.in ret ENTER
+.out ret OUT
+ 
+;print the message id
+routine print_nogo_message
+byte 1
+word 0
+	;tbd
+	ret 0

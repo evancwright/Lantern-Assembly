@@ -1,0 +1,31 @@
+;tree utils
+;So the basic Z-machine object relationship model is that everything has a parent (can be zero), 
+;could have a sibling (if that is non-zero) and could have a child (if that's non-zero)
+
+;An object with no children given a child has to update its child number
+;and the child updates the parent number but has no siblings yet
+
+;adding a second object means the new one also updates its parent, then there's a tree walk 
+;down to the child and across siblings until a zero is found then the zero is replaced by 
+;the object number of the new child (sibling to end child) 
+;and the new child gets the new parent.
+
+;
+;param 1: object being moved
+;param 2: destination object
+routine move_object()
+byte 04
+word 0,0,0,0
+    get_child l02 -> l03 .children
+    ;destination has no children
+    remove_obj l01 ; disconnect from current location
+    insert_obj l01 l02 ; add it to destination
+.children ; target object has children
+    get_sibling l03 -> l04 [false].add
+    ;insert object into new sibling chain
+.lp
+    lp
+
+    rtrue
+
+ 
