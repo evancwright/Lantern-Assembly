@@ -24,6 +24,7 @@ word 0,0,0,0
 ;		put_prop L01 INITIAL_DESCRIPTION 00
 ;		jump .items
 
+		;print out the room's children
 		store l01 PLAYER_ID
 		get_parent l01 -> l01
 		get_child l01 -> l01 [false] .x
@@ -45,9 +46,10 @@ word 0,0,0,0
 routine list_object
 byte 4
 word 0,0,0,0	 
-	;is it scenery
-	test_attr l00 SCENERY [true] .x
-	get_prop l00 INITIAL_DESCRIPTION ->l03 
+	;is it scenery?
+	store l01 l00
+	test_attr l01 SCENERY [true] .x
+	get_prop l01 INITIAL_DESCRIPTION ->l03 
 ;	print_num l03
 ;	new_line
 	je l03 00 .no	
@@ -55,13 +57,13 @@ word 0,0,0,0
 	new_line
 	jump .c
 .no
-	store l03 @thereisa
-	print_paddr l03
-	print_obj l00
-	store l03 @here
-	print_paddr l03
-	new_line
-.c	get_child l01 -> l01 [false] .x
+	;default description
+	call print_object_here l01 -> l01
+.c
+	call has_visible_children l01 -> (sp)
+	je (sp) 00 .x
+	call print_on_the_in_the l01 -> l01
+	get_child l01 -> l01 [false] .x
 	call list_siblings l01 -> l01
 .x	rtrue
 		
@@ -81,7 +83,7 @@ word 0,0,0
 		test_attr PLAYER LIT [true] .yes
 
 		;find a lit object visible to the player's room
-		store l02 02
+		store l02 01
 .lp		test_attr l01 LIT [false] .c
 		store l02 PLAYER_ID
 		call sees(l02, l01) -> (sp)
@@ -107,33 +109,42 @@ word 0,0,0
 		;now list the contents
 		call has_visible_children NOUN_1 -> l02
 		je l02 00 .x ; no contents ; no contents, done
-		test_attr NOUN_1 CONTAINER .container
-		test_attr NOUN_1 SUPPORTER .x
-		;list supporter's visible contents
-		store l01 @onthe
-		print_paddr l01
-		print_obj NOUN_1
-		store l01 @is
-		print_paddr l01
-		new_line
+		call print_on_the_in_the NOUN_1 -> NOUN_1 
 		get_child NOUN_1 l01 [false] .x
 		call list_siblings l01 -> l01
 		rtrue
 .container
 		test_attr NOUN_1 SUPPORTER [false] .x ;could be neither
 		test_attr NOUN_1 OPEN [false] .x
-		print_char 'n'
-		print_char '1'
-		print_num NOUN_1
-		new_line
+;		print_char 'n'
+;		print_char '1'
+;		print_num NOUN_1
+;		new_line
 		call look_in_sub NOUN_1 -> l01
 .x		rtrue
+
+
+;l00 contains the object
+routine print_adjective
+byte 02
+word 0,0
+	test_attr l00 BEING_WORN [false] .lit
+	store l01 @beingworn
+	print_paddr l01
+.lit
+	test_attr l00 LIT [false] .x
+	store l01 @providingLight
+	print_paddr l01
+.x	rtrue
 
 ;l00 is the object whose children to check 
 routine has_visible_children
 byte 02
 word 0,0
 	store l01 l00
+	je l01 PLAYER_ID .lp
+	call is_supporter_or_open_container l01 -> (sp)
+	je (sp) 00 .x
 	get_child l01 -> l01 [false] .x  ;get first child
 .lp	
 	test_attr l01 SCENERY .c
@@ -144,12 +155,6 @@ word 0,0
 routine look_in_sub
 byte 3
 word 0,0,0
-;	print_num l00 
-;	new_line
-;	print_char 'l'
-;	print_char 'i'
-;	print_obj NOUN_1
-;	new_line
 	store l01 NOUN_1
 	test_attr l01 SUPPORTER .solid
 	test_attr l01 CONTAINER [false] .solid; 
@@ -174,22 +179,14 @@ word 0,0,0
 	call has_visible_children NOUN_1 -> (sp)
 	je (sp) 00 .empty
 	get_child NOUN_1 -> l01 [false] .empty
-	store l02 @the
-	print_paddr l02
-	print_obj NOUN_1
-	store l02 @contains
-	print_paddr l02
-	new_line
-;	print_char 's'
-;	print_char 'i'
-;	print_char 'b'
-;	new_line
+	call print_contains NOUN_1 -> NOUN_1
 	call list_siblings l01 -> l01
 	rtrue
 .empty	
 	store l01 @the
 	print_paddr l01
 	print_obj NOUN_1
+	print_char 20
 	store l01 @isempty
 	print_paddr l01
 	new_line
@@ -218,4 +215,81 @@ word 0,0
 	store l01 l00
 	call look_at_sub l01 -> l01
 	rtrue
-	
+
+
+;assumes there are visible contents
+;prints the "on the", or "in the"
+;returns the object printed
+routine list_contents
+byte 4
+word 0,0,0,0
+	store l01 l00
+	call print_on_the_in_the l01 -> l02
+	get_child l01 -> l02 [false] .x
+	;now list the siblings of the child
+	call list_siblings l02 -> l02
+.x	push l01
+	ret_popped
+
+
+;returns the object printed
+routine print_object_here
+byte 3
+word 0,0,0
+	store l01 l00
+	store l02 @thereisa
+	print_paddr l02
+	print_obj l01
+	store l02 @here
+	print_paddr l02
+	new_line	
+	push l01
+	ret_popped
+
+;returns the 1st param
+routine print_contains
+byte 3
+word 0,0,0
+	store l01 l00
+	store l02 @the
+	print_paddr l02
+	print_obj l01
+	store l02 @contains
+	print_paddr l02
+	new_line
+	push l01
+	ret_popped
+
+;assumes there are visible contents
+;returns the object
+routine print_on_the_in_the
+byte 2
+word 0,0
+	store l01 l00
+	test_attr NOUN_1 CONTAINER .container 
+	;must be supporter
+	store l02 @onthe
+	print_paddr l02
+	print_obj l01
+	store l02 @is
+	print_paddr l02
+	new_line
+	push l01
+	ret_popped
+.container
+	call print_contains l01 -> l01
+	push l01
+	ret_popped
+
+routine is_supporter_or_open_container
+byte 2
+word 0,0
+	store l01 l00
+	test_attr l01 CONTAINER .container 		
+	test_attr l01 SUPPORTER .supporter 		
+.container
+	test_attr l01 OPEN [false] .no
+	rtrue
+.supporter
+	rtrue	
+.no rfalse

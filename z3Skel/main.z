@@ -13,7 +13,9 @@ include objects.z
 ;global variables - first two are the buffers
 .globals
 
-#define NOTO_TABLE gdc
+#define NUM_STRINGS gda
+;gdb is STATIC_STRINGS
+#define NOGO_TABLE gdc
 #define DFLT_SENTENCE_TABLE gdd
 #define INDENT_AMOUNT gde
 #define PREACTIONS_TABLE ge0
@@ -34,12 +36,14 @@ include objects.z
 #define WRD_ID_BUFFER gEB
 #define REAL_WORDS gEC ;number of input words minus articles
 #define STRINGS gdb
-
+#define TEXT_BUFFER ged
+#define PARSE_BUFFER gee
 ;number of globals needs to add up to 240
 defw START_LOC	;player location G00
 defw 00   	; score?
 defw 00		;moves	
-resw 216
+resw 215
+defw NUM_STRINGS_ ; gda
 defw .static_strings ;gdb
 defw .nogo_string_table ;gdc
 defw .default_sentence_table  ; gdd
@@ -79,8 +83,8 @@ resw 10
 .verbs
 include zverbs.z 
 
-.verb_map
-include verb_map.z
+;.verb_map
+;include verb_map.z
 
 .dictionary
 include dictionary.z

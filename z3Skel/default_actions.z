@@ -35,26 +35,12 @@ word 0,0,0,0
 .lp
     test_attr l02 SCENERY .c
     print_obj l02 ;print the object
+    call print_adjective l02 ->l01
     new_line
     call has_visible_children l02 -> (l03) 
     je l03 00 .c ; skip if no children
-    ;TBD: also need to check if children are visible    
-    test_attr l02 CONTAINER .container
-    test_attr l02 SUPPORTER .supporter
-    jump .c
-;   list contents
-.supporter
-    store l01 @onthe
-    jump .p ;print string
-.container
-    test_attr l02 OPEN [false] .c
-    store l01 @the
-    print_paddr l01
-    print_char 20
-    store l01 @contains
-.p  print_paddr l01
-    new_line
-    get_child l02 -> l03 [false] .c
+    call print_on_the_in_the l02 -> l02 
+.n  get_child l02 -> l03 [false] .c
     call list_siblings l03 -> l01    
 .c  get_sibling l02 -> l02 .lp
 .x  rtrue
@@ -218,11 +204,11 @@ word 0,0,0,0
     store l03 l00 ;counter
     store l01 STRINGS ; base pointer
 .lp
-    loadb l01 00 -> l02 ;get 1st byte of word
-    and l02 80 -> l02 ; clear all but top bit
+    loadb l01 00 -> l02 ;get byte of word
+    and l02 80 -> l02 ; clear all but top bit (stop bit)
  ;   print_num l02
     je l02 00 .c
-    dec l03  ; loop counter--
+    dec l03  ; (hit the end of a string) loop counter--
 .c  add l01 02 -> l01 ;next word   
     je l03 00 [false] .lp
     div l01 02 -> l01 ; pack address
@@ -231,7 +217,62 @@ word 0,0,0,0
  ;   print_num l01
  ;   new_line
     ret_popped
-        
+
+
+;PROBLEM - The stop bit on the input isn't set (but it is)
+;String 110 has the stop bit set
+;1 in dictionary  = 152594a5 = d5413,d-27483 (stop bit) = 0+5+9+5 SECOND BYTE is 1 + 5 + 5 + 5
+;1 in the string table =  9525 = 1+5+9+5
+
+;for now compare just the first two words of what was entered
+;returns the number of the string in the strings list    
+;l01 -table pointer
+;l02 -first word of answer
+;l03 -second word of answer
+;l04 -temp
+;l05 -result
+;l06 is stop bit (either 00 or 80)
+routine lookup_answer_number()
+byte 7
+word 0,0,0,0,0,0,0
+    store l05, 00
+    loadw gee 01 -> l01  ; get address of first word
+    loadw l01 00 -> l02  ; get first word  (works)
+    loadw l01 01 -> l03  ; get second word (works)
+    store l01 STRINGS ; base pointer
+.outer
+    ;does the 1st word match?
+    loadw l01 00 -> l04
+    je l02 l04 [false] .inner
+    ;if there isn't a second word, we have a match
+    loadb l01 00 -> l04
+    and l04 80 -> l06
+    je l06 80 .match ; if stop bit is set, we have a match
+    ;does the second word match?
+    loadw l01 01 -> l04
+    je l03 l04 [false] .inner
+    ;found a match
+.match
+    push l05
+    ret_popped
+.inner ; run to start of next word
+    ;if not at end already, run to the end of the current word, then add 1
+    je l06 80 [false] .run_ahead
+    ;if at end, just add 1 to table pointer to get to the next string
+    inc l01
+    jump .outer
+.run_ahead
+    add l01 02 -> l01 ;next word   
+    loadb l01 00 -> l04 ;get byte of word
+    and l04 80 -> l04 ; clear all but top bit (stop bit)
+    je l04 00 .run_ahead
+    add l01 02 -> l01 ; skip to start of next word
+    inc l05  ; (hit the end of a string) result++
+    je l05 NUM_STRINGS .not_found
+    jump .outer
+.not_found
+    rfalse
+
 
 ;called every turn to set the weight of the inventory
 routine set_inv_weight()
@@ -242,7 +283,7 @@ word 0,0,0
     call add_child_weights PLAYER_ID -> l01
 ;    print_char 'w'
 ;    print_num invWeight
-    new_line
+;    new_line
     rtrue
 
 ;1st param is parent of the child whose add_child_weights

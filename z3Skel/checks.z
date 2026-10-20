@@ -453,8 +453,8 @@ word 0,0
 routine check_dobj_wearable
 byte 2
 word 0,0
-		print_obj NOUN_1
-		new_line
+;		print_obj NOUN_1
+;		new_line
 		test_attr NOUN_1 WEARABLE [false] .nw
 		test_attr NOUN_1 BEING_WORN [true] .bw
 		rtrue

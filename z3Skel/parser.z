@@ -96,7 +96,6 @@ defw 0,0,0,0,0,0,0
     print_char '.'
     new_line
  	rfalse
-    rtrue
 
 ;copies a word into the buffer if not an article
 ;l00 is the addr in the dictionary of the word to copy
@@ -138,13 +137,13 @@ defw 0,0,0,0,0
 	rtrue
 
 .compoundv
-	store l04 @string112 ; "compound verb"
-	print_paddr l04
-	new_line
+;	store l04 @string112 ; "compound verb"
+;	print_paddr l04
+;	new_line
 	store TWO_WORD_VERB 01
 	store VERB_PREP_ID l03 ; save lantern prep id
-	print_num VERB_PREP_ID
-	new_line
+;	print_num VERB_PREP_ID
+;	new_line
 	inc REAL_WORDS
 	rtrue
 
